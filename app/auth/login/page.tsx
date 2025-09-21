@@ -9,12 +9,22 @@ import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import { ArrowLeft, Mail, Lock } from "lucide-react"
 import Link from "next/link"
+import { EnvDebug } from "@/components/env-debug"
 
 export default function LoginPage() {
-  // Check if Supabase is available
-  const isSupabaseAvailable = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!isSupabaseAvailable) {
+  // Debug environment variables
+  console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Not set')
+  console.log('Supabase Key:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Set' : 'Not set')
+  
+  // Check if Supabase is available - be more lenient
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  
+  // If we have the environment variables, show the normal login
+  if (supabaseUrl && supabaseKey) {
+    console.log('Supabase is available, showing normal login')
+  } else {
+    console.log('Supabase not available, showing demo mode')
     // Use fallback login page when Supabase is not available
     return (
       <div className="min-h-screen bg-background">
@@ -324,6 +334,7 @@ export default function LoginPage() {
           </Card>
         </div>
       </div>
+      <EnvDebug />
     </div>
   )
 }
