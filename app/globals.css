@@ -1,0 +1,233 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* WeightWin Design System - New Brand Colors */
+  --primary-600: #4F46E5;    /* Main brand color - Indigo */
+  --primary-700: #4338CA;    /* Darker variant */
+  --primary-50: #EEF2FF;     /* Light background */
+  --primary-100: #E0E7FF;    /* Very light background */
+  
+  /* Status Colors */
+  --success-600: #059669;    /* Success states */
+  --success-50: #ECFDF5;     /* Success light */
+  --warning-600: #D97706;    /* Warning states */
+  --warning-50: #FFFBEB;     /* Warning light */
+  --danger-600: #E11D48;     /* Error states */
+  --danger-50: #FEF2F2;      /* Error light */
+  
+  /* Neutrals */
+  --neutral-900: #0F172A;    /* Text primary */
+  --neutral-700: #334155;    /* Text secondary */
+  --neutral-500: #64748B;    /* Text muted */
+  --neutral-300: #CBD5E1;    /* Borders */
+  --neutral-100: #F1F5F9;    /* Backgrounds */
+  --neutral-50: #F8FAFC;     /* Light backgrounds */
+  --white: #FFFFFF;
+
+  /* Spacing Scale (8px Grid) */
+  --space-4: 4px;    /* 0.5x */
+  --space-8: 8px;    /* 1x base */
+  --space-12: 12px;  /* 1.5x */
+  --space-16: 16px;  /* 2x */
+  --space-24: 24px;  /* 3x */
+  --space-32: 32px;  /* 4x */
+  --space-40: 40px;  /* 5x */
+  --space-64: 64px;  /* 8x */
+
+  /* Typography Scale */
+  --text-display: 40px;      /* Hero headings */
+  --text-display-line: 48px;
+  --text-h1: 32px;           /* Page titles */
+  --text-h1-line: 40px;
+  --text-h2: 24px;           /* Section titles */
+  --text-h2-line: 32px;
+  --text-body: 16px;         /* Body text */
+  --text-body-line: 24px;
+  --text-caption: 12px;      /* Small text */
+  --text-caption-line: 16px;
+
+  /* Map to semantic design tokens */
+  --background: var(--neutral-50);
+  --foreground: var(--neutral-900);
+  --card: var(--white);
+  --card-foreground: var(--neutral-900);
+  --popover: var(--white);
+  --popover-foreground: var(--neutral-900);
+  --primary: var(--primary-600);
+  --primary-foreground: var(--white);
+  --secondary: var(--neutral-100);
+  --secondary-foreground: var(--neutral-700);
+  --muted: var(--neutral-100);
+  --muted-foreground: var(--neutral-500);
+  --accent: var(--primary-600);
+  --accent-foreground: var(--white);
+  --destructive: var(--danger-600);
+  --destructive-foreground: var(--white);
+  --border: var(--neutral-300);
+  --input: var(--neutral-300);
+  --ring: var(--primary-600);
+  --chart-1: var(--primary-600);
+  --chart-2: var(--success-600);
+  --chart-3: var(--warning-600);
+  --chart-4: var(--neutral-500);
+  --chart-5: var(--neutral-900);
+  --radius: 0.5rem;  /* 8px radius for modern look */
+  --sidebar: var(--white);
+  --sidebar-foreground: var(--neutral-900);
+  --sidebar-primary: var(--primary-600);
+  --sidebar-primary-foreground: var(--white);
+  --sidebar-accent: var(--neutral-100);
+  --sidebar-accent-foreground: var(--neutral-700);
+  --sidebar-border: var(--neutral-300);
+  --sidebar-ring: var(--primary-600);
+}
+
+.dark {
+  /* Dark mode variants for WeightWin colors */
+  --background: var(--neutral-900);
+  --foreground: var(--white);
+  --card: #1e293b;
+  --card-foreground: var(--white);
+  --popover: #1e293b;
+  --popover-foreground: var(--white);
+  --primary: var(--primary-600);
+  --primary-foreground: var(--white);
+  --secondary: #334155;
+  --secondary-foreground: var(--white);
+  --muted: #334155;
+  --muted-foreground: #94a3b8;
+  --accent: var(--primary-600);
+  --accent-foreground: var(--white);
+  --destructive: var(--danger-600);
+  --destructive-foreground: var(--white);
+  --border: #334155;
+  --input: #334155;
+  --ring: var(--primary-600);
+  --chart-1: var(--primary-600);
+  --chart-2: var(--success-600);
+  --chart-3: var(--warning-600);
+  --chart-4: #94a3b8;
+  --chart-5: var(--white);
+  --sidebar: #1e293b;
+  --sidebar-foreground: var(--white);
+  --sidebar-primary: var(--primary-600);
+  --sidebar-primary-foreground: var(--white);
+  --sidebar-accent: #334155;
+  --sidebar-accent-foreground: var(--white);
+  --sidebar-border: #334155;
+  --sidebar-ring: var(--primary-600);
+}
+
+@theme inline {
+  --font-sans: var(--font-inter);
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  /* Typography Scale Utilities */
+  .text-display {
+    font-size: var(--text-display);
+    line-height: var(--text-display-line);
+    font-weight: 700;
+  }
+  
+  .text-h1 {
+    font-size: var(--text-h1);
+    line-height: var(--text-h1-line);
+    font-weight: 600;
+  }
+  
+  .text-h2 {
+    font-size: var(--text-h2);
+    line-height: var(--text-h2-line);
+    font-weight: 600;
+  }
+  
+  .text-body {
+    font-size: var(--text-body);
+    line-height: var(--text-body-line);
+    font-weight: 400;
+  }
+  
+  .text-caption {
+    font-size: var(--text-caption);
+    line-height: var(--text-caption-line);
+    font-weight: 400;
+  }
+
+  /* Spacing Utilities (8px Grid) */
+  .space-4 { margin: var(--space-4); }
+  .space-8 { margin: var(--space-8); }
+  .space-12 { margin: var(--space-12); }
+  .space-16 { margin: var(--space-16); }
+  .space-24 { margin: var(--space-24); }
+  .space-32 { margin: var(--space-32); }
+  .space-40 { margin: var(--space-40); }
+  .space-64 { margin: var(--space-64); }
+
+  .p-4 { padding: var(--space-4); }
+  .p-8 { padding: var(--space-8); }
+  .p-12 { padding: var(--space-12); }
+  .p-16 { padding: var(--space-16); }
+  .p-24 { padding: var(--space-24); }
+  .p-32 { padding: var(--space-32); }
+  .p-40 { padding: var(--space-40); }
+  .p-64 { padding: var(--space-64); }
+
+  /* Brand Color Utilities */
+  .bg-primary-600 { background-color: var(--primary-600); }
+  .bg-primary-50 { background-color: var(--primary-50); }
+  .text-primary-600 { color: var(--primary-600); }
+  .text-neutral-900 { color: var(--neutral-900); }
+  .text-neutral-700 { color: var(--neutral-700); }
+  .text-neutral-500 { color: var(--neutral-500); }
+  .border-neutral-300 { border-color: var(--neutral-300); }
+}
