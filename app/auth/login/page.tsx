@@ -100,11 +100,24 @@ export default function LoginPage() {
 
     try {
       if (isSignUp) {
+            // Get the correct redirect URL based on environment
+            const isProduction = process.env.NODE_ENV === "production"
+            const isVercel = typeof window !== "undefined" && window.location.hostname.includes("vercel.app")
+            
+            let redirectUrl: string
+            if (isProduction && isVercel) {
+              redirectUrl = `${window.location.origin}/auth/callback?next=/consent`
+            } else if (isProduction) {
+              redirectUrl = `${window.location.origin}/auth/callback?next=/consent`
+            } else {
+              redirectUrl = `${window.location.origin}/auth/callback?next=/consent`
+            }
+            
             const { data, error } = await supabase.auth.signUp({
               email,
               password,
               options: {
-                emailRedirectTo: `${window.location.origin}/auth/callback?next=/consent`,
+                emailRedirectTo: redirectUrl,
               },
             })
 
@@ -144,15 +157,32 @@ export default function LoginPage() {
 
     try {
       console.log("[v0] Starting Google OAuth login")
-      const redirectUrl = `${window.location.origin}/auth/callback`
+      
+      // Get the correct redirect URL based on environment
+      const isProduction = process.env.NODE_ENV === "production"
+      const isVercel = typeof window !== "undefined" && window.location.hostname.includes("vercel.app")
+      
+      let redirectUrl: string
+      if (isProduction && isVercel) {
+        // In production on Vercel, use the current domain
+        redirectUrl = `${window.location.origin}/auth/callback?next=/consent`
+      } else if (isProduction) {
+        // In production but not Vercel, still use current domain
+        redirectUrl = `${window.location.origin}/auth/callback?next=/consent`
+      } else {
+        // In development, use localhost
+        redirectUrl = `${window.location.origin}/auth/callback?next=/consent`
+      }
+      
       console.log("[v0] Redirect URL:", redirectUrl)
+      console.log("[v0] Environment:", { isProduction, isVercel, hostname: window.location.hostname })
 
-          const { data, error } = await supabase.auth.signInWithOAuth({
-            provider: "google",
-            options: {
-              redirectTo: `${window.location.origin}/auth/callback?next=/consent`,
-            },
-          })
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: redirectUrl,
+        },
+      })
 
       console.log("[v0] OAuth response:", { data, error })
 

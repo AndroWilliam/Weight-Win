@@ -36,19 +36,39 @@ export async function GET(request: NextRequest) {
 
     console.log("[v0] Authentication successful, user:", data.user?.email)
 
+    // Get the correct base URL for redirects
     const forwardedHost = request.headers.get("x-forwarded-host")
+    const forwardedProto = request.headers.get("x-forwarded-proto")
     const isLocalEnv = process.env.NODE_ENV === "development"
 
     let redirectUrl: string
     if (isLocalEnv) {
+      // In development, use localhost
       redirectUrl = `${origin}${next}`
     } else if (forwardedHost) {
-      redirectUrl = `https://${forwardedHost}${next}`
+      // In production with Vercel, use the forwarded host
+      const protocol = forwardedProto || "https"
+      redirectUrl = `${protocol}://${forwardedHost}${next}`
     } else {
-      redirectUrl = `${origin}${next}`
+      // Fallback: try to construct from origin but ensure it's not localhost
+      const url = new URL(origin)
+      if (url.hostname === "localhost" || url.hostname === "127.0.0.1") {
+        // If somehow we're getting localhost in production, use environment variable
+        const vercelUrl = process.env.VERCEL_URL
+        if (vercelUrl) {
+          redirectUrl = `https://${vercelUrl}${next}`
+        } else {
+          // Last resort: use the request origin but log a warning
+          console.warn("[v0] Using localhost origin in production, this may cause issues")
+          redirectUrl = `${origin}${next}`
+        }
+      } else {
+        redirectUrl = `${origin}${next}`
+      }
     }
 
     console.log("[v0] Redirecting to:", redirectUrl)
+    console.log("[v0] Environment check:", { isLocalEnv, forwardedHost, forwardedProto, origin })
     return NextResponse.redirect(redirectUrl)
   } catch (error) {
     console.error("[v0] Unexpected error in auth callback:", error)
