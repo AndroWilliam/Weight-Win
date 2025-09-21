@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
 import { type NextRequest, NextResponse } from "next/server"
 
+export const runtime = 'nodejs'
+
 export async function GET(request: NextRequest) {
   console.log("[v0] Auth callback route hit")
 
