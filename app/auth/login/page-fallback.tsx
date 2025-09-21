@@ -1,69 +1,15 @@
 "use client"
 
-import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useRouter } from "next/navigation"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { ArrowLeft, Mail, Lock } from "lucide-react"
 import Link from "next/link"
 
-export default function LoginPage() {
-  // Check if Supabase is available
-  const isSupabaseAvailable = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!isSupabaseAvailable) {
-    // Use fallback login page when Supabase is not available
-    return (
-      <div className="min-h-screen bg-background">
-        {/* Header */}
-        <header className="px-4 py-6">
-          <div className="max-w-6xl mx-auto flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-2 text-neutral-700 hover:text-neutral-900">
-              <ArrowLeft className="w-4 h-4" />
-              <span className="text-body">Back to home</span>
-            </Link>
-          </div>
-        </header>
-
-        <div className="flex min-h-[calc(100vh-120px)] w-full items-center justify-center p-6">
-          <div className="w-full max-w-md">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <span className="text-white font-bold text-2xl">W</span>
-              </div>
-              <h1 className="text-h1 text-neutral-900 mb-2">Welcome to WeightWin</h1>
-              <p className="text-body text-neutral-700">
-                Start your 7-day weight tracking challenge
-              </p>
-            </div>
-
-            <Card className="border-neutral-300">
-              <CardContent className="p-8">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-2xl">🚀</span>
-                  </div>
-                  <h2 className="text-xl font-semibold text-neutral-900 mb-2">Demo Mode</h2>
-                  <p className="text-neutral-600 mb-6">
-                    Supabase authentication is not configured. You can still explore the app in demo mode.
-                  </p>
-                  <Button
-                    onClick={() => window.location.href = '/consent'}
-                    className="w-full bg-primary-600 hover:bg-primary-700 text-white py-3 text-body font-semibold rounded-lg"
-                  >
-                    Continue to Demo
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    )
-  }
+export default function LoginPageFallback() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isSignUp, setIsSignUp] = useState(false)
@@ -71,94 +17,27 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const router = useRouter()
 
-  const isDevelopment =
-    typeof window !== "undefined" &&
-    (window.location.hostname.includes("vusercontent.net") || window.location.hostname === "localhost")
-
-  useEffect(() => {
-    console.log("[v0] Login page URL:", window.location.href)
-    console.log("[v0] OAuth callback URL will be:", `${window.location.origin}/auth/callback`)
-    console.log("[v0] Development mode:", isDevelopment)
-  }, [isDevelopment])
-
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError(null)
 
-    const supabase = createClient()
-
-    try {
-      if (isSignUp) {
-            const { data, error } = await supabase.auth.signUp({
-              email,
-              password,
-              options: {
-                emailRedirectTo: `${window.location.origin}/auth/callback?next=/consent`,
-              },
-            })
-
-        if (error) throw error
-
-        if (data.user && !data.user.email_confirmed_at) {
-          setError("Please check your email for a confirmation link.")
-            } else {
-              router.push("/consent")
-            }
-      } else {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        })
-
-        if (error) throw error
-
-        router.push("/consent")
-      }
-    } catch (error: unknown) {
-      console.error("[v0] Auth error:", error)
-      if (error instanceof Error) {
-        setError(error.message)
-      } else {
-        setError("An unexpected error occurred during authentication")
-      }
-    } finally {
+    // Simulate authentication for demo purposes
+    setTimeout(() => {
       setIsLoading(false)
-    }
+      router.push("/consent")
+    }, 1000)
   }
 
   const handleGoogleLogin = async () => {
-    const supabase = createClient()
     setIsLoading(true)
     setError(null)
 
-    try {
-      console.log("[v0] Starting Google OAuth login")
-      const redirectUrl = `${window.location.origin}/auth/callback`
-      console.log("[v0] Redirect URL:", redirectUrl)
-
-          const { data, error } = await supabase.auth.signInWithOAuth({
-            provider: "google",
-            options: {
-              redirectTo: `${window.location.origin}/auth/callback?next=/consent`,
-            },
-          })
-
-      console.log("[v0] OAuth response:", { data, error })
-
-      if (error) {
-        console.error("[v0] OAuth error:", error)
-        throw error
-      }
-    } catch (error: unknown) {
-      console.error("[v0] Login error:", error)
-      if (error instanceof Error) {
-        setError(`Authentication failed: ${error.message}`)
-      } else {
-        setError("An unexpected error occurred during authentication")
-      }
+    // Simulate Google OAuth for demo purposes
+    setTimeout(() => {
       setIsLoading(false)
-    }
+      router.push("/consent")
+    }, 1000)
   }
 
   const handleDevLogin = async () => {
@@ -168,8 +47,8 @@ export default function LoginPage() {
     // Simulate loading time
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
-        // Redirect to consent
-        router.push("/consent")
+    // Redirect to consent
+    router.push("/consent")
   }
 
   return (
@@ -194,8 +73,8 @@ export default function LoginPage() {
               {isSignUp ? "Create your account" : "Welcome back"}
             </h1>
             <p className="text-body text-neutral-700">
-              {isSignUp 
-                ? "Start your 7-day weight tracking challenge" 
+              {isSignUp
+                ? "Start your 7-day weight tracking challenge"
                 : "Sign in to continue your challenge"
               }
             </p>
@@ -295,16 +174,14 @@ export default function LoginPage() {
                     Continue with Google
                   </Button>
 
-                  {isDevelopment && (
-                    <Button
-                      onClick={handleDevLogin}
-                      disabled={isLoading}
-                      variant="outline"
-                      className="w-full border-neutral-300 hover:bg-neutral-50 py-3 text-body font-medium rounded-lg"
-                    >
-                      Skip Login (Dev Mode)
-                    </Button>
-                  )}
+                  <Button
+                    onClick={handleDevLogin}
+                    disabled={isLoading}
+                    variant="outline"
+                    className="w-full border-neutral-300 hover:bg-neutral-50 py-3 text-body font-medium rounded-lg"
+                  >
+                    Skip Login (Demo Mode)
+                  </Button>
                 </div>
               </div>
 
