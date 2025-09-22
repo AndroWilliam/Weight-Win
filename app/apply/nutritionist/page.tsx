@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { createClient } from "@/lib/supabase/client"
+import { APPLICANT_BUCKET } from "@/lib/supabase/constants"
 import { useRouter } from "next/navigation"
 
 const EGY_MOBILE = /^\+20(10|11|12|15)\d{8}$/
@@ -121,9 +122,9 @@ export default function ApplyAsNutritionistPage() {
       const cvPath = `${user.id}/cv-${ts}.${cvExt}`
       const idPath = `${user.id}/id-${ts}.${idExt}`
 
-      const upCv = await supabase.storage.from("applicant-docs").upload(cvPath, values.cvFile, { upsert: true })
+      const upCv = await supabase.storage.from(APPLICANT_BUCKET).upload(cvPath, values.cvFile, { upsert: true })
       if (upCv.error) throw upCv.error
-      const upId = await supabase.storage.from("applicant-docs").upload(idPath, values.idFile, { upsert: true })
+      const upId = await supabase.storage.from(APPLICANT_BUCKET).upload(idPath, values.idFile, { upsert: true })
       if (upId.error) throw upId.error
 
       // 3) Insert document rows
