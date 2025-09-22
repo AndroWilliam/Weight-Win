@@ -166,7 +166,7 @@ export default function HomePage() {
                 <span className="text-white font-bold text-lg">2</span>
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-neutral-900 mb-3">Snap your scale daily</h3>
+                <h3 className="text-2xl font-bold text-neutral-900 mb-3">Take a picture of your scale daily</h3>
                 <p className="text-neutral-600 text-lg">
                   Each morning, take a photo of your bathroom scale. Our AI reads the weight automatically - no typing required.
                 </p>
