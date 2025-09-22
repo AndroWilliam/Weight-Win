@@ -208,12 +208,14 @@ export default function HomePage() {
           <p className="text-xl text-neutral-600 mb-8 max-w-2xl mx-auto">
             Connect with pre-qualified clients who've already demonstrated commitment. Join our network of certified nutritionists.
           </p>
-          <Button 
-            variant="outline" 
-            className="border-primary-600 text-primary-600 hover:bg-primary-50 px-8 py-4 text-lg font-semibold rounded-lg"
-          >
-            Apply as a Nutritionist
-          </Button>
+          <Link href="/apply/nutritionist">
+            <Button 
+              variant="outline" 
+              className="border-primary-600 text-primary-600 hover:bg-primary-50 px-8 py-4 text-lg font-semibold rounded-lg"
+            >
+              Apply as a Nutritionist
+            </Button>
+          </Link>
         </div>
       </section>
 
