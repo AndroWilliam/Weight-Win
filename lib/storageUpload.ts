@@ -8,32 +8,14 @@ export async function uploadWithProgress(
   path: string,
   onProgress: UploadProgressCB
 ): Promise<{ path: string }> {
-  const supa = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-  
-  const { data: sess } = await supa.auth.getSession()
-  const token = sess.session?.access_token
-  if (!token) throw new Error('Not authenticated')
+  // For anonymous uploads, we'll use a server-side endpoint
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('bucket', bucket)
+  formData.append('path', path)
 
-  const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/${bucket}/${encodeURIComponent(path)}`
-  
-  await new Promise<void>((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest()
-    xhr.open('POST', url)
-    xhr.setRequestHeader('Authorization', `Bearer ${token}`)
-    xhr.setRequestHeader('x-upsert', 'true')
-    
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        resolve()
-      } else {
-        reject(new Error(xhr.responseText || `HTTP ${xhr.status}`))
-      }
-    }
-    
-    xhr.onerror = () => reject(new Error('Network error'))
     
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) {
@@ -45,8 +27,22 @@ export async function uploadWithProgress(
       }
     }
     
-    xhr.send(file)
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const response = JSON.parse(xhr.responseText)
+          resolve({ path: response.path })
+        } catch (e) {
+          reject(new Error('Invalid response from server'))
+        }
+      } else {
+        reject(new Error(xhr.responseText || `HTTP ${xhr.status}`))
+      }
+    }
+    
+    xhr.onerror = () => reject(new Error('Network error'))
+    
+    xhr.open('POST', '/api/upload/anonymous')
+    xhr.send(formData)
   })
-  
-  return { path }
 }

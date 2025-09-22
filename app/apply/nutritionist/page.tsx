@@ -21,7 +21,7 @@ export default function ApplyNutritionistPage() {
 
   const methods = useForm<ApplyInput>({
     resolver: zodResolver(ApplySchema),
-    mode: 'onTouched',
+    mode: 'onChange',
     defaultValues: {
       idType: 'national_id',
       consent: false,

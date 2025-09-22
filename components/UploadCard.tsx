@@ -53,25 +53,28 @@ export function UploadCard({
     setPct(0)
     setErrorMessage(undefined)
 
-    const { data: userData } = await supa.auth.getUser()
-    const user = userData?.user
-    if (!user) {
-      setState('error')
-      setErrorMessage('Not authenticated. Please log in again.')
-      return
-    }
-
+    // Generate a unique path for anonymous uploads
     const ext = f.name.split('.').pop()
-    const p = `${user.id}/${prefix}-${Date.now()}.${ext}`
+    const timestamp = Date.now()
+    const randomId = Math.random().toString(36).substring(2, 15)
+    const p = `anonymous/${prefix}-${timestamp}-${randomId}.${ext}`
 
     try {
       await uploadWithProgress(f, APPLICANT_BUCKET, p, ({ pct }) => setPct(pct))
       setPath(p)
       setValue(formFieldName, p, { shouldValidate: true, shouldDirty: true })
 
-      // Create preview
-      const { data } = await supa.storage.from(APPLICANT_BUCKET).createSignedUrl(p, 60)
-      setPreview(data?.signedUrl)
+      // Create preview using server-side signed URL
+      const previewResponse = await fetch('/api/upload/preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bucket: APPLICANT_BUCKET, path: p })
+      })
+      
+      if (previewResponse.ok) {
+        const { signedUrl } = await previewResponse.json()
+        setPreview(signedUrl)
+      }
 
       setState('scanning')
 
