@@ -1,297 +1,312 @@
-"use client"
+'use client'
 
-import { useEffect, useMemo, useState } from "react"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { AnimatePresence, motion } from "framer-motion"
-import { useDropzone } from "react-dropzone"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Checkbox } from "@/components/ui/checkbox"
-import { createClient } from "@/lib/supabase/client"
-import { APPLICANT_BUCKET } from "@/lib/supabase/constants"
-import { useRouter } from "next/navigation"
+import { useState } from 'react'
+import { useForm, FormProvider, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { ApplySchema, ApplyInput } from '@/lib/schema'
+import { UploadCard } from '@/components/UploadCard'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+import { ArrowLeft, CheckCircle } from 'lucide-react'
+import Link from 'next/link'
 
-const EGY_MOBILE = /^\+20(10|11|12|15)\d{8}$/
+export default function ApplyNutritionistPage() {
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [applicationId, setApplicationId] = useState<string>()
 
-const schema = z.object({
-  firstName: z.string().min(1, "Required"),
-  familyName: z.string().min(1, "Required"),
-  phone: z.string().regex(EGY_MOBILE, "Egyptian mobile only"),
-  email: z.string().email(),
-  idType: z.enum(["national_id", "passport"]),
-  idNumber: z
-    .string()
-    .min(1)
-    .superRefine((val, ctx) => {
-      const t = (ctx as any).parent?.idType
-      if (t === "national_id" && !/^\d{14}$/.test(val)) {
-        ctx.addIssue({ code: "custom", message: "14 digits required" })
-      }
-      if (t === "passport" && !/^[A-Za-z0-9]{9}$/.test(val)) {
-        ctx.addIssue({ code: "custom", message: "9 alphanumeric chars required" })
-      }
-    }),
-  cvFile: z.instanceof(File),
-  idFile: z.instanceof(File),
-  consent: z.literal(true, { errorMap: () => ({ message: "Consent required" }) }),
-})
-
-type FormValues = z.infer<typeof schema>
-
-export default function ApplyAsNutritionistPage() {
-  const router = useRouter()
-  const supabase = useMemo(() => createClient(), [])
-  const [submitting, setSubmitting] = useState(false)
-  const [ocrState, setOcrState] = useState<{cv?: string; id?: string}>({})
-  const [showSuccess, setShowSuccess] = useState(false)
-
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+  const methods = useForm<ApplyInput>({
+    resolver: zodResolver(ApplySchema),
+    mode: 'onTouched',
     defaultValues: {
-      idType: "national_id",
+      idType: 'national_id',
       consent: false,
-    },
+    }
   })
 
-  const idType = watch("idType")
+  const { register, control, handleSubmit, formState: { errors, isSubmitting, isValid }, watch, setValue } = methods
+  const idType = watch('idType') ?? 'national_id'
 
-  // Dropzones
-  const onDropCv = (accepted: File[]) => {
-    if (accepted?.[0]) setValue("cvFile", accepted[0], { shouldValidate: true })
-  }
-  const onDropId = (accepted: File[]) => {
-    if (accepted?.[0]) setValue("idFile", accepted[0], { shouldValidate: true })
-  }
-
-  const { getRootProps: getCvRoot, getInputProps: getCvInput, isDragActive: cvActive } = useDropzone({
-    onDrop: onDropCv,
-    multiple: false,
-    accept: { "application/pdf": [".pdf"], "image/jpeg": [".jpg", ".jpeg"], "image/png": [".png"] },
-    maxSize: 10 * 1024 * 1024,
-  })
-  const { getRootProps: getIdRoot, getInputProps: getIdInput, isDragActive: idActive } = useDropzone({
-    onDrop: onDropId,
-    multiple: false,
-    accept: { "application/pdf": [".pdf"], "image/jpeg": [".jpg", ".jpeg"], "image/png": [".png"] },
-    maxSize: 10 * 1024 * 1024,
-  })
-
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = async (data: ApplyInput) => {
     try {
-      setSubmitting(true)
-      // Normalize
-      const email = values.email.toLowerCase()
-      const userRes = await supabase.auth.getUser()
-      const user = userRes.data.user
-      if (!user) throw new Error("Not authenticated")
+      const response = await fetch('/api/applications/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
 
-      // 1) Create application row
-      const { data: appRow, error: appErr } = await supabase
-        .from("nutritionist_applications")
-        .insert({
-          applicant_user_id: user.id,
-          first_name: values.firstName,
-          family_name: values.familyName,
-          phone_e164: values.phone,
-          email,
-          id_type: values.idType,
-          id_number: values.idNumber,
-          status: "new",
-        })
-        .select("id")
-        .single()
-      if (appErr) throw appErr
+      if (!response.ok) {
+        throw new Error('Failed to submit application')
+      }
 
-      const applicationId = appRow.id as number
-
-      // 2) Upload files
-      const ts = Date.now()
-      const cvExt = values.cvFile.name.split(".").pop() || "pdf"
-      const idExt = values.idFile.name.split(".").pop() || "jpg"
-      const cvPath = `${user.id}/cv-${ts}.${cvExt}`
-      const idPath = `${user.id}/id-${ts}.${idExt}`
-
-      const upCv = await supabase.storage.from(APPLICANT_BUCKET).upload(cvPath, values.cvFile, { upsert: true })
-      if (upCv.error) throw upCv.error
-      const upId = await supabase.storage.from(APPLICANT_BUCKET).upload(idPath, values.idFile, { upsert: true })
-      if (upId.error) throw upId.error
-
-      // 3) Insert document rows
-      const { data: docs, error: docErr } = await supabase
-        .from("application_documents")
-        .insert([
-          { application_id: applicationId, kind: "cv", file_path: cvPath },
-          { application_id: applicationId, kind: "id", file_path: idPath },
-        ])
-        .select("id, kind")
-      if (docErr) throw docErr
-
-      const cvDoc = docs.find(d => d.kind === "cv")
-      const idDoc = docs.find(d => d.kind === "id")
-
-      // 4) Trigger OCR
-      setOcrState(s => ({ ...s, cv: "Scanning CV..." }))
-      await fetch("/api/ocr/cv", { method: "POST", body: JSON.stringify({ documentId: cvDoc?.id }) })
-      setOcrState(s => ({ ...s, cv: "OCR complete" }))
-
-      setOcrState(s => ({ ...s, id: "Scanning ID..." }))
-      await fetch("/api/ocr/id", { method: "POST", body: JSON.stringify({ documentId: idDoc?.id, idNumber: values.idNumber }) })
-      setOcrState(s => ({ ...s, id: "OCR complete" }))
-
-      // 5) Log event
-      await supabase.from("application_events").insert({ application_id: applicationId, event_type: "submitted" })
-
-      setShowSuccess(true)
-    } catch (e) {
-      console.error(e)
-      alert("Failed to submit application. Please try again.")
-    } finally {
-      setSubmitting(false)
+      const result = await response.json()
+      setApplicationId(result.applicationId)
+      setShowSuccessModal(true)
+    } catch (error) {
+      console.error('Submission error:', error)
+      // Handle error - you might want to show a toast or error message
     }
   }
 
-  const idTitle = (
-    <AnimatePresence mode="wait">
-      <motion.span key={idType} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-        {idType === "national_id" ? "National ID Photo" : "Passport Photo"}
-      </motion.span>
-    </AnimatePresence>
-  )
-
   return (
-    <div className="min-h-screen bg-background">
-      <header className="px-6 py-4 border-b border-neutral-300">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-2xl font-bold">Apply as a Nutritionist</h1>
-          <p className="text-neutral-600">Tell us a few details so we can verify your profile. We'll review and get back to you soon.</p>
+    <div className="min-h-screen bg-slate-50">
+      {/* Header */}
+      <div className="bg-white border-b border-slate-200">
+        <div className="max-w-4xl mx-auto px-6 py-4">
+          <div className="flex items-center gap-4">
+            <Link href="/" className="text-slate-600 hover:text-slate-900">
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">Apply as a Nutritionist</h1>
+              <p className="text-slate-600">Join our network of certified nutritionists</p>
+            </div>
+          </div>
         </div>
-      </header>
+      </div>
 
-      <main className="px-6 py-8">
-        <form className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8" onSubmit={handleSubmit(onSubmit)}>
-          <section className="space-y-4">
-            <h2 className="text-lg font-semibold">Personal Information</h2>
-            <div>
-              <Label>First Name</Label>
-              <Input placeholder="Enter your first name" {...register("firstName")} />
-              {errors.firstName && <p className="text-sm text-red-600">{errors.firstName.message}</p>}
+      <div className="max-w-4xl mx-auto px-6 py-8">
+        <FormProvider {...methods}>
+          <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-8">
+            {/* Personal Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold">Personal Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input
+                      id="firstName"
+                      {...register('firstName')}
+                      className={errors.firstName ? 'border-red-500' : ''}
+                    />
+                    {errors.firstName && (
+                      <p className="text-sm text-red-600">{errors.firstName.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="familyName">Family Name</Label>
+                    <Input
+                      id="familyName"
+                      {...register('familyName')}
+                      className={errors.familyName ? 'border-red-500' : ''}
+                    />
+                    {errors.familyName && (
+                      <p className="text-sm text-red-600">{errors.familyName.message}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Mobile Number</Label>
+                  <Controller
+                    control={control}
+                    name="phone"
+                    render={({ field }) => (
+                      <div className="flex items-center">
+                        <span className="px-3 py-2 rounded-l-md bg-slate-100 border border-r-0 border-slate-300 text-slate-700">
+                          +20
+                        </span>
+                        <Input
+                          className={`flex-1 rounded-l-none ${errors.phone ? 'border-red-500' : ''}`}
+                          value={(field.value || '').replace(/^\+20/, '')}
+                          onChange={(e) => {
+                            const cleanValue = e.target.value.replace(/\D/g, '').slice(0, 10)
+                            field.onChange(`+20${cleanValue}`)
+                          }}
+                          inputMode="numeric"
+                          maxLength={10}
+                          placeholder="10XXXXXXXX"
+                        />
+                      </div>
+                    )}
+                  />
+                  {errors.phone && (
+                    <p className="text-sm text-red-600">{errors.phone.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    {...register('email')}
+                    className={errors.email ? 'border-red-500' : ''}
+                  />
+                  {errors.email && (
+                    <p className="text-sm text-red-600">{errors.email.message}</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Identification */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold">Identification</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <Label>ID Type</Label>
+                  <Controller
+                    control={control}
+                    name="idType"
+                    render={({ field }) => (
+                      <RadioGroup
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        className="flex gap-6"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="national_id" id="national_id" />
+                          <Label htmlFor="national_id">National ID</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="passport" id="passport" />
+                          <Label htmlFor="passport">Passport</Label>
+                        </div>
+                      </RadioGroup>
+                    )}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="idNumber">
+                    {idType === 'national_id' ? 'National ID Number' : 'Passport Number'}
+                  </Label>
+                  <Input
+                    id="idNumber"
+                    {...register('idNumber')}
+                    inputMode="numeric"
+                    className={errors.idNumber ? 'border-red-500' : ''}
+                    placeholder={idType === 'national_id' ? '14 digits' : '9 characters'}
+                  />
+                  {errors.idNumber && (
+                    <p className="text-sm text-red-600">{errors.idNumber.message}</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Documents */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold">Documents</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <UploadCard
+                      formFieldName="cvPath"
+                      title="Upload your CV (PDF or Photo)"
+                      accept="application/pdf,image/jpeg,image/png"
+                      prefix="cv"
+                    />
+                    {errors.cvPath && (
+                      <p className="text-sm text-red-600">{errors.cvPath.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <UploadCard
+                      formFieldName="idPath"
+                      title={idType === 'national_id' ? 'National ID Photo' : 'Passport Photo'}
+                      accept="application/pdf,image/jpeg,image/png"
+                      prefix="id"
+                    />
+                    {errors.idPath && (
+                      <p className="text-sm text-red-600">{errors.idPath.message}</p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Consent */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-start space-x-3">
+                  <Controller
+                    control={control}
+                    name="consent"
+                    render={({ field }) => (
+                      <Checkbox
+                        id="consent"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className={errors.consent ? 'border-red-500' : ''}
+                      />
+                    )}
+                  />
+                  <div className="space-y-1">
+                    <Label htmlFor="consent" className="text-sm leading-relaxed">
+                      I consent to WeightWin using OCR to extract relevant information from my documents for verification.{' '}
+                      <a href="#" className="text-blue-600 hover:underline">Privacy</a> and{' '}
+                      <a href="#" className="text-blue-600 hover:underline">Terms</a>.
+                    </Label>
+                    {errors.consent && (
+                      <p className="text-sm text-red-600">{errors.consent.message}</p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Submit Button */}
+            <div className="flex justify-end gap-4">
+              <Button type="button" variant="outline" asChild>
+                <Link href="/">Cancel</Link>
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting || !isValid}
+                className="bg-primary-600 hover:bg-primary-700"
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit details'}
+              </Button>
             </div>
-            <div>
-              <Label>Family Name</Label>
-              <Input placeholder="Enter your family name" {...register("familyName")} />
-              {errors.familyName && <p className="text-sm text-red-600">{errors.familyName.message}</p>}
-            </div>
-            <div>
-              <Label>Mobile Number</Label>
-              <div className="flex">
-                <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-neutral-50 text-neutral-600">+20</span>
-                <Input placeholder="1X XXX XXXX" className="rounded-l-none" inputMode="numeric" maxLength={10}
-                  onChange={(e) => {
-                    const digits = e.target.value.replace(/\D/g, "").slice(0, 10)
-                    const full = `+20${digits}`
-                    setValue("phone", full, { shouldValidate: true })
-                    e.target.value = digits
-                  }} />
+          </form>
+        </FormProvider>
+      </div>
+
+      {/* Success Modal */}
+      <AlertDialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-emerald-600" />
               </div>
-              {errors.phone && <p className="text-sm text-red-600">{errors.phone.message}</p>}
+              <div>
+                <AlertDialogTitle className="text-xl">Application Submitted Successfully!</AlertDialogTitle>
+                <AlertDialogDescription className="text-base mt-2">
+                  Thank you for your interest in joining WeightWin. We'll review your application and get back to you within 3-5 business days.
+                </AlertDialogDescription>
+              </div>
             </div>
-            <div>
-              <Label>Email Address</Label>
-              <Input type="email" placeholder="Enter your email address" {...register("email")} />
-              {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
+          </AlertDialogHeader>
+          <div className="mt-6">
+            <p className="text-sm text-slate-600 mb-4">
+              Application ID: <span className="font-mono text-slate-900">{applicationId}</span>
+            </p>
+            <div className="flex justify-end">
+              <Button onClick={() => setShowSuccessModal(false)} asChild>
+                <Link href="/">Return to Home</Link>
+              </Button>
             </div>
-          </section>
-
-          <section className="space-y-4">
-            <h2 className="text-lg font-semibold">Identification</h2>
-            <div>
-              <Label>ID Type</Label>
-              <RadioGroup defaultValue="national_id" onValueChange={(v) => setValue("idType", v as any, { shouldValidate: true })} className="mt-2">
-                <div className="flex items-center gap-3">
-                  <RadioGroupItem id="nat" value="national_id" />
-                  <Label htmlFor="nat">National ID</Label>
-                </div>
-                <div className="flex items-center gap-3 mt-2">
-                  <RadioGroupItem id="pass" value="passport" />
-                  <Label htmlFor="pass">Passport</Label>
-                </div>
-              </RadioGroup>
-            </div>
-            <div>
-              <Label>ID Number</Label>
-              <Input placeholder="Enter your ID number" {...register("idNumber")} inputMode={idType === "national_id" ? "numeric" : "text"} maxLength={idType === "national_id" ? 14 : 9} />
-              {errors.idNumber && <p className="text-sm text-red-600">{errors.idNumber.message}</p>}
-            </div>
-          </section>
-
-          <section className="md:col-span-2">
-            <h2 className="text-lg font-semibold mb-4">Documents</h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card className="border-dashed border-2">
-                <CardContent className="p-6">
-                  <div {...getCvRoot()} className={`rounded-lg p-6 text-center cursor-pointer ${cvActive ? "bg-primary-50 border-primary-300" : "bg-neutral-50 border-neutral-300"}`}>
-                    <input {...getCvInput()} />
-                    <p className="font-medium">Drag and drop or click to upload</p>
-                    <p className="text-sm text-neutral-600">PDF, JPG, or PNG — max 10MB</p>
-                  </div>
-                  {errors.cvFile && <p className="text-sm text-red-600 mt-2">CV required</p>}
-                  {ocrState.cv && <p className="text-sm text-neutral-700 mt-3">{ocrState.cv}</p>}
-                </CardContent>
-              </Card>
-              <Card className="border-dashed border-2">
-                <CardContent className="p-6">
-                  <div {...getIdRoot()} className={`rounded-lg p-6 text-center cursor-pointer ${idActive ? "bg-primary-50 border-primary-300" : "bg-neutral-50 border-neutral-300"}`}>
-                    <input {...getIdInput()} />
-                    <p className="font-medium">{idTitle}</p>
-                    <p className="text-sm text-neutral-600">JPG or PNG — front side, clear photo</p>
-                  </div>
-                  {errors.idFile && <p className="text-sm text-red-600 mt-2">{idType === "national_id" ? "ID photo required" : "Passport photo required"}</p>}
-                  {ocrState.id && <p className="text-sm text-neutral-700 mt-3">{ocrState.id}</p>}
-                </CardContent>
-              </Card>
-            </div>
-          </section>
-
-          <section className="md:col-span-2 space-y-3">
-            <div className="flex items-start gap-3">
-              <input id="consent" type="checkbox" {...register("consent")} className="mt-1" />
-              <Label htmlFor="consent" className="font-normal">
-                I consent to WeightWin using OCR to extract relevant information from my documents for verification. <a className="underline" href="#">Privacy</a> and <a className="underline" href="#">Terms</a>.
-              </Label>
-            </div>
-            {errors.consent && <p className="text-sm text-red-600">{errors.consent.message}</p>}
-          </section>
-
-          <div className="md:col-span-2 flex justify-end gap-3">
-            <Button type="button" variant="outline" onClick={() => router.push("/")}>Cancel</Button>
-            <Button type="submit" disabled={submitting}>{submitting ? "Submitting..." : "Submit details"}</Button>
           </div>
-        </form>
-      </main>
-
-      {showSuccess && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-[90%] max-w-md shadow-xl text-center">
-            <div className="mx-auto mb-4 w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center">✓</div>
-            <h3 className="text-lg font-semibold mb-2">Application submitted</h3>
-            <p className="text-neutral-700 mb-6">Thank you for applying to WeightWin. Our Admin will review your application and contact you soon 😊</p>
-            <Button onClick={() => { setShowSuccess(false); router.push("/") }}>Close</Button>
-          </div>
-        </div>
-      )}
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
-
-
