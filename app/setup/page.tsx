@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Clock, Globe, ArrowRight } from "lucide-react"
@@ -13,6 +14,7 @@ export default function SetupPage() {
   const [weightUnit, setWeightUnit] = useState("kg")
   const [reminderTime, setReminderTime] = useState("08:00")
   const [timezone, setTimezone] = useState("")
+  const [tzLocked, setTzLocked] = useState(false)
   const [locationPermission, setLocationPermission] = useState<"granted" | "denied" | "pending">("pending")
   const router = useRouter()
 
@@ -43,6 +45,7 @@ export default function SetupPage() {
       
       if (timezoneFromLocation) {
         setTimezone(timezoneFromLocation)
+        setTzLocked(true)
       }
       
       setLocationPermission("granted")
@@ -186,13 +189,39 @@ export default function SetupPage() {
                   </div>
                 )}
 
-                <div className="max-w-md">
-                  <Input
-                    value={timezone}
-                    onChange={(e) => setTimezone(e.target.value)}
-                    placeholder="Select your timezone"
-                    className="border-neutral-300 focus:border-primary-600 focus:ring-primary-600"
-                  />
+                <div className={`max-w-md transition-opacity duration-300 ${tzLocked ? 'opacity-60' : 'opacity-100'}`}>
+                  <Select value={timezone} onValueChange={setTimezone} disabled={tzLocked}>
+                    <SelectTrigger className="border-neutral-300 focus:border-primary-600 focus:ring-primary-600">
+                      <SelectValue placeholder="Select your timezone" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-72 overflow-auto">
+                      {[
+                        'Africa/Cairo',
+                        'Africa/Johannesburg',
+                        'Africa/Nairobi',
+                        'America/New_York',
+                        'America/Chicago',
+                        'America/Denver',
+                        'America/Los_Angeles',
+                        'America/Sao_Paulo',
+                        'Asia/Dubai',
+                        'Asia/Jerusalem',
+                        'Asia/Kolkata',
+                        'Asia/Singapore',
+                        'Asia/Tokyo',
+                        'Australia/Sydney',
+                        'Europe/Amsterdam',
+                        'Europe/Berlin',
+                        'Europe/Istanbul',
+                        'Europe/London',
+                        'Europe/Madrid',
+                        'Europe/Moscow',
+                        'Pacific/Auckland'
+                      ].map((tz) => (
+                        <SelectItem key={tz} value={tz}>{tz}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <p className="text-sm text-neutral-500 mt-2">
                   This ensures your daily reminders arrive at the right time.
