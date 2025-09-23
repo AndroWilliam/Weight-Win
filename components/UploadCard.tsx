@@ -29,12 +29,14 @@ export function UploadCard({
   const [pct, setPct] = useState(0)
   const [path, setPath] = useState<string>()
   const [preview, setPreview] = useState<string>() // signed URL
+  const [originalName, setOriginalName] = useState<string>()
   const [errorMessage, setErrorMessage] = useState<string>()
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
 
   async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]
     if (!f) return
+    setOriginalName(f.name)
 
     // Check file size (10MB max)
     if (f.size > 10 * 1024 * 1024) {
@@ -171,41 +173,44 @@ export function UploadCard({
       )}
 
       {state === 'success' && (
-        <div className="flex items-center gap-3">
-          {isPdf ? (
-            <div className="flex items-center gap-2 p-2 bg-slate-100 rounded-md">
-              <FileText className="w-4 h-4 text-slate-600" />
-              <span className="text-sm text-slate-700">{path?.split('/').pop()}</span>
-            </div>
-          ) : (
-            <img
-              src={preview}
-              alt="preview"
-              className="h-14 w-14 rounded object-cover border border-slate-200"
-            />
-          )}
-          <div className="flex-1">
-            <p className="text-sm text-emerald-700 font-medium">Key details extracted</p>
-            <p className="text-xs text-slate-500">Document processed successfully</p>
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex items-center gap-3">
+            {isPdf ? (
+              <div className="flex items-center gap-2 p-2 bg-slate-100 rounded-md">
+                <FileText className="w-4 h-4 text-slate-600" />
+                <span className="text-sm text-slate-700 truncate max-w-[220px]" title={originalName || ''}>{originalName || 'Document'}</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <img
+                  src={preview}
+                  alt="preview"
+                  className="h-14 w-14 rounded object-cover border border-slate-200"
+                />
+                <span className="text-sm text-slate-700 truncate max-w-[220px]" title={originalName || ''}>{originalName || 'Image'}</span>
+              </div>
+            )}
           </div>
-          <button
-            type="button"
-            onClick={() => setIsPreviewOpen(true)}
-            className="px-3 py-1 rounded border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-colors text-sm"
-          >
-            Preview
-          </button>
-          <label className="inline-flex cursor-pointer">
-            <input
-              type="file"
-              accept={accept}
-              className="hidden"
-              onChange={onPick}
-            />
-            <span className="px-3 py-1 rounded border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-colors text-sm">
-              Replace
-            </span>
-          </label>
+          <div className="mt-1 flex justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => setIsPreviewOpen(true)}
+              className="px-3 py-1.5 rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-colors text-sm"
+            >
+              Preview
+            </button>
+            <label className="inline-flex cursor-pointer">
+              <input
+                type="file"
+                accept={accept}
+                className="hidden"
+                onChange={onPick}
+              />
+              <span className="px-3 py-1.5 rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-colors text-sm">
+                Replace
+              </span>
+            </label>
+          </div>
         </div>
       )}
 
