@@ -6,7 +6,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { Clock, Globe, ArrowRight } from "lucide-react"
 
@@ -15,6 +15,30 @@ export default function SetupPage() {
   const [reminderTime, setReminderTime] = useState("08:00")
   const [timezone, setTimezone] = useState("")
   const [tzLocked, setTzLocked] = useState(false)
+  const baseTimezones = useMemo(() => ([
+    'Africa/Cairo',
+    'Africa/Johannesburg',
+    'Africa/Nairobi',
+    'America/New_York',
+    'America/Chicago',
+    'America/Denver',
+    'America/Los_Angeles',
+    'America/Sao_Paulo',
+    'Asia/Dubai',
+    'Asia/Jerusalem',
+    'Asia/Kolkata',
+    'Asia/Singapore',
+    'Asia/Tokyo',
+    'Australia/Sydney',
+    'Europe/Amsterdam',
+    'Europe/Berlin',
+    'Europe/Istanbul',
+    'Europe/London',
+    'Europe/Madrid',
+    'Europe/Moscow',
+    'Pacific/Auckland'
+  ]), [])
+  const [timezones, setTimezones] = useState<string[]>(baseTimezones)
   const [locationPermission, setLocationPermission] = useState<"granted" | "denied" | "pending">("pending")
   const router = useRouter()
 
@@ -22,6 +46,9 @@ export default function SetupPage() {
     // Auto-detect timezone
     const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
     setTimezone(detectedTimezone)
+    if (!baseTimezones.includes(detectedTimezone)) {
+      setTimezones((prev) => [detectedTimezone, ...prev])
+    }
   }, [])
 
   const requestLocationPermission = async () => {
@@ -41,12 +68,14 @@ export default function SetupPage() {
 
       // Get timezone from coordinates
       const { latitude, longitude } = position.coords
-      const timezoneFromLocation = await getTimezoneFromCoordinates(latitude, longitude)
-      
-      if (timezoneFromLocation) {
-        setTimezone(timezoneFromLocation)
-        setTzLocked(true)
+      // Use the browser-resolved IANA timezone. Coordinates
+      // are only used to justify locking after permission.
+      const browserTz = Intl.DateTimeFormat().resolvedOptions().timeZone
+      if (!timezones.includes(browserTz)) {
+        setTimezones((prev) => [browserTz, ...prev])
       }
+      setTimezone(browserTz)
+      setTzLocked(true)
       
       setLocationPermission("granted")
     } catch (error) {
@@ -56,17 +85,7 @@ export default function SetupPage() {
     }
   }
 
-  const getTimezoneFromCoordinates = async (lat: number, lng: number): Promise<string | null> => {
-    try {
-      // Using a timezone API to get timezone from coordinates
-      const response = await fetch(`https://api.timezonedb.com/v2.1/get-time-zone?key=demo&format=json&by=position&lat=${lat}&lng=${lng}`)
-      const data = await response.json()
-      return data.zoneName || null
-    } catch (error) {
-      console.error("Error fetching timezone:", error)
-      return null
-    }
-  }
+  // Deprecated: external lookup not required; we rely on browser IANA timezone
 
   const handleContinue = () => {
     // Save settings to localStorage or send to server
