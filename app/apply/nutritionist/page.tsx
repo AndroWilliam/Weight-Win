@@ -33,6 +33,10 @@ export default function ApplyNutritionistPage() {
     mode: 'onSubmit',
     reValidateMode: 'onChange',
     defaultValues: {
+      firstName: '',
+      familyName: '',
+      email: '',
+      idNumber: '',
       idType: 'national_id',
       consent: false,
     }
