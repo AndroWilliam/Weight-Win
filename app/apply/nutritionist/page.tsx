@@ -21,14 +21,19 @@ export default function ApplyNutritionistPage() {
 
   const methods = useForm<ApplyInput>({
     resolver: zodResolver(ApplySchema),
-    mode: 'onChange',
+    mode: 'onSubmit',
+    reValidateMode: 'onChange',
     defaultValues: {
       idType: 'national_id',
       consent: false,
     }
   })
 
-  const { register, control, handleSubmit, formState: { errors, isSubmitting, isValid }, watch, setValue } = methods
+  const { register, control, handleSubmit, formState: { errors, isSubmitting, isValid, isSubmitted, touchedFields }, watch, setValue } = methods
+  const showError = (field: keyof ApplyInput) => {
+    // Only show validation messages after submit, or after the specific field was touched
+    return !!errors[field] && (isSubmitted || (touchedFields as any)[field])
+  }
   const idType = watch('idType') ?? 'national_id'
 
   const onSubmit = async (data: ApplyInput) => {
@@ -86,9 +91,9 @@ export default function ApplyNutritionistPage() {
                     <Input
                       id="firstName"
                       {...register('firstName')}
-                      className={errors.firstName ? 'border-red-500' : ''}
+                      className={showError('firstName') ? 'border-red-500' : ''}
                     />
-                    {errors.firstName && (
+                    {showError('firstName') && (
                       <p className="text-sm text-red-600">{errors.firstName.message}</p>
                     )}
                   </div>
@@ -98,9 +103,9 @@ export default function ApplyNutritionistPage() {
                     <Input
                       id="familyName"
                       {...register('familyName')}
-                      className={errors.familyName ? 'border-red-500' : ''}
+                      className={showError('familyName') ? 'border-red-500' : ''}
                     />
-                    {errors.familyName && (
+                    {showError('familyName') && (
                       <p className="text-sm text-red-600">{errors.familyName.message}</p>
                     )}
                   </div>
@@ -117,7 +122,7 @@ export default function ApplyNutritionistPage() {
                           +20
                         </span>
                         <Input
-                          className={`flex-1 rounded-l-none ${errors.phone ? 'border-red-500' : ''}`}
+                          className={`flex-1 rounded-l-none ${showError('phone') ? 'border-red-500' : ''}`}
                           value={(field.value || '').replace(/^\+20/, '')}
                           onChange={(e) => {
                             const cleanValue = e.target.value.replace(/\D/g, '').slice(0, 10)
@@ -130,7 +135,7 @@ export default function ApplyNutritionistPage() {
                       </div>
                     )}
                   />
-                  {errors.phone && (
+                  {showError('phone') && (
                     <p className="text-sm text-red-600">{errors.phone.message}</p>
                   )}
                 </div>
@@ -141,9 +146,9 @@ export default function ApplyNutritionistPage() {
                     id="email"
                     type="email"
                     {...register('email')}
-                    className={errors.email ? 'border-red-500' : ''}
+                    className={showError('email') ? 'border-red-500' : ''}
                   />
-                  {errors.email && (
+                  {showError('email') && (
                     <p className="text-sm text-red-600">{errors.email.message}</p>
                   )}
                 </div>
@@ -188,10 +193,10 @@ export default function ApplyNutritionistPage() {
                     id="idNumber"
                     {...register('idNumber')}
                     inputMode="numeric"
-                    className={errors.idNumber ? 'border-red-500' : ''}
+                    className={showError('idNumber') ? 'border-red-500' : ''}
                     placeholder={idType === 'national_id' ? '14 digits' : '9 characters'}
                   />
-                  {errors.idNumber && (
+                  {showError('idNumber') && (
                     <p className="text-sm text-red-600">{errors.idNumber.message}</p>
                   )}
                 </div>
@@ -212,7 +217,7 @@ export default function ApplyNutritionistPage() {
                       accept="application/pdf,image/jpeg,image/png"
                       prefix="cv"
                     />
-                    {errors.cvPath && (
+                    {showError('cvPath') && (
                       <p className="text-sm text-red-600">{errors.cvPath.message}</p>
                     )}
                   </div>
@@ -224,7 +229,7 @@ export default function ApplyNutritionistPage() {
                       accept="application/pdf,image/jpeg,image/png"
                       prefix="id"
                     />
-                    {errors.idPath && (
+                    {showError('idPath') && (
                       <p className="text-sm text-red-600">{errors.idPath.message}</p>
                     )}
                   </div>
@@ -244,7 +249,7 @@ export default function ApplyNutritionistPage() {
                         id="consent"
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        className={errors.consent ? 'border-red-500' : ''}
+                        className={showError('consent') ? 'border-red-500' : ''}
                       />
                     )}
                   />
@@ -254,7 +259,7 @@ export default function ApplyNutritionistPage() {
                       <a href="#" className="text-blue-600 hover:underline">Privacy</a> and{' '}
                       <a href="#" className="text-blue-600 hover:underline">Terms</a>.
                     </Label>
-                    {errors.consent && (
+                    {showError('consent') && (
                       <p className="text-sm text-red-600">{errors.consent.message}</p>
                     )}
                   </div>
@@ -269,7 +274,7 @@ export default function ApplyNutritionistPage() {
               </Button>
               <Button
                 type="submit"
-                disabled={isSubmitting || !isValid}
+                disabled={isSubmitting}
                 className="bg-primary-600 hover:bg-primary-700"
               >
                 {isSubmitting ? 'Submitting...' : 'Submit details'}
