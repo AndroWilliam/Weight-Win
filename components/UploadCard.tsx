@@ -6,6 +6,7 @@ import { useFormContext } from 'react-hook-form'
 import { createClient } from '@supabase/supabase-js'
 import { APPLICANT_BUCKET } from '@/lib/supabase/constants'
 import { Loader2, FileText, Image as ImageIcon, CheckCircle, AlertCircle } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 const supa = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -29,6 +30,7 @@ export function UploadCard({
   const [path, setPath] = useState<string>()
   const [preview, setPreview] = useState<string>() // signed URL
   const [errorMessage, setErrorMessage] = useState<string>()
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
 
   async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]
@@ -90,6 +92,8 @@ export function UploadCard({
       }
 
       setState('success')
+      // Auto-open preview after successful processing
+      setIsPreviewOpen(true)
     } catch (e) {
       console.error('Upload error:', e)
       setState('error')
@@ -184,6 +188,13 @@ export function UploadCard({
             <p className="text-sm text-emerald-700 font-medium">Key details extracted</p>
             <p className="text-xs text-slate-500">Document processed successfully</p>
           </div>
+          <button
+            type="button"
+            onClick={() => setIsPreviewOpen(true)}
+            className="px-3 py-1 rounded border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-colors text-sm"
+          >
+            Preview
+          </button>
           <label className="inline-flex cursor-pointer">
             <input
               type="file"
@@ -215,5 +226,25 @@ export function UploadCard({
         </div>
       )}
     </div>
+    
+    {/* Preview dialog */}
+    <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>Document preview</DialogTitle>
+        </DialogHeader>
+        <div className="mt-2">
+          {isPdf ? (
+            <iframe
+              src={preview}
+              className="w-full h-[70vh] rounded border"
+              title="PDF preview"
+            />
+          ) : (
+            <img src={preview} alt="Document preview" className="w-full max-h-[70vh] object-contain rounded border" />
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }
