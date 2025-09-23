@@ -225,26 +225,26 @@ export function UploadCard({
           </label>
         </div>
       )}
+      
+      {/* Preview dialog */}
+      <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Document preview</DialogTitle>
+          </DialogHeader>
+          <div className="mt-2">
+            {isPdf ? (
+              <iframe
+                src={preview}
+                className="w-full h-[70vh] rounded border"
+                title="PDF preview"
+              />
+            ) : (
+              <img src={preview} alt="Document preview" className="w-full max-h-[70vh] object-contain rounded border" />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
-    
-    {/* Preview dialog */}
-    <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-      <DialogContent className="max-w-3xl">
-        <DialogHeader>
-          <DialogTitle>Document preview</DialogTitle>
-        </DialogHeader>
-        <div className="mt-2">
-          {isPdf ? (
-            <iframe
-              src={preview}
-              className="w-full h-[70vh] rounded border"
-              title="PDF preview"
-            />
-          ) : (
-            <img src={preview} alt="Document preview" className="w-full max-h-[70vh] object-contain rounded border" />
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
   )
 }
