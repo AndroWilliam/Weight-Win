@@ -64,7 +64,9 @@ export default function ApplyNutritionistPage() {
       })
 
       if (!response.ok) {
-        const err = await response.json().catch(() => null)
+        const text = await response.text().catch(() => '')
+        let errJson: any = null
+        try { errJson = JSON.parse(text) } catch {}
         if (response.status === 409) {
           toast({
             variant: 'destructive',
@@ -73,7 +75,12 @@ export default function ApplyNutritionistPage() {
           })
           return
         }
-        throw new Error(err?.message || 'Failed to submit application')
+        toast({
+          variant: 'destructive',
+          title: 'Submission failed',
+          description: errJson?.message || text || 'Please try again.',
+        })
+        throw new Error(errJson?.message || text || 'Failed to submit application')
       }
 
       const result = await response.json()
