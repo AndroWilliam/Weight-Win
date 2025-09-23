@@ -4,6 +4,11 @@ import { NextResponse, type NextRequest } from "next/server"
 export async function updateSession(request: NextRequest) {
   console.log("[v0] Middleware hit for path:", request.nextUrl.pathname)
 
+  // Skip all API routes entirely
+  if (request.nextUrl.pathname.startsWith("/api/")) {
+    return NextResponse.next({ request })
+  }
+
   // Check if environment variables are available
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
