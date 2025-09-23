@@ -290,10 +290,10 @@ export default function LoginPage() {
 
                 <Button
                   type="submit"
-                  disabled={isLoading}
+                  loading={isLoading}
                   className="w-full bg-primary-600 hover:bg-primary-700 text-white py-3 text-body font-semibold rounded-lg"
                 >
-                  {isLoading ? "Please wait..." : (isSignUp ? "Create Account" : "Sign In")}
+                  {isSignUp ? "Create Account" : "Sign In"}
                 </Button>
               </form>
 
@@ -310,7 +310,7 @@ export default function LoginPage() {
                 <div className="mt-6 space-y-3">
                   <Button
                     onClick={handleGoogleLogin}
-                    disabled={isLoading}
+                    loading={isLoading}
                     variant="outline"
                     className="w-full border-neutral-300 hover:bg-neutral-50 py-3 text-body font-medium rounded-lg"
                   >
@@ -338,7 +338,7 @@ export default function LoginPage() {
                   {isDevelopment && (
                     <Button
                       onClick={handleDevLogin}
-                      disabled={isLoading}
+                      loading={isLoading}
                       variant="outline"
                       className="w-full border-neutral-300 hover:bg-neutral-50 py-3 text-body font-medium rounded-lg"
                     >

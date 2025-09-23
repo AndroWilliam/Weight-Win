@@ -355,10 +355,10 @@ export default function ApplyNutritionistPage() {
               </Button>
               <Button
                 type="submit"
-                disabled={isSubmitting}
+                loading={isSubmitting}
                 className="bg-primary-600 hover:bg-primary-700"
               >
-                {isSubmitting ? 'Submitting...' : 'Submit details'}
+                Submit details
               </Button>
             </div>
           </form>
