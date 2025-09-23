@@ -49,6 +49,7 @@ export default function ApplyNutritionistPage() {
     try {
       if (debug) {
         console.log('[Apply Debug] submit payload', data)
+        console.log('[Apply Debug] getValues at submit', methods.getValues())
       }
       const response = await fetch('/api/applications/submit', {
         method: 'POST',
@@ -86,6 +87,7 @@ export default function ApplyNutritionistPage() {
   const onInvalid = (errs: any) => {
     if (debug) {
       console.log('[Apply Debug] invalid submit errors', errs)
+      console.log('[Apply Debug] getValues at invalid', methods.getValues())
     }
     // Show a single helper toast
     toast({
