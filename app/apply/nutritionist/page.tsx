@@ -130,10 +130,18 @@ export default function ApplyNutritionistPage() {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First Name</Label>
-                    <Input
-                      id="firstName"
-                      {...register('firstName')}
-                      className={showError('firstName') ? 'border-red-500' : ''}
+                    <Controller
+                      name="firstName"
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          id="firstName"
+                          value={field.value ?? ''}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          onBlur={field.onBlur}
+                          className={showError('firstName') ? 'border-red-500' : ''}
+                        />
+                      )}
                     />
                     {showError('firstName') && (
                       <p className="text-sm text-red-600">{errors.firstName.message}</p>
@@ -142,10 +150,18 @@ export default function ApplyNutritionistPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="familyName">Family Name</Label>
-                    <Input
-                      id="familyName"
-                      {...register('familyName')}
-                      className={showError('familyName') ? 'border-red-500' : ''}
+                    <Controller
+                      name="familyName"
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          id="familyName"
+                          value={field.value ?? ''}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          onBlur={field.onBlur}
+                          className={showError('familyName') ? 'border-red-500' : ''}
+                        />
+                      )}
                     />
                     {showError('familyName') && (
                       <p className="text-sm text-red-600">{errors.familyName.message}</p>
@@ -184,11 +200,19 @@ export default function ApplyNutritionistPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    {...register('email')}
-                    className={showError('email') ? 'border-red-500' : ''}
+                  <Controller
+                    name="email"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        id="email"
+                        type="email"
+                        value={field.value ?? ''}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        onBlur={field.onBlur}
+                        className={showError('email') ? 'border-red-500' : ''}
+                      />
+                    )}
                   />
                   {showError('email') && (
                     <p className="text-sm text-red-600">{errors.email.message}</p>
@@ -231,12 +255,20 @@ export default function ApplyNutritionistPage() {
                   <Label htmlFor="idNumber">
                     {idType === 'national_id' ? 'National ID Number' : 'Passport Number'}
                   </Label>
-                  <Input
-                    id="idNumber"
-                    {...register('idNumber')}
-                    inputMode="numeric"
-                    className={showError('idNumber') ? 'border-red-500' : ''}
-                    placeholder={idType === 'national_id' ? '14 digits' : '9 characters'}
+                  <Controller
+                    name="idNumber"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        id="idNumber"
+                        inputMode="numeric"
+                        value={field.value ?? ''}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        onBlur={field.onBlur}
+                        className={showError('idNumber') ? 'border-red-500' : ''}
+                        placeholder={idType === 'national_id' ? '14 digits' : '9 characters'}
+                      />
+                    )}
                   />
                   {showError('idNumber') && (
                     <p className="text-sm text-red-600">{errors.idNumber.message}</p>
