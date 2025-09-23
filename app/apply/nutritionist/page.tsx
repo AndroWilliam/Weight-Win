@@ -22,17 +22,17 @@ export default function ApplyNutritionistPage() {
   const methods = useForm<ApplyInput>({
     resolver: zodResolver(ApplySchema),
     mode: 'onSubmit',
-    reValidateMode: 'onChange',
+    reValidateMode: 'onSubmit',
     defaultValues: {
       idType: 'national_id',
       consent: false,
     }
   })
 
-  const { register, control, handleSubmit, formState: { errors, isSubmitting, isValid, isSubmitted, touchedFields }, watch, setValue } = methods
+  const { register, control, handleSubmit, formState: { errors, isSubmitting, isValid, isSubmitted }, watch, setValue } = methods
   const showError = (field: keyof ApplyInput) => {
-    // Only show validation messages after submit, or after the specific field was touched
-    return !!errors[field] && (isSubmitted || (touchedFields as any)[field])
+    // Only show after a submit attempt
+    return !!errors[field] && isSubmitted
   }
   const idType = watch('idType') ?? 'national_id'
 
