@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm, FormProvider, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ApplySchema, ApplyInput } from '@/lib/schema'
@@ -20,7 +20,13 @@ export default function ApplyNutritionistPage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [applicationId, setApplicationId] = useState<string>()
   const { toast } = useToast()
-  const debug = false
+  const [debug, setDebug] = useState(false)
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search)
+      setDebug(params.get('debug') === '1')
+    } catch {}
+  }, [])
 
   const methods = useForm<ApplyInput>({
     resolver: zodResolver(ApplySchema),
@@ -77,6 +83,18 @@ export default function ApplyNutritionistPage() {
     }
   }
 
+  const onInvalid = (errs: any) => {
+    if (debug) {
+      console.log('[Apply Debug] invalid submit errors', errs)
+    }
+    // Show a single helper toast
+    toast({
+      variant: 'destructive',
+      title: 'Please review the highlighted fields',
+      description: 'Some required fields are missing or invalid.',
+    })
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
@@ -96,7 +114,7 @@ export default function ApplyNutritionistPage() {
 
       <div className="max-w-4xl mx-auto px-6 py-8">
         <FormProvider {...methods}>
-          <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-8">
+          <form onSubmit={handleSubmit(onSubmit, onInvalid)} noValidate className="space-y-8">
             {/* Personal Information */}
             <Card>
               <CardHeader>
