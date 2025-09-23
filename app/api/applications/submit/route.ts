@@ -20,14 +20,11 @@ export async function POST(req: Request) {
     const body = await req.json()
     const payload = schema.parse(body)
     const supabase = await createClient()
-    const { data: auth } = await supabase.auth.getUser()
-    const user = auth.user
-    if (!user) return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 })
 
     const { data: appRow, error } = await supabase
       .from('nutritionist_applications')
       .insert({
-        applicant_user_id: user.id,
+        // applicant_user_id is optional for anonymous applicants
         first_name: payload.firstName,
         family_name: payload.familyName,
         phone_e164: payload.phone,
