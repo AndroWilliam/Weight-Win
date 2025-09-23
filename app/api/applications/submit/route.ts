@@ -21,6 +21,17 @@ export async function POST(req: Request) {
     const payload = schema.parse(body)
     const supabase = await createClient()
 
+    // Conflict check: existing application by email or phone
+    const { data: existing, error: existErr } = await supabase
+      .from('nutritionist_applications')
+      .select('id')
+      .or(`email.eq.${payload.email.toLowerCase()},phone_e164.eq.${payload.phone}`)
+      .limit(1)
+    if (existErr) throw existErr
+    if (existing && existing.length > 0) {
+      return NextResponse.json({ ok: false, message: 'Application already exists' }, { status: 409 })
+    }
+
     const { data: appRow, error } = await supabase
       .from('nutritionist_applications')
       .insert({

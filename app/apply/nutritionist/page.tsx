@@ -14,15 +14,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { ArrowLeft, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
+import { useToast } from '@/hooks/use-toast'
 
 export default function ApplyNutritionistPage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [applicationId, setApplicationId] = useState<string>()
+  const { toast } = useToast()
 
   const methods = useForm<ApplyInput>({
     resolver: zodResolver(ApplySchema),
     mode: 'onSubmit',
-    reValidateMode: 'onSubmit',
+    reValidateMode: 'onChange',
     defaultValues: {
       idType: 'national_id',
       consent: false,
@@ -47,7 +49,16 @@ export default function ApplyNutritionistPage() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to submit application')
+        const err = await response.json().catch(() => null)
+        if (response.status === 409) {
+          toast({
+            variant: 'destructive',
+            title: 'Application already exists',
+            description: 'Please use a different email or mobile number.',
+          })
+          return
+        }
+        throw new Error(err?.message || 'Failed to submit application')
       }
 
       const result = await response.json()
