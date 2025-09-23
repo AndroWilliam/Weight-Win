@@ -15,11 +15,14 @@ import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHea
 import { ArrowLeft, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 import { useToast } from '@/hooks/use-toast'
+import { useSearchParams } from 'next/navigation'
 
 export default function ApplyNutritionistPage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [applicationId, setApplicationId] = useState<string>()
   const { toast } = useToast()
+  const searchParams = useSearchParams()
+  const debug = searchParams.get('debug') === '1'
 
   const methods = useForm<ApplyInput>({
     resolver: zodResolver(ApplySchema),
@@ -40,6 +43,9 @@ export default function ApplyNutritionistPage() {
 
   const onSubmit = async (data: ApplyInput) => {
     try {
+      if (debug) {
+        console.log('[Apply Debug] submit payload', data)
+      }
       const response = await fetch('/api/applications/submit', {
         method: 'POST',
         headers: {
@@ -66,6 +72,9 @@ export default function ApplyNutritionistPage() {
       setShowSuccessModal(true)
     } catch (error) {
       console.error('Submission error:', error)
+      if (debug) {
+        console.log('[Apply Debug] form errors', methods.formState.errors)
+      }
       // Handle error - you might want to show a toast or error message
     }
   }
