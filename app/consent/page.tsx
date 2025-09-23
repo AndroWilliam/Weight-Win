@@ -22,10 +22,19 @@ export default function ConsentPage() {
     }))
   }
 
-  const handleContinue = () => {
+  const [loading, setLoading] = useState(false)
+
+  const handleContinue = async () => {
     // Save consents to localStorage or send to server
-    localStorage.setItem('userConsents', JSON.stringify(consents))
-    router.push('/setup')
+    try {
+      setLoading(true)
+      localStorage.setItem('userConsents', JSON.stringify(consents))
+      // small delay to let animation be visible even on fast nav
+      await new Promise(r => setTimeout(r, 250))
+      router.push('/setup')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -206,9 +215,20 @@ export default function ConsentPage() {
           <div className="text-center">
             <Button
               onClick={handleContinue}
-              className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 text-lg font-semibold rounded-lg"
+              disabled={loading}
+              className="relative bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 text-lg font-semibold rounded-lg transition-transform duration-200 disabled:opacity-75"
             >
-              Continue to Setup
+              <span className={`inline-flex items-center gap-2 ${loading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-150`}>
+                Continue to Setup
+              </span>
+              {loading && (
+                <span className="absolute inset-0 flex items-center justify-center">
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                  </svg>
+                </span>
+              )}
             </Button>
           </div>
         </div>
