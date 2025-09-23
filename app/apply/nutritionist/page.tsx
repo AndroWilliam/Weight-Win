@@ -15,14 +15,12 @@ import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHea
 import { ArrowLeft, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 import { useToast } from '@/hooks/use-toast'
-import { useSearchParams } from 'next/navigation'
 
 export default function ApplyNutritionistPage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [applicationId, setApplicationId] = useState<string>()
   const { toast } = useToast()
-  const searchParams = useSearchParams()
-  const debug = searchParams.get('debug') === '1'
+  const debug = false
 
   const methods = useForm<ApplyInput>({
     resolver: zodResolver(ApplySchema),
