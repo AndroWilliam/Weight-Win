@@ -88,25 +88,41 @@ export function UploadCard({
 
       // Call OCR based on document type
       if (prefix === 'id' && idType && onIdExtracted) {
+        console.log('[UploadCard] Starting ID extraction for:', { prefix, idType, hasCallback: !!onIdExtracted })
         // ID extraction for National ID or Passport
         const reader = new FileReader()
         reader.onloadend = async () => {
           try {
             const base64 = reader.result as string
+            console.log('[UploadCard] Base64 ready, calling API:', { 
+              base64Length: base64.length, 
+              idType 
+            })
+            
             const idExtractionResponse = await fetch('/api/ocr/id-extract', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ imageBase64: base64, idType })
             })
 
+            console.log('[UploadCard] API response status:', idExtractionResponse.status)
+
             if (idExtractionResponse.ok) {
               const result = await idExtractionResponse.json()
+              console.log('[UploadCard] API response data:', result)
+              
               if (result.success && result.extractedId) {
+                console.log('[UploadCard] Calling onIdExtracted with:', result.extractedId)
                 onIdExtracted(result.extractedId)
+              } else {
+                console.log('[UploadCard] No extracted ID in response')
               }
+            } else {
+              const errorData = await idExtractionResponse.json()
+              console.error('[UploadCard] API error response:', errorData)
             }
           } catch (error) {
-            console.error('ID extraction error:', error)
+            console.error('[UploadCard] ID extraction error:', error)
           }
         }
         reader.readAsDataURL(f)

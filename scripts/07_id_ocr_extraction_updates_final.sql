@@ -1,4 +1,4 @@
--- Update database schema for ID/Passport OCR extraction
+-- Final Fixed: Update database schema for ID/Passport OCR extraction (Supabase compatible)
 
 -- Add columns to document_ocr_extractions table for ID extraction
 do $$ 
@@ -92,7 +92,7 @@ begin
 end;
 $$;
 
--- Create index for extracted IDs
+-- Create indexes for extracted IDs
 create index if not exists idx_ocr_extractions_extracted_id 
 on public.document_ocr_extractions (extracted_id);
 
@@ -200,49 +200,6 @@ begin
 end;
 $$;
 
--- Create materialized view for admin dashboard (ID validation summary)
-create materialized view if not exists public.id_validation_summary as
-select 
-  na.id as application_id,
-  na.first_name,
-  na.family_name,
-  na.email,
-  na.id_type,
-  na.id_number,
-  na.id_validation_status,
-  na.id_validation_confidence,
-  doe.extracted_id,
-  doe.confidence as ocr_confidence,
-  doe.provider as ocr_provider,
-  na.submitted_at,
-  na.status as application_status
-from public.nutritionist_applications na
-left join public.application_documents ad on ad.application_id = na.id and ad.kind = 'id'
-left join public.document_ocr_extractions doe on doe.document_id = ad.id
-where na.submitted_at is not null
-order by na.submitted_at desc;
-
--- Create index on materialized view
-create unique index if not exists idx_id_validation_summary_app_id 
-on public.id_validation_summary (application_id);
-
--- Function to refresh the materialized view
-create or replace function public.refresh_id_validation_summary()
-returns void
-language plpgsql
-security definer
-as $$
-begin
-  refresh materialized view concurrently public.id_validation_summary;
-end;
-$$;
-
--- Grant permissions for the materialized view
-grant select on public.id_validation_summary to authenticated;
-
--- Note: RLS on materialized views is not supported in Supabase
--- Access control will be handled at the application level
-
 -- Comments for documentation
 comment on table public.document_ocr_extractions is 'OCR extraction results including ID numbers from documents';
 comment on column public.document_ocr_extractions.extracted_id is 'ID number extracted from document via OCR';
@@ -251,4 +208,3 @@ comment on column public.document_ocr_extractions.validation_status is 'Status o
 
 comment on function public.validate_extracted_id(text, text, text) is 'Validates extracted ID against user-typed ID and returns match confidence';
 comment on function public.update_application_id_validation(bigint, json) is 'Updates application with ID validation results';
-comment on materialized view public.id_validation_summary is 'Summary view of ID validation results for admin dashboard';

@@ -9,14 +9,14 @@ export interface IDExtractionResult {
   idType?: 'national_id' | 'passport'
 }
 
-export async function extractIDFromImage(
+export async function extractIdFromImage(
   imageBase64: string, 
   expectedType: 'national_id' | 'passport'
 ): Promise<IDExtractionResult> {
   try {
     // Check if we're in production with real Google Vision API
     if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
-      return await extractIDFromImageProduction(imageBase64, expectedType)
+      return await extractIdFromImageProduction(imageBase64, expectedType)
     }
     
     // Development/Mock implementation
@@ -54,7 +54,7 @@ export async function extractIDFromImage(
 }
 
 // Production Google Vision API implementation
-async function extractIDFromImageProduction(
+async function extractIdFromImageProduction(
   imageBase64: string, 
   expectedType: 'national_id' | 'passport'
 ): Promise<IDExtractionResult> {
