@@ -18,11 +18,15 @@ export function UploadCard({
   title, // string (dynamic for ID/Passport)
   accept, // 'application/pdf,image/*'
   prefix, // userId prefix will be added internally
+  idType, // 'national_id' | 'passport' - for ID extraction
+  onIdExtracted, // callback when ID is extracted
 }: {
   formFieldName: 'cvPath' | 'idPath'
   title: string
   accept: string
   prefix: 'cv' | 'id'
+  idType?: 'national_id' | 'passport'
+  onIdExtracted?: (extractedId: string) => void
 }) {
   const { setValue } = useFormContext()
   const [state, setState] = useState<'idle' | 'uploading' | 'scanning' | 'success' | 'error'>('idle')
@@ -82,15 +86,41 @@ export function UploadCard({
 
       setState('scanning')
 
-      // Call OCR
-      const ocrResponse = await fetch(`/api/ocr/${prefix === 'cv' ? 'cv' : 'id'}`, {
-        method: 'POST',
-        body: JSON.stringify({ path: p }),
-        headers: { 'Content-Type': 'application/json' }
-      })
+      // Call OCR based on document type
+      if (prefix === 'id' && idType && onIdExtracted) {
+        // ID extraction for National ID or Passport
+        const reader = new FileReader()
+        reader.onloadend = async () => {
+          try {
+            const base64 = reader.result as string
+            const idExtractionResponse = await fetch('/api/ocr/id-extract', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ imageBase64: base64, idType })
+            })
 
-      if (!ocrResponse.ok) {
-        throw new Error('OCR processing failed')
+            if (idExtractionResponse.ok) {
+              const result = await idExtractionResponse.json()
+              if (result.success && result.extractedId) {
+                onIdExtracted(result.extractedId)
+              }
+            }
+          } catch (error) {
+            console.error('ID extraction error:', error)
+          }
+        }
+        reader.readAsDataURL(f)
+      } else {
+        // Regular OCR for CV
+        const ocrResponse = await fetch(`/api/ocr/${prefix === 'cv' ? 'cv' : 'id'}`, {
+          method: 'POST',
+          body: JSON.stringify({ path: p }),
+          headers: { 'Content-Type': 'application/json' }
+        })
+
+        if (!ocrResponse.ok) {
+          throw new Error('OCR processing failed')
+        }
       }
 
       setState('success')

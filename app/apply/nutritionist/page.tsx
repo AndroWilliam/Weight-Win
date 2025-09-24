@@ -309,6 +309,14 @@ export default function ApplyNutritionistPage() {
                       title={idType === 'national_id' ? 'National ID Photo' : 'Passport Photo'}
                       accept="application/pdf,image/jpeg,image/png"
                       prefix="id"
+                      idType={idType}
+                      onIdExtracted={(extractedId) => {
+                        setValue('idNumber', extractedId, { shouldValidate: true, shouldDirty: true })
+                        toast({
+                          title: 'ID Number Extracted',
+                          description: `Auto-filled: ${extractedId}`,
+                        })
+                      }}
                     />
                     {showError('idPath') && (
                       <p className="text-sm text-red-600">{errors.idPath.message}</p>
