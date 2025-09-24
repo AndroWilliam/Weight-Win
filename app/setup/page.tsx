@@ -256,7 +256,7 @@ export default function SetupPage() {
             <Button
               onClick={handleContinue}
               loading={isLoading}
-              className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 text-lg font-semibold rounded-lg flex items-center gap-2 mx-auto"
+              className="bg-primary-600 hover:bg-primary-700 text-white px-10 py-3 text-lg font-semibold rounded-lg flex items-center gap-2 mx-auto whitespace-nowrap"
             >
               Next: Review Commitment
               <ArrowRight className="w-5 h-5" />
