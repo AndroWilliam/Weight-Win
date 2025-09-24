@@ -4,14 +4,15 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { useState, useRef, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Camera, Upload, ArrowLeft, RotateCcw, Check } from "lucide-react"
+import { Camera, Upload, ArrowLeft, RotateCcw, Check, AlertCircle } from "lucide-react"
 
 export function WeightCheckContent() {
-  const [currentStep, setCurrentStep] = useState<'upload' | 'camera' | 'preview' | 'processing'>('upload')
+  const [currentStep, setCurrentStep] = useState<'upload' | 'camera' | 'preview' | 'processing' | 'success' | 'error'>('upload')
   const [capturedImage, setCapturedImage] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [isCameraLoading, setIsCameraLoading] = useState(false)
   const [weight, setWeight] = useState<number | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -195,26 +196,82 @@ export function WeightCheckContent() {
     setCurrentStep('upload')
   }
 
-  const handleUsePhoto = () => {
+  const handleUsePhoto = async () => {
     if (capturedImage) {
       setIsProcessing(true)
-      // Simulate OCR processing
-      setTimeout(() => {
-        const detectedWeight = parseFloat((Math.random() * (100 - 50) + 50).toFixed(1)) // Mock weight
-        setWeight(detectedWeight)
+      setCurrentStep('processing')
+      
+      try {
+        // Upload image to Supabase Storage
+        const timestamp = new Date().getTime()
+        const fileName = `weight-${timestamp}.jpg`
+        const filePath = `weights/${fileName}`
         
-        // Update challenge data in localStorage
-        const savedChallenge = localStorage.getItem('challengeData')
-        if (savedChallenge) {
-          const challengeData = JSON.parse(savedChallenge)
-          challengeData.weights.push({ day: day, weight: detectedWeight, date: new Date().toISOString() })
-          challengeData.currentDay = parseInt(day) + 1 // Increment day
-          localStorage.setItem('challengeData', JSON.stringify(challengeData))
+        // Convert base64 to blob
+        const response = await fetch(capturedImage)
+        const blob = await response.blob()
+        
+        // Get current user for authenticated upload
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (!user) {
+          throw new Error('Not authenticated')
         }
         
+        // Upload to Supabase Storage
+        const userPath = `${user.id}/${fileName}`
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('weight-photos')
+          .upload(userPath, blob)
+        
+        if (uploadError) {
+          throw uploadError
+        }
+        
+        const photoUrl = uploadData.path
+        
+        // Process with OCR
+        const ocrRes = await fetch('/api/weight/process', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            imageBase64: capturedImage,
+            photoUrl
+          })
+        })
+        
+        const result = await ocrRes.json()
+        
+        if (!ocrRes.ok || !result.success) {
+          throw new Error(result.error || 'Failed to process weight')
+        }
+        
+        // Success - show success state
+        setWeight(result.weight)
+        setCurrentStep('success')
         setIsProcessing(false)
-        router.push('/dashboard') // Redirect to dashboard after processing
-      }, 2000)
+        
+        // Redirect to progress page after showing success
+        setTimeout(() => {
+          router.push('/progress')
+        }, 2000)
+        
+      } catch (error) {
+        console.error('Error processing weight:', error)
+        setIsProcessing(false)
+        setCurrentStep('error')
+        setErrorMessage('Please use a different photo ensuring that the scale is visible without any shadows.')
+        
+        // Allow retry after showing error
+        setTimeout(() => {
+          setCurrentStep('preview')
+          setErrorMessage(null)
+        }, 3000)
+      }
     }
   }
 
@@ -464,6 +521,37 @@ export function WeightCheckContent() {
               <div className="w-16 h-16 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
               <p className="text-neutral-600 text-lg">Analyzing your weight...</p>
             </div>
+          )}
+          
+          {/* Success State */}
+          {currentStep === 'success' && (
+            <Card className="border-green-300 bg-green-50 mb-6">
+              <CardContent className="p-6">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Check className="w-8 h-8 text-green-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-green-900 mb-2">Weight Recorded Successfully!</h3>
+                  <p className="text-green-700 text-2xl font-bold mb-2">{weight} kg</p>
+                  <p className="text-green-600">Redirecting to your progress...</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
+          {/* Error State */}
+          {currentStep === 'error' && (
+            <Card className="border-red-300 bg-red-50 mb-6">
+              <CardContent className="p-6">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <AlertCircle className="w-8 h-8 text-red-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-red-900 mb-2">Unable to Read Weight</h3>
+                  <p className="text-red-700">{errorMessage}</p>
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
       </main>

@@ -44,7 +44,10 @@ export default function DashboardPage() {
     router.push(`/weight-check?day=${currentDay}`)
   }
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    const { createClient } = await import('@/lib/supabase/client')
+    const supabase = createClient()
+    await supabase.auth.signOut()
     localStorage.removeItem('challengeData')
     localStorage.removeItem('userSettings')
     localStorage.removeItem('userConsents')
