@@ -63,7 +63,10 @@ export default function HomePage() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/auth/login">
-              <Button className="bg-primary-600 hover:bg-primary-700 text-white px-12 py-3 text-lg font-semibold rounded-lg flex items-center gap-2 whitespace-nowrap">
+              <Button 
+                size="lg"
+                className="text-lg font-semibold px-8 min-w-fit"
+              >
                 Start the 7-Day Challenge
                 <ArrowRight className="w-5 h-5" />
               </Button>
