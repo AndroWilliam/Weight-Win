@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { extractIdFromImage } from '@/lib/ocr/id-extraction'
 
+export const runtime = 'nodejs'
+
 export async function POST(request: NextRequest) {
+  console.log('[ID Extract API] Function called')
+  
   try {
+    console.log('[ID Extract API] Parsing request body...')
     const { imageBase64, idType } = await request.json()
     
     console.log('[ID Extract API] Request received:', { 
@@ -26,9 +31,17 @@ export async function POST(request: NextRequest) {
     
     // Extract ID from image
     console.log('[ID Extract API] Starting OCR extraction...')
-    const result = await extractIdFromImage(imageBase64, idType)
-    
-    console.log('[ID Extract API] OCR result:', result)
+    let result
+    try {
+      result = await extractIdFromImage(imageBase64, idType)
+      console.log('[ID Extract API] OCR result:', result)
+    } catch (ocrError) {
+      console.error('[ID Extract API] OCR function threw error:', ocrError)
+      return NextResponse.json({
+        success: false,
+        error: 'OCR processing failed: ' + (ocrError as Error).message
+      }, { status: 500 })
+    }
     
     if (!result.success) {
       console.log('[ID Extract API] OCR failed:', result.error)

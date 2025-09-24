@@ -1,6 +1,6 @@
 // ID/Passport OCR extraction for Egyptian documents
 
-export interface IDExtractionResult {
+export interface IdExtractionResult {
   success: boolean
   extractedId?: string
   confidence?: number
@@ -12,7 +12,7 @@ export interface IDExtractionResult {
 export async function extractIdFromImage(
   imageBase64: string, 
   expectedType: 'national_id' | 'passport'
-): Promise<IDExtractionResult> {
+): Promise<IdExtractionResult> {
   try {
     // Check if we're in production with real Google Vision API
     if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
@@ -57,7 +57,7 @@ export async function extractIdFromImage(
 async function extractIdFromImageProduction(
   imageBase64: string, 
   expectedType: 'national_id' | 'passport'
-): Promise<IDExtractionResult> {
+): Promise<IdExtractionResult> {
   try {
     const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON!)
     const { ImageAnnotatorClient } = await import('@google-cloud/vision')
