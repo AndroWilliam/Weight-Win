@@ -23,6 +23,7 @@ export default function CommitPage() {
   const [settings, setSettings] = useState<UserSettings | null>(null)
   const [consents, setConsents] = useState<UserConsents | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -41,6 +42,7 @@ export default function CommitPage() {
   }, [])
 
   const handleStartChallenge = () => {
+    setIsSubmitting(true)
     // Save challenge start data
     const challengeData = {
       startDate: new Date().toISOString(),
@@ -181,7 +183,8 @@ export default function CommitPage() {
           <div className="text-center space-y-4">
             <Button
               onClick={handleStartChallenge}
-              className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 text-lg font-semibold rounded-lg flex items-center justify-center gap-2 mx-auto"
+              loading={isSubmitting}
+              className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 text-lg font-semibold rounded-lg flex items-center gap-2 mx-auto"
             >
               I'm in - Start My Challenge
               <ArrowRight className="w-5 h-5" />

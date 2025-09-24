@@ -15,6 +15,7 @@ export default function SetupPage() {
   const [reminderTime, setReminderTime] = useState("08:00")
   const [timezone, setTimezone] = useState("")
   const [tzLocked, setTzLocked] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const baseTimezones = useMemo(() => ([
     'Africa/Cairo',
     'Africa/Johannesburg',
@@ -88,6 +89,7 @@ export default function SetupPage() {
   // Deprecated: external lookup not required; we rely on browser IANA timezone
 
   const handleContinue = () => {
+    setIsLoading(true)
     // Save settings to localStorage or send to server
     const settings = {
       weightUnit,
@@ -253,7 +255,8 @@ export default function SetupPage() {
           <div className="text-center">
             <Button
               onClick={handleContinue}
-              className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 text-lg font-semibold rounded-lg flex items-center justify-center gap-2 mx-auto"
+              loading={isLoading}
+              className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 text-lg font-semibold rounded-lg flex items-center gap-2 mx-auto"
             >
               Next: Review Commitment
               <ArrowRight className="w-5 h-5" />

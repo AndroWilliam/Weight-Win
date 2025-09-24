@@ -19,6 +19,7 @@ interface ChallengeData {
 export default function DashboardPage() {
   const [challengeData, setChallengeData] = useState<ChallengeData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isNavigating, setIsNavigating] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -39,6 +40,7 @@ export default function DashboardPage() {
   const canTrackToday = currentDay <= 7
 
   const handleTakePhoto = () => {
+    setIsNavigating(true)
     router.push(`/weight-check?day=${currentDay}`)
   }
 
@@ -141,10 +143,11 @@ export default function DashboardPage() {
                 {canTrackToday && !isCompleted && (
                   <Button
                     onClick={handleTakePhoto}
-                    className="w-full bg-primary-600 hover:bg-primary-700 text-white py-5"
+                    loading={isNavigating}
+                    className="w-full bg-primary-600 hover:bg-primary-700 text-white py-4 h-auto"
                   >
-                    <div className="flex flex-col items-center justify-center w-full">
-                      <Camera className="w-6 h-6 mb-1" />
+                    <div className="flex flex-col items-center justify-center gap-1">
+                      <Camera className="w-5 h-5" />
                       <span>Take Photo</span>
                     </div>
                   </Button>
