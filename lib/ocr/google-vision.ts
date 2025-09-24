@@ -10,11 +10,12 @@ export interface OCRResult {
 
 export async function extractWeightFromImage(imageBase64: string): Promise<OCRResult> {
   try {
-    // For production, you'll need to set up Google Vision API
-    // and add GOOGLE_APPLICATION_CREDENTIALS to your environment
+    // Check if we're in production with real Google Vision API
+    if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+      return await extractWeightFromImageProduction(imageBase64)
+    }
     
-    // Mock implementation for now - replace with actual Google Vision API call
-    // This is a placeholder that simulates OCR results
+    // Development/Mock implementation
     const mockWeight = 70 + Math.random() * 30 // Random weight between 70-100
     const mockConfidence = 0.85 + Math.random() * 0.15 // Confidence between 0.85-1.0
     
@@ -29,12 +30,6 @@ export async function extractWeightFromImage(imageBase64: string): Promise<OCRRe
       }
     }
     
-    // In production, you would:
-    // 1. Call Google Vision API with the image
-    // 2. Extract text using TEXT_DETECTION
-    // 3. Parse the text to find numeric weight values
-    // 4. Apply regex patterns to identify weight readings
-    
     return {
       success: true,
       weight: parseFloat(mockWeight.toFixed(1)),
@@ -46,6 +41,65 @@ export async function extractWeightFromImage(imageBase64: string): Promise<OCRRe
     return {
       success: false,
       error: 'Failed to process image. Please try again.'
+    }
+  }
+}
+
+// Production Google Vision API implementation
+async function extractWeightFromImageProduction(imageBase64: string): Promise<OCRResult> {
+  try {
+    // Initialize Google Vision client with credentials from environment
+    const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON!)
+    
+    const { ImageAnnotatorClient } = await import('@google-cloud/vision')
+    const client = new ImageAnnotatorClient({
+      credentials,
+      projectId: credentials.project_id
+    })
+
+    // Remove data URL prefix if present
+    const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, '')
+    
+    // Call Google Vision API for text detection
+    const [result] = await client.textDetection({
+      image: {
+        content: cleanBase64
+      }
+    })
+    
+    const detections = result.textAnnotations
+    if (!detections || detections.length === 0) {
+      return {
+        success: false,
+        error: 'No text detected in image. Please ensure the scale display is clearly visible.'
+      }
+    }
+    
+    const fullText = detections[0].description || ''
+    const weight = parseWeightFromText(fullText)
+    
+    if (weight === null) {
+      return {
+        success: false,
+        error: 'Could not find weight reading in image. Please ensure the numbers are clearly visible.',
+        rawText: fullText
+      }
+    }
+    
+    // Calculate confidence based on detection confidence
+    const confidence = detections[0].confidence || 0.9
+    
+    return {
+      success: true,
+      weight,
+      confidence,
+      rawText: fullText
+    }
+  } catch (error) {
+    console.error('Google Vision API error:', error)
+    return {
+      success: false,
+      error: 'Failed to process image with OCR service. Please try again.'
     }
   }
 }
