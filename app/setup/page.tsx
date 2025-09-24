@@ -253,7 +253,7 @@ export default function SetupPage() {
           <div className="text-center">
             <Button
               onClick={handleContinue}
-              className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 text-lg font-semibold rounded-lg flex items-center gap-2 mx-auto"
+              className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 text-lg font-semibold rounded-lg flex items-center justify-center gap-2 mx-auto"
             >
               Next: Review Commitment
               <ArrowRight className="w-5 h-5" />

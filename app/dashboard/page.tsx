@@ -141,10 +141,12 @@ export default function DashboardPage() {
                 {canTrackToday && !isCompleted && (
                   <Button
                     onClick={handleTakePhoto}
-                    className="w-full bg-primary-600 hover:bg-primary-700 text-white"
+                    className="w-full bg-primary-600 hover:bg-primary-700 text-white py-5"
                   >
-                    <Camera className="w-4 h-4 mr-2" />
-                    Take Photo
+                    <div className="flex flex-col items-center justify-center w-full">
+                      <Camera className="w-6 h-6 mb-1" />
+                      <span>Take Photo</span>
+                    </div>
                   </Button>
                 )}
                 {isCompleted && (
