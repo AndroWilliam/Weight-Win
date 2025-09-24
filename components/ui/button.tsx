@@ -62,7 +62,7 @@ function Button({
         children
       ) : (
         <>
-          <span className={cn('transition-opacity duration-150', loading ? 'opacity-0' : 'opacity-100')}>{children}</span>
+          <span className={cn('flex items-center gap-2 transition-opacity duration-150', loading ? 'opacity-0' : 'opacity-100')}>{children}</span>
           {loading && (
             <span className="absolute inset-0 flex items-center justify-center">
               <svg className="animate-spin h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
