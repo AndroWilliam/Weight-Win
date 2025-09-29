@@ -105,7 +105,9 @@ export function UploadDropzone({ onFileSelect, onCameraCapture, className }: Upl
                 <Button
                   variant="outline"
                   onClick={() => fileInputRef.current?.click()}
+                  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && fileInputRef.current?.click()}
                   className="flex items-center gap-2"
+                  aria-label="Choose scale photo file from device"
                 >
                   <Upload className="w-4 h-4" />
                   Choose File
@@ -113,7 +115,9 @@ export function UploadDropzone({ onFileSelect, onCameraCapture, className }: Upl
                 
                 <Button
                   onClick={onCameraCapture}
+                  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onCameraCapture()}
                   className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700"
+                  aria-label="Take scale photo with camera"
                 >
                   <Camera className="w-4 h-4" />
                   Take Photo
@@ -126,6 +130,7 @@ export function UploadDropzone({ onFileSelect, onCameraCapture, className }: Upl
                 accept="image/*"
                 onChange={handleFileInput}
                 className="hidden"
+                aria-hidden="true"
               />
 
               <p className="text-caption text-neutral-500">
