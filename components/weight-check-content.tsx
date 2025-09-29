@@ -457,15 +457,19 @@ export function WeightCheckContent() {
                   <div className="flex gap-4 justify-center">
                     <Button
                       onClick={handleTakePhoto}
+                      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleTakePhoto()}
                       className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3"
+                      aria-label="Take weight scale photo with camera"
                     >
                       <Camera className="w-4 h-4 mr-2" />
                       Take Photo
                     </Button>
                     <Button
                       onClick={handleUploadPhoto}
+                      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleUploadPhoto()}
                       variant="outline"
                       className="border-neutral-300 px-6 py-3"
+                      aria-label="Upload weight scale photo from device"
                     >
                       <Upload className="w-4 h-4 mr-2" />
                       Upload Photo
