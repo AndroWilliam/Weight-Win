@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { useState, useRef, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { maybeCompressImage } from "@/lib/images/compress"
 import { Camera, Upload, ArrowLeft, RotateCcw, Check, AlertCircle } from "lucide-react"
 
 export function WeightCheckContent() {
@@ -145,15 +146,28 @@ export function WeightCheckContent() {
     fileInputRef.current?.click()
   }
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setCapturedImage(reader.result as string)
-        setCurrentStep('preview')
+      try {
+        // Compress image if needed (already an image format)
+        const compressedFile = await maybeCompressImage(file)
+        
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setCapturedImage(reader.result as string)
+          setCurrentStep('preview')
+        }
+        reader.readAsDataURL(compressedFile)
+      } catch (error) {
+        console.warn('Compression failed, using original file:', error)
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setCapturedImage(reader.result as string)
+          setCurrentStep('preview')
+        }
+        reader.readAsDataURL(file)
       }
-      reader.readAsDataURL(file)
     }
   }
 
