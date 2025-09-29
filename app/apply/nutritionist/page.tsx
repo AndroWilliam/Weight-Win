@@ -4,7 +4,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { useForm, FormProvider, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ApplySchema, ApplyInput } from '@/lib/schema'
-import { UploadCard } from '@/components/UploadCard'
+import dynamic from 'next/dynamic'
+
+const UploadCard = dynamic(() => import('@/components/UploadCard').then(mod => ({ default: mod.UploadCard })), {
+  ssr: false,
+  loading: () => <div className="h-48 animate-pulse bg-slate-200 rounded-xl" />
+})
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'

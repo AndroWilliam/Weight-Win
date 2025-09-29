@@ -1,19 +1,20 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, memo, useCallback } from 'react'
 import { uploadWithProgress } from '@/lib/storageUpload'
 import { useFormContext } from 'react-hook-form'
 import { createClient } from '@supabase/supabase-js'
 import { APPLICANT_BUCKET } from '@/lib/supabase/constants'
 import { Loader2, FileText, Image as ImageIcon, CheckCircle, AlertCircle } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { maybeCompressImage } from '@/lib/images/compress'
 
 const supa = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-export function UploadCard({
+const UploadCard = memo(function UploadCard({
   formFieldName, // 'cvPath' | 'idPath'
   title, // string (dynamic for ID/Passport)
   accept, // 'application/pdf,image/*'
@@ -37,13 +38,13 @@ export function UploadCard({
   const [errorMessage, setErrorMessage] = useState<string>()
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
 
-  async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0]
-    if (!f) return
-    setOriginalName(f.name)
+  const onPick = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const chosen = e.target.files?.[0]
+    if (!chosen) return
+    setOriginalName(chosen.name)
 
     // Check file size (10MB max)
-    if (f.size > 10 * 1024 * 1024) {
+    if (chosen.size > 10 * 1024 * 1024) {
       setState('error')
       setErrorMessage('File too large. Maximum size is 10MB.')
       return
@@ -51,11 +52,14 @@ export function UploadCard({
 
     // Check file type
     const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png']
-    if (!allowedTypes.includes(f.type)) {
+    if (!allowedTypes.includes(chosen.type)) {
       setState('error')
       setErrorMessage('Invalid file type. Please upload PDF, JPG, or PNG.')
       return
     }
+
+    // Compress image if needed (PDFs pass through unchanged)
+    const f = await maybeCompressImage(chosen)
 
     setState('uploading')
     setPct(0)
@@ -147,7 +151,7 @@ export function UploadCard({
       setState('error')
       setErrorMessage(e instanceof Error ? e.message : 'Upload failed. Please try again.')
     }
-  }
+  }, [formFieldName, prefix, idType, onIdExtracted, setValue])
 
   const getStateStyles = () => {
     switch (state) {
@@ -298,4 +302,6 @@ export function UploadCard({
       </Dialog>
     </div>
   )
-}
+})
+
+export { UploadCard }

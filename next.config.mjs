@@ -1,3 +1,7 @@
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+})
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
@@ -8,7 +12,21 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/sign/**',
+      },
+      {
+        protocol: 'https', 
+        hostname: 'supabase.com',
+        port: '',
+        pathname: '/storage/v1/object/sign/**',
+      }
+    ],
   },
 }
 
-export default nextConfig
+export default withBundleAnalyzer(nextConfig)

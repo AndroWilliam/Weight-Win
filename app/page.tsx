@@ -1,52 +1,16 @@
-"use client"
-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
 import { CheckCircle, TrendingUp, Award, ArrowRight, Users } from "lucide-react"
+import { NavigationHeader } from "@/components/navigation-header"
+
+export const revalidate = 3600 // 1 hour
 
 export default function HomePage() {
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId)
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' })
-    }
-  }
-
   return (
     <main className="min-h-screen bg-white">
       {/* Header */}
-      <header className="px-6 py-4">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">W</span>
-            </div>
-            <h1 className="text-xl font-bold text-neutral-900">WeightWin</h1>
-          </div>
-          
-          <nav className="hidden md:flex items-center gap-8">
-            <button 
-              onClick={() => scrollToSection('how-it-works')}
-              className="text-neutral-700 hover:text-neutral-900 font-medium transition-colors"
-            >
-              How it works
-            </button>
-            <button 
-              onClick={() => scrollToSection('for-nutritionists')}
-              className="text-neutral-700 hover:text-neutral-900 font-medium transition-colors"
-            >
-              For Nutritionists
-            </button>
-          </nav>
-          
-          <Link href="/auth/login">
-            <Button className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg font-medium">
-              Start the 7-Day Challenge
-            </Button>
-          </Link>
-        </div>
-      </header>
+      <NavigationHeader />
 
       {/* Hero Section */}
       <section className="text-center py-16 px-6">
@@ -74,9 +38,11 @@ export default function HomePage() {
             <Button 
               variant="outline" 
               className="border-neutral-300 px-8 py-4 text-lg font-semibold rounded-lg"
-              onClick={() => scrollToSection('how-it-works')}
+              asChild
             >
-              See how it works
+              <a href="#how-it-works">
+                See how it works
+              </a>
             </Button>
           </div>
         </div>
@@ -241,18 +207,18 @@ export default function HomePage() {
             <div>
               <h4 className="font-semibold mb-4">Product</h4>
               <div className="space-y-2">
-                <button 
-                  onClick={() => scrollToSection('how-it-works')}
+                <a 
+                  href="#how-it-works"
                   className="block text-neutral-400 hover:text-white transition-colors"
                 >
                   How it works
-                </button>
-                <button 
-                  onClick={() => scrollToSection('for-nutritionists')}
+                </a>
+                <a 
+                  href="#for-nutritionists"
                   className="block text-neutral-400 hover:text-white transition-colors"
                 >
                   For Nutritionists
-                </button>
+                </a>
               </div>
             </div>
             
