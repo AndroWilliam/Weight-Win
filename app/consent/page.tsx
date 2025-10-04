@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ExternalLink, ShieldCheck, Mail, FileText, Globe } from "lucide-react"
+import { ExternalLink } from "lucide-react"
 
 const dataHighlights = [
   {
@@ -56,40 +56,6 @@ const finePrint = [
   "We comply with privacy laws including GDPR and CCPA",
   "Data may be processed on secure servers located in the US/EU",
   "Full details live in our Privacy Policy and Terms of Service"
-]
-
-const implementationNotes = [
-  {
-    title: "For Development",
-    items: [
-      "Ensure privacy@weightwin.com is active and monitored",
-      "Implement automatic deletion of challenge data after 90 days",
-      "Add user-controlled data export tools in Settings",
-      "Publish dedicated Privacy Policy and Terms of Service pages",
-      "Verify photo deletion happens immediately after OCR"
-    ],
-    Icon: ShieldCheck
-  },
-  {
-    title: "For Legal Review",
-    items: [
-      "Confirm compliance with privacy laws in your operating regions",
-      "Document where data is processed and the legal basis for doing so",
-      "Validate that retention periods match business and regulatory requirements",
-      "Confirm age restriction enforcement (18+)"
-    ],
-    Icon: FileText
-  },
-  {
-    title: "Localization Notes",
-    items: [
-      "Translate the page while keeping the warm, transparent tone",
-      "Adapt legal references for local regulations (e.g., GDPR, CCPA)",
-      "Ensure emoji usage aligns with local expectations",
-      "Localize privacy notice formatting conventions"
-    ],
-    Icon: Globe
-  }
 ]
 
 export default function ConsentPage() {
@@ -153,7 +119,7 @@ export default function ConsentPage() {
               <h2 className="text-xl font-semibold text-neutral-900">⚡ Your Rights</h2>
               <ul className="space-y-2 text-neutral-700 list-disc list-inside">
                 {rights.map(item => (
-                  <li key={item}>{item}</li>
+                  <li key={item}>✨ {item}</li>
                 ))}
               </ul>
             </CardContent>
@@ -164,7 +130,7 @@ export default function ConsentPage() {
               <h2 className="text-xl font-semibold text-neutral-900">🔒 Our Commitments</h2>
               <ul className="space-y-2 text-neutral-700 list-disc list-inside">
                 {commitments.map(item => (
-                  <li key={item}>{item}</li>
+                  <li key={item}>💙 {item}</li>
                 ))}
               </ul>
             </CardContent>
@@ -175,7 +141,7 @@ export default function ConsentPage() {
               <h2 className="text-xl font-semibold text-neutral-900">📋 The Fine Print</h2>
               <ul className="space-y-2 text-neutral-700 list-disc list-inside">
                 {finePrint.map(item => (
-                  <li key={item}>{item}</li>
+                  <li key={item}>ℹ️ {item}</li>
                 ))}
               </ul>
               <div className="flex flex-wrap gap-4 pt-4">
@@ -188,36 +154,6 @@ export default function ConsentPage() {
                   <ExternalLink className="w-3 h-3" />
                 </a>
               </div>
-            </CardContent>
-          </Card>
-
-          <section className="space-y-6">
-            {implementationNotes.map(({ title, items, Icon }) => (
-              <Card key={title} className="border-dashed border-neutral-300">
-                <CardContent className="p-6 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <Icon className="w-5 h-5 text-primary-600" />
-                    <h3 className="text-lg font-semibold text-neutral-900">{title}</h3>
-                  </div>
-                  <ul className="space-y-2 text-neutral-700 list-disc list-inside">
-                    {items.map(item => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            ))}
-          </section>
-
-          <Card className="border-neutral-300">
-            <CardContent className="p-6 space-y-4">
-              <div className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-primary-600" />
-                <h3 className="text-lg font-semibold text-neutral-900">Questions?</h3>
-              </div>
-              <p className="text-neutral-700">
-                We're here to help. Email us anytime at <a className="text-primary-600 font-medium" href="mailto:privacy@weightwin.com">privacy@weightwin.com</a> and our team will respond promptly.
-              </p>
             </CardContent>
           </Card>
 
