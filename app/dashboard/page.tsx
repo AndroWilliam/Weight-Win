@@ -1,11 +1,9 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { StreakPills } from "@/components/streak-pills"
 import { DailyTips } from "@/components/daily-tips"
 import { RewardCountdown } from "@/components/reward-countdown"
-import { Camera, Target, ArrowLeft } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 
@@ -23,12 +21,10 @@ export default function DashboardPage() {
   const router = useRouter()
 
   useEffect(() => {
-    // Load challenge data from localStorage
     const savedChallenge = localStorage.getItem('challengeData')
     if (savedChallenge) {
       setChallengeData(JSON.parse(savedChallenge))
     } else {
-      // If no challenge data, redirect to commit page
       router.push('/commit')
       return
     }
@@ -38,6 +34,7 @@ export default function DashboardPage() {
   const currentDay = challengeData?.currentDay || 1
   const isCompleted = currentDay > 7
   const canTrackToday = currentDay <= 7
+  const progressPercent = Math.min(100, Math.round((currentDay / 7) * 100))
 
   const handleTakePhoto = () => {
     setIsNavigating(true)
@@ -67,121 +64,89 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="px-6 py-4 border-b border-neutral-300">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
+      <header className="px-6 py-4 border-b border-neutral-200">
+        <div className="max-w-5xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">W</span>
             </div>
             <h1 className="text-xl font-bold text-neutral-900">WeightWin</h1>
           </div>
-          <div className="flex items-center gap-6">
-            <button 
-              onClick={() => router.push('/dashboard')}
-              className="text-neutral-700 hover:text-neutral-900 font-medium"
-            >
-              Dashboard
-            </button>
-            <button 
-              onClick={() => router.push('/progress')}
-              className="text-neutral-700 hover:text-neutral-900 font-medium"
-            >
-              Progress
-            </button>
-            <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm">A</span>
-            </div>
-            <button 
-              onClick={handleSignOut}
-              className="text-neutral-700 hover:text-neutral-900 font-medium"
-            >
-              Sign Out
-            </button>
+          <div className="flex items-center gap-6 text-sm font-medium text-neutral-700">
+            <button onClick={() => router.push('/dashboard')} className="hover:text-neutral-900">Dashboard</button>
+            <button onClick={() => router.push('/progress')} className="hover:text-neutral-900">Progress</button>
+            <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white">A</div>
+            <button onClick={handleSignOut} className="hover:text-neutral-900">Sign Out</button>
           </div>
         </div>
       </header>
 
-      <main className="px-4 py-4">
-        <div className="mx-auto max-w-[1000px] px-0 sm:px-2 grid grid-cols-12 gap-4">
-          <div className="col-span-12 text-center mb-1">
-            <h1 className="text-2xl font-semibold text-neutral-900">Ready for today's weigh-in?</h1>
+      <main className="px-4 py-8">
+        <div className="mx-auto max-w-5xl space-y-8">
+          <div className="text-center space-y-2">
+            <h2 className="text-3xl font-semibold text-neutral-900">Day {Math.min(currentDay, 7)} of 7</h2>
+            <p className="text-neutral-600">Ready for today's weigh-in?</p>
           </div>
 
-          {/* Take Photo */}
-          <section className="col-span-12 lg:col-span-6" aria-labelledby="take-photo-heading">
-            <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-              <div className="px-4 pt-4 pb-3 text-center space-y-1">
-                <h2 id="take-photo-heading" className="text-base font-semibold text-slate-900">Take today's photo</h2>
-                <p className="text-xs text-slate-600">
-                  Snap a photo of your scale to track day {currentDay}. Keep your streak going and help us calculate your reward.
-                </p>
-              </div>
-              <button
-                onClick={handleTakePhoto}
-                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleTakePhoto()}
-                className="w-full aspect-[4/3] max-h-[300px] min-h-[220px] grid place-content-center bg-gradient-to-br from-indigo-600 to-violet-600 text-white text-base font-semibold shadow-md transition-transform duration-300 hover:scale-[1.005] active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 disabled:opacity-70"
-                disabled={!canTrackToday || isCompleted}
-              >
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-lg">📷</span>
-                  <span>Take Photo</span>
-                  {!canTrackToday || isCompleted ? (
-                    <span className="text-[11px] text-white/80">Challenge complete!</span>
-                  ) : (
-                    <span className="text-[11px] text-white/80">Tap to capture today's weigh-in</span>
-                  )}
-                </div>
-              </button>
-            </div>
-          </section>
-
-          {/* Progress under photo */}
-          <section className="col-span-12 lg:col-span-6" aria-labelledby="progress-heading">
-            <div className="rounded-xl border border-slate-200 bg-white p-4 h-[130px] flex flex-col justify-between">
+          <div className="grid gap-6 lg:grid-cols-2">
+            {/* Progress Card */}
+            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" aria-labelledby="progress-heading">
               <div className="flex items-center justify-between">
-                <h3 id="progress-heading" className="text-sm font-semibold text-slate-800">Your Progress</h3>
-                <span className="text-xs text-slate-500">{Math.round((currentDay / 7) * 100)}% complete</span>
+                <h3 id="progress-heading" className="text-lg font-semibold text-slate-900">Your Progress</h3>
               </div>
-              <div>
-                <ul className="flex items-center gap-1.5 justify-center">
-                  {Array.from({ length: 7 }).map((_, i) => {
-                    const day = i + 1
-                    const done = day <= currentDay
-                    return (
-                      <li
-                        key={day}
-                        className={`h-5 w-5 grid place-content-center rounded-full text-[10px] font-medium ${done ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'}`}
-                        aria-label={`Day ${day} ${done ? 'completed' : 'pending'}`}
-                      >
-                        {day}
-                      </li>
-                    )
-                  })}
-                </ul>
+              <div className="mt-6 space-y-6">
+                <div className="flex justify-between">
+                  <StreakPills currentDay={currentDay} />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm text-slate-500">
+                    <span>Progress</span>
+                    <span>{progressPercent}%</span>
+                  </div>
+                  <div className="h-2.5 w-full rounded-full bg-slate-200 overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-[width] duration-700"
+                      style={{ width: `${progressPercent}%` }}
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={progressPercent}
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-[width] duration-700 ease-out"
-                  style={{ width: `${(currentDay / 7) * 100}%` }}
-                  role="progressbar"
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-valuenow={(currentDay / 7) * 100}
-                />
-              </div>
-            </div>
-          </section>
+            </section>
 
-          {/* Reward */}
-          <section className="col-span-12 lg:col-span-6" aria-labelledby="reward-heading">
-            <RewardCountdown currentDay={currentDay} className="border border-slate-200 rounded-xl h-[210px]" />
-          </section>
+            {/* Reward Card */}
+            <RewardCountdown currentDay={currentDay} className="h-full" />
 
-          {/* Daily Tips */}
-          <section className="col-span-12 lg:col-span-6" aria-labelledby="tips-heading">
-            <DailyTips className="border border-slate-200 rounded-xl h-[210px]" />
-          </section>
+            {/* Take Photo Card */}
+            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" aria-labelledby="take-photo-heading">
+              <div className="space-y-6">
+                <div className="space-y-2 text-center">
+                  <h3 id="take-photo-heading" className="text-lg font-semibold text-slate-900">Take today's photo</h3>
+                  <p className="text-sm text-slate-600 max-w-sm mx-auto">
+                    Snap a photo of your scale to track day {currentDay}. Keep your streak going for that free nutritionist session.
+                  </p>
+                </div>
+                <div className="rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 p-8 text-center text-white space-y-4 shadow-inner">
+                  <div className="w-16 h-16 rounded-full bg-white/15 mx-auto flex items-center justify-center text-2xl">📷</div>
+                  <div className="text-sm opacity-90">Tap to capture today's weigh-in</div>
+                  <Button
+                    onClick={handleTakePhoto}
+                    loading={isNavigating}
+                    disabled={!canTrackToday || isCompleted}
+                    className="bg-white text-indigo-600 hover:bg-slate-100 border-none"
+                  >
+                    {isCompleted ? 'Challenge complete!' : 'Take Photo'}
+                  </Button>
+                </div>
+              </div>
+            </section>
+
+            {/* Daily Tips Card */}
+            <DailyTips className="h-full" />
+          </div>
         </div>
       </main>
     </div>
