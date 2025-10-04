@@ -124,7 +124,7 @@ export function DailyTips({ className }: DailyTipsProps) {
                   <span className="inline-flex px-2 py-1 bg-primary-100 text-primary-600 text-[11px] font-medium rounded-full w-min">
                     {getCategoryLabel(tip.category)}
                   </span>
-                  <h4 className="font-medium text-neutral-900 text-sm leading-snug">{tip.title}</h4>
+                  <h4 className="font-medium text-neutral-900 text-sm leading-snug line-clamp-2">{tip.title}</h4>
                   <p className="text-neutral-700 text-xs leading-relaxed line-clamp-5">{tip.content}</p>
                 </div>
               </div>

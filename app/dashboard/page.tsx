@@ -103,13 +103,13 @@ export default function DashboardPage() {
       </header>
 
       <main className="px-4 py-4">
-        <div className="mx-auto max-w-[1100px] px-0 sm:px-2 lg:px-4 grid grid-cols-12 gap-4">
-          <div className="col-span-12 text-center mb-2">
+        <div className="mx-auto max-w-[1000px] px-0 sm:px-2 grid grid-cols-12 gap-4">
+          <div className="col-span-12 text-center mb-1">
             <h1 className="text-2xl font-semibold text-neutral-900">Ready for today's weigh-in?</h1>
           </div>
 
           {/* Take Photo */}
-          <section className="col-span-12 lg:col-span-7" aria-labelledby="take-photo-heading">
+          <section className="col-span-12 lg:col-span-6" aria-labelledby="take-photo-heading">
             <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
               <div className="px-4 pt-4 pb-3 text-center space-y-1">
                 <h2 id="take-photo-heading" className="text-base font-semibold text-slate-900">Take today's photo</h2>
@@ -120,11 +120,11 @@ export default function DashboardPage() {
               <button
                 onClick={handleTakePhoto}
                 onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleTakePhoto()}
-                className="w-full aspect-[4/3] max-h-[360px] min-h-[260px] grid place-content-center bg-gradient-to-br from-indigo-600 to-violet-600 text-white text-base md:text-lg font-semibold shadow-md transition-transform duration-300 hover:scale-[1.005] active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 disabled:opacity-70"
+                className="w-full aspect-[4/3] max-h-[300px] min-h-[220px] grid place-content-center bg-gradient-to-br from-indigo-600 to-violet-600 text-white text-base font-semibold shadow-md transition-transform duration-300 hover:scale-[1.005] active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 disabled:opacity-70"
                 disabled={!canTrackToday || isCompleted}
               >
                 <div className="flex flex-col items-center gap-1">
-                  <span className="text-xl">📷</span>
+                  <span className="text-lg">📷</span>
                   <span>Take Photo</span>
                   {!canTrackToday || isCompleted ? (
                     <span className="text-[11px] text-white/80">Challenge complete!</span>
@@ -136,22 +136,22 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          {/* Progress */}
-          <section className="col-span-12 lg:col-span-5" aria-labelledby="progress-heading">
-            <div className="rounded-xl border border-slate-200 bg-white p-4 h-[180px] flex flex-col justify-between">
+          {/* Progress under photo */}
+          <section className="col-span-12 lg:col-span-6" aria-labelledby="progress-heading">
+            <div className="rounded-xl border border-slate-200 bg-white p-4 h-[130px] flex flex-col justify-between">
               <div className="flex items-center justify-between">
                 <h3 id="progress-heading" className="text-sm font-semibold text-slate-800">Your Progress</h3>
                 <span className="text-xs text-slate-500">{Math.round((currentDay / 7) * 100)}% complete</span>
               </div>
               <div>
-                <ul className="flex items-center gap-2 justify-center">
+                <ul className="flex items-center gap-1.5 justify-center">
                   {Array.from({ length: 7 }).map((_, i) => {
                     const day = i + 1
                     const done = day <= currentDay
                     return (
                       <li
                         key={day}
-                        className={`h-6 w-6 grid place-content-center rounded-full text-[11px] font-medium ${done ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'}`}
+                        className={`h-5 w-5 grid place-content-center rounded-full text-[10px] font-medium ${done ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'}`}
                         aria-label={`Day ${day} ${done ? 'completed' : 'pending'}`}
                       >
                         {day}
@@ -160,7 +160,7 @@ export default function DashboardPage() {
                   })}
                 </ul>
               </div>
-              <div className="h-2.5 w-full rounded-full bg-slate-200 overflow-hidden">
+              <div className="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-[width] duration-700 ease-out"
                   style={{ width: `${(currentDay / 7) * 100}%` }}
@@ -175,12 +175,12 @@ export default function DashboardPage() {
 
           {/* Reward */}
           <section className="col-span-12 lg:col-span-6" aria-labelledby="reward-heading">
-            <RewardCountdown currentDay={currentDay} className="border border-slate-200 rounded-xl h-[220px]" />
+            <RewardCountdown currentDay={currentDay} className="border border-slate-200 rounded-xl h-[210px]" />
           </section>
 
           {/* Daily Tips */}
           <section className="col-span-12 lg:col-span-6" aria-labelledby="tips-heading">
-            <DailyTips className="border border-slate-200 rounded-xl h-[220px]" />
+            <DailyTips className="border border-slate-200 rounded-xl h-[210px]" />
           </section>
         </div>
       </main>

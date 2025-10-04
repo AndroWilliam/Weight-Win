@@ -82,7 +82,7 @@ export function RewardCountdown({ currentDay, className }: RewardCountdownProps)
           <h3 className="text-sm font-semibold text-neutral-900">Your Reward</h3>
         </div>
         
-        <p className="text-neutral-700 mb-3 text-xs leading-relaxed">
+        <p className="text-neutral-700 mb-2 text-xs leading-relaxed">
           Complete {daysRemaining} more day{daysRemaining !== 1 ? 's' : ''} to unlock your free 30-minute session with a certified nutritionist.
         </p>
 
@@ -95,19 +95,19 @@ export function RewardCountdown({ currentDay, className }: RewardCountdownProps)
               </div>
               <div className="grid grid-cols-4 gap-2 text-center text-xs">
                 <div className="bg-white rounded-lg p-2">
-                  <div className="text-base font-bold text-primary-600 leading-none">{timeLeft.days}</div>
+                  <div className="text-sm font-bold text-primary-600 leading-none">{timeLeft.days}</div>
                   <div className="text-[10px] text-neutral-500">Days</div>
                 </div>
                 <div className="bg-white rounded-lg p-2">
-                  <div className="text-base font-bold text-primary-600 leading-none">{timeLeft.hours}</div>
+                  <div className="text-sm font-bold text-primary-600 leading-none">{timeLeft.hours}</div>
                   <div className="text-[10px] text-neutral-500">Hours</div>
                 </div>
                 <div className="bg-white rounded-lg p-2">
-                  <div className="text-base font-bold text-primary-600 leading-none">{timeLeft.minutes}</div>
+                  <div className="text-sm font-bold text-primary-600 leading-none">{timeLeft.minutes}</div>
                   <div className="text-[10px] text-neutral-500">Minutes</div>
                 </div>
                 <div className="bg-white rounded-lg p-2">
-                  <div className="text-base font-bold text-primary-600 leading-none">{timeLeft.seconds}</div>
+                  <div className="text-sm font-bold text-primary-600 leading-none">{timeLeft.seconds}</div>
                   <div className="text-[10px] text-neutral-500">Seconds</div>
                 </div>
               </div>
