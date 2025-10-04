@@ -51,13 +51,6 @@ const commitments = [
   "You own your data – we're just temporarily helping you track it"
 ]
 
-const finePrint = [
-  "WeightWin is designed for adults 18+ pursuing personal wellness goals",
-  "We comply with privacy laws including GDPR and CCPA",
-  "Data may be processed on secure servers located in the US/EU",
-  "Full details live in our Privacy Policy and Terms of Service"
-]
-
 export default function ConsentPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -133,27 +126,6 @@ export default function ConsentPage() {
                   <li key={item}>💙 {item}</li>
                 ))}
               </ul>
-            </CardContent>
-          </Card>
-
-          <Card className="border-neutral-300">
-            <CardContent className="p-6 space-y-3">
-              <h2 className="text-xl font-semibold text-neutral-900">📋 The Fine Print</h2>
-              <ul className="space-y-2 text-neutral-700 list-disc list-inside">
-                {finePrint.map(item => (
-                  <li key={item}>ℹ️ {item}</li>
-                ))}
-              </ul>
-              <div className="flex flex-wrap gap-4 pt-4">
-                <a href="#" className="text-primary-600 hover:text-primary-700 text-sm font-medium inline-flex items-center gap-1">
-                  Privacy Policy
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-                <a href="#" className="text-primary-600 hover:text-primary-700 text-sm font-medium inline-flex items-center gap-1">
-                  Terms of Service
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-              </div>
             </CardContent>
           </Card>
 
