@@ -82,7 +82,13 @@ export default function DashboardPage() {
       </header>
 
       <main className="px-4 py-8">
-        <div className="mx-auto max-w-5xl space-y-8">
+        <div className="mx-auto max-w-5xl space-y-6">
+          {/* Home breadcrumb */}
+          <div className="flex items-center gap-2 text-sm text-neutral-600">
+            <span className="text-lg">🏠</span>
+            <span>Home</span>
+          </div>
+
           <div className="text-center space-y-2">
             <h2 className="text-3xl font-semibold text-neutral-900">Day {Math.min(currentDay, 7)} of 7</h2>
             <p className="text-neutral-600">Ready for today's weigh-in?</p>
@@ -91,10 +97,10 @@ export default function DashboardPage() {
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Progress Card */}
             <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" aria-labelledby="progress-heading">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-6">
                 <h3 id="progress-heading" className="text-lg font-semibold text-slate-900">Your Progress</h3>
               </div>
-              <div className="mt-6 space-y-6">
+              <div className="space-y-6">
                 <div className="flex justify-between">
                   <StreakPills currentDay={currentDay} />
                 </div>
@@ -117,20 +123,28 @@ export default function DashboardPage() {
               </div>
             </section>
 
-            {/* Reward Card */}
-            <RewardCountdown currentDay={currentDay} className="h-full" />
+            {/* Reward Card - smaller square */}
+            <section className="rounded-2xl border border-slate-200 bg-gradient-to-br from-green-50 to-emerald-50 p-6 shadow-sm h-[240px] flex flex-col" aria-labelledby="reward-heading">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">🎁</span>
+                <h3 id="reward-heading" className="text-lg font-semibold text-slate-900">Your Reward</h3>
+              </div>
+              <p className="text-sm text-slate-700 flex-1">
+                Complete {Math.max(0, 7 - currentDay)} more day{Math.max(0, 7 - currentDay) !== 1 ? 's' : ''} to unlock your free 30-minute session with a certified nutritionist.
+              </p>
+            </section>
 
             {/* Take Photo Card */}
             <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" aria-labelledby="take-photo-heading">
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div className="space-y-2 text-center">
                   <h3 id="take-photo-heading" className="text-lg font-semibold text-slate-900">Take today's photo</h3>
-                  <p className="text-sm text-slate-600 max-w-sm mx-auto">
+                  <p className="text-sm text-slate-600">
                     Snap a photo of your scale to track day {currentDay}. Keep your streak going for that free nutritionist session.
                   </p>
                 </div>
-                <div className="rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 p-8 text-center text-white space-y-4 shadow-inner">
-                  <div className="w-16 h-16 rounded-full bg-white/15 mx-auto flex items-center justify-center text-2xl">📷</div>
+                <div className="rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 p-6 text-center text-white space-y-3 shadow-inner">
+                  <div className="w-14 h-14 rounded-full bg-white/15 mx-auto flex items-center justify-center text-xl">📷</div>
                   <div className="text-sm opacity-90">Tap to capture today's weigh-in</div>
                   <Button
                     onClick={handleTakePhoto}
@@ -144,8 +158,25 @@ export default function DashboardPage() {
               </div>
             </section>
 
-            {/* Daily Tips Card */}
-            <DailyTips className="h-full" />
+            {/* Daily Tips Card - smaller square with green background */}
+            <section className="rounded-2xl border border-slate-200 bg-gradient-to-br from-teal-50 to-cyan-50 p-6 shadow-sm h-[240px] flex flex-col" aria-labelledby="tips-heading">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">📖</span>
+                <h3 id="tips-heading" className="text-lg font-semibold text-slate-900">Daily Tips</h3>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <div className="mb-2">
+                  <span className="inline-block px-2 py-0.5 bg-teal-100 text-teal-700 text-xs font-medium rounded-full">
+                    Lifestyle
+                  </span>
+                </div>
+                <h4 className="font-semibold text-slate-900 text-sm mb-2">Consistent sleep schedule</h4>
+                <p className="text-xs text-slate-700 leading-relaxed">
+                  Go to bed and wake up at the same time every day, even on weekends. This regulates your body clock.
+                </p>
+              </div>
+              <div className="mt-3 text-xs text-slate-500">1 min read</div>
+            </section>
           </div>
         </div>
       </main>
