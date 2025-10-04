@@ -102,35 +102,34 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <main className="px-4 py-10">
-        <div className="max-w-6xl mx-auto space-y-6">
-          <div className="text-center">
-            <h1 className="text-3xl font-semibold text-neutral-900">Ready for today's weigh-in?</h1>
+      <main className="px-4 py-4">
+        <div className="mx-auto max-w-[1100px] px-0 sm:px-2 lg:px-4 grid grid-cols-12 gap-4">
+          <div className="col-span-12 text-center mb-2">
+            <h1 className="text-2xl font-semibold text-neutral-900">Ready for today's weigh-in?</h1>
           </div>
 
           {/* Take Photo */}
-          <section className="rounded-2xl border border-slate-200 bg-white p-0 overflow-hidden">
-            <div className="p-6">
-              <div className="mb-6 text-center space-y-2">
-                <h2 className="text-lg font-semibold text-slate-900">Take today's photo</h2>
-                <p className="text-sm text-slate-600 max-w-xl mx-auto">
-                  Snap a photo of your scale to track day {currentDay}. This keeps your streak alive
-                  and helps us calculate your reward.
+          <section className="col-span-12 lg:col-span-7" aria-labelledby="take-photo-heading">
+            <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+              <div className="px-4 pt-4 pb-3 text-center space-y-1">
+                <h2 id="take-photo-heading" className="text-base font-semibold text-slate-900">Take today's photo</h2>
+                <p className="text-xs text-slate-600">
+                  Snap a photo of your scale to track day {currentDay}. Keep your streak going and help us calculate your reward.
                 </p>
               </div>
               <button
                 onClick={handleTakePhoto}
                 onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleTakePhoto()}
-                className="w-full aspect-square rounded-2xl grid place-content-center bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-lg transition-transform duration-300 hover:scale-[1.01] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500"
+                className="w-full aspect-[4/3] max-h-[360px] min-h-[260px] grid place-content-center bg-gradient-to-br from-indigo-600 to-violet-600 text-white text-base md:text-lg font-semibold shadow-md transition-transform duration-300 hover:scale-[1.005] active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 disabled:opacity-70"
                 disabled={!canTrackToday || isCompleted}
               >
-                <div className="flex flex-col items-center gap-3">
-                  <span className="text-4xl">📷</span>
-                  <span className="text-lg font-semibold">Take Photo</span>
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-xl">📷</span>
+                  <span>Take Photo</span>
                   {!canTrackToday || isCompleted ? (
-                    <span className="text-xs text-white/80">Challenge complete!</span>
+                    <span className="text-[11px] text-white/80">Challenge complete!</span>
                   ) : (
-                    <span className="text-xs text-white/80">Tap to capture today's weigh-in</span>
+                    <span className="text-[11px] text-white/80">Tap to capture today's weigh-in</span>
                   )}
                 </div>
               </button>
@@ -138,16 +137,30 @@ export default function DashboardPage() {
           </section>
 
           {/* Progress */}
-          <section className="rounded-2xl border border-slate-200 bg-white p-6">
-            <div className="space-y-5">
+          <section className="col-span-12 lg:col-span-5" aria-labelledby="progress-heading">
+            <div className="rounded-xl border border-slate-200 bg-white p-4 h-[180px] flex flex-col justify-between">
               <div className="flex items-center justify-between">
-                <h3 className="text-base font-semibold text-slate-900">Your Progress</h3>
-                <span className="text-sm text-slate-500">{Math.round((currentDay / 7) * 100)}% complete</span>
+                <h3 id="progress-heading" className="text-sm font-semibold text-slate-800">Your Progress</h3>
+                <span className="text-xs text-slate-500">{Math.round((currentDay / 7) * 100)}% complete</span>
               </div>
-              <div className="flex justify-center">
-                <StreakPills currentDay={currentDay} />
+              <div>
+                <ul className="flex items-center gap-2 justify-center">
+                  {Array.from({ length: 7 }).map((_, i) => {
+                    const day = i + 1
+                    const done = day <= currentDay
+                    return (
+                      <li
+                        key={day}
+                        className={`h-6 w-6 grid place-content-center rounded-full text-[11px] font-medium ${done ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'}`}
+                        aria-label={`Day ${day} ${done ? 'completed' : 'pending'}`}
+                      >
+                        {day}
+                      </li>
+                    )
+                  })}
+                </ul>
               </div>
-              <div className="h-3 w-full rounded-full bg-slate-200 overflow-hidden">
+              <div className="h-2.5 w-full rounded-full bg-slate-200 overflow-hidden">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-[width] duration-700 ease-out"
                   style={{ width: `${(currentDay / 7) * 100}%` }}
@@ -160,14 +173,14 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          {/* Reward & Tips */}
-          <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden aspect-square">
-              <RewardCountdown currentDay={currentDay} className="h-full border-none" />
-            </div>
-            <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden aspect-square">
-              <DailyTips className="h-full border-none" />
-            </div>
+          {/* Reward */}
+          <section className="col-span-12 lg:col-span-6" aria-labelledby="reward-heading">
+            <RewardCountdown currentDay={currentDay} className="border border-slate-200 rounded-xl h-[220px]" />
+          </section>
+
+          {/* Daily Tips */}
+          <section className="col-span-12 lg:col-span-6" aria-labelledby="tips-heading">
+            <DailyTips className="border border-slate-200 rounded-xl h-[220px]" />
           </section>
         </div>
       </main>

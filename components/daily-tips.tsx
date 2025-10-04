@@ -54,15 +54,15 @@ export function DailyTips({ className }: DailyTipsProps) {
 
   if (isLoading) {
     return (
-      <Card className={`border-neutral-300 h-full ${className}`}>
-        <CardContent className="p-5 h-full flex flex-col">
-          <div className="flex items-center gap-3 mb-3">
+      <Card className={`border-neutral-300 rounded-xl h-full ${className}`}>
+        <CardContent className="p-4 h-full flex flex-col">
+          <div className="flex items-center gap-3 mb-2">
             <BookOpen className="w-5 h-5 text-primary-600" />
-            <h3 className="text-base font-semibold text-neutral-900">Daily Tips</h3>
+            <h3 className="text-sm font-semibold text-neutral-900">Daily Tips</h3>
           </div>
           <div className="flex-1 flex flex-col items-center justify-center text-center gap-3">
-            <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-neutral-600 text-sm">Loading today's tips...</p>
+            <div className="w-7 h-7 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-neutral-600 text-xs">Loading today's tips...</p>
           </div>
         </CardContent>
       </Card>
@@ -71,13 +71,13 @@ export function DailyTips({ className }: DailyTipsProps) {
 
   if (!dailyTips || dailyTips.tips.length === 0) {
     return (
-      <Card className={`border-neutral-300 h-full ${className}`}>
-        <CardContent className="p-5 h-full flex flex-col">
-          <div className="flex items-center gap-3 mb-3">
+      <Card className={`border-neutral-300 rounded-xl h-full ${className}`}>
+        <CardContent className="p-4 h-full flex flex-col">
+          <div className="flex items-center gap-3 mb-2">
             <BookOpen className="w-5 h-5 text-primary-600" />
-            <h3 className="text-base font-semibold text-neutral-900">Daily Tips</h3>
+            <h3 className="text-sm font-semibold text-neutral-900">Daily Tips</h3>
           </div>
-          <p className="text-neutral-600 text-sm">No tips available today.</p>
+          <p className="text-neutral-600 text-xs">No tips available today.</p>
         </CardContent>
       </Card>
     )
@@ -86,14 +86,14 @@ export function DailyTips({ className }: DailyTipsProps) {
   const currentTip = dailyTips.tips[currentTipIndex]
 
   return (
-    <Card className={`border-neutral-300 h-full ${className}`}>
-      <CardContent className="p-5 h-full flex flex-col">
-        <div className="flex items-center justify-between mb-3">
+    <Card className={`border-neutral-300 rounded-xl h-full ${className}`}>
+      <CardContent className="p-4 h-full flex flex-col">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
             <BookOpen className="w-5 h-5 text-primary-600" />
-            <h3 className="text-base font-semibold text-neutral-900">Daily Tips</h3>
+            <h3 className="text-sm font-semibold text-neutral-900">Daily Tips</h3>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <Button
               onClick={goToPrevious}
               variant="outline"
@@ -120,20 +120,20 @@ export function DailyTips({ className }: DailyTipsProps) {
           >
             {dailyTips.tips.map((tip) => (
               <div key={tip.id} className="w-full flex-shrink-0 flex flex-col">
-                <div className="space-y-3 flex-1">
-                  <span className="inline-flex px-2 py-1 bg-primary-100 text-primary-600 text-xs font-medium rounded-full w-min">
+                <div className="space-y-2 flex-1">
+                  <span className="inline-flex px-2 py-1 bg-primary-100 text-primary-600 text-[11px] font-medium rounded-full w-min">
                     {getCategoryLabel(tip.category)}
                   </span>
                   <h4 className="font-medium text-neutral-900 text-sm leading-snug">{tip.title}</h4>
-                  <p className="text-neutral-700 text-sm leading-relaxed line-clamp-6">{tip.content}</p>
+                  <p className="text-neutral-700 text-xs leading-relaxed line-clamp-5">{tip.content}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="flex items-center justify-between mt-4">
-          <span className="text-xs text-neutral-500">{currentTip.readTime}</span>
+        <div className="flex items-center justify-between mt-3">
+          <span className="text-[11px] text-neutral-500">{currentTip.readTime}</span>
           <div className="flex gap-1">
             {dailyTips.tips.map((_, index) => (
               <button
