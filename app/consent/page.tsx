@@ -2,34 +2,103 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Switch } from "@/components/ui/switch"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Eye, Database, Share2, CheckCircle, ExternalLink } from "lucide-react"
+import { ExternalLink, ShieldCheck, Mail, FileText, Globe } from "lucide-react"
+
+const dataHighlights = [
+  {
+    icon: "📸",
+    title: "Photo Processing",
+    bullets: [
+      "We use AI to detect weight numbers from your scale photos",
+      "Photos are processed instantly and automatically deleted from our systems",
+      "No human ever sees your photos, and they can't be recovered once processed"
+    ]
+  },
+  {
+    icon: "📊",
+    title: "Weight Data Storage",
+    bullets: [
+      "We securely store your daily weight entries and challenge progress",
+      "Data is encrypted and kept on audited servers for the 7-day challenge + 90 days",
+      "You can export or delete all of your data anytime from Settings"
+    ]
+  },
+  {
+    icon: "🥗",
+    title: "Nutritionist Sharing (Optional)",
+    bullets: [
+      "Only offered after you finish the challenge and book a free session",
+      "We share weight trends and completion dates only – no photos or additional personal info",
+      "You decide if you want to share and which nutritionist gets access"
+    ]
+  }
+]
+
+const rights = [
+  "Access: Download all of your data whenever you need it",
+  "Delete: Remove your account and wipe all data instantly",
+  "Correct: Update any information that's inaccurate",
+  "Questions: Reach us anytime at privacy@weightwin.com"
+]
+
+const commitments = [
+  "We never sell your data to anyone",
+  "We don't use your information for advertising",
+  "We notify you immediately if a security issue ever affects your data",
+  "We follow industry-standard security practices",
+  "You own your data – we're just temporarily helping you track it"
+]
+
+const finePrint = [
+  "WeightWin is designed for adults 18+ pursuing personal wellness goals",
+  "We comply with privacy laws including GDPR and CCPA",
+  "Data may be processed on secure servers located in the US/EU",
+  "Full details live in our Privacy Policy and Terms of Service"
+]
+
+const implementationNotes = [
+  {
+    title: "For Development",
+    items: [
+      "Ensure privacy@weightwin.com is active and monitored",
+      "Implement automatic deletion of challenge data after 90 days",
+      "Add user-controlled data export tools in Settings",
+      "Publish dedicated Privacy Policy and Terms of Service pages",
+      "Verify photo deletion happens immediately after OCR"
+    ],
+    Icon: ShieldCheck
+  },
+  {
+    title: "For Legal Review",
+    items: [
+      "Confirm compliance with privacy laws in your operating regions",
+      "Document where data is processed and the legal basis for doing so",
+      "Validate that retention periods match business and regulatory requirements",
+      "Confirm age restriction enforcement (18+)"
+    ],
+    Icon: FileText
+  },
+  {
+    title: "Localization Notes",
+    items: [
+      "Translate the page while keeping the warm, transparent tone",
+      "Adapt legal references for local regulations (e.g., GDPR, CCPA)",
+      "Ensure emoji usage aligns with local expectations",
+      "Localize privacy notice formatting conventions"
+    ],
+    Icon: Globe
+  }
+]
 
 export default function ConsentPage() {
-  const [consents, setConsents] = useState({
-    ocrProcessing: true,
-    dataStorage: true,
-    shareWithNutritionist: true
-  })
   const router = useRouter()
-
-  const handleConsentChange = (key: keyof typeof consents) => {
-    setConsents(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }))
-  }
-
   const [loading, setLoading] = useState(false)
 
   const handleContinue = async () => {
-    // Save consents to localStorage or send to server
     try {
       setLoading(true)
-      localStorage.setItem('userConsents', JSON.stringify(consents))
-      // small delay to let animation be visible even on fast nav
       await new Promise(r => setTimeout(r, 250))
       router.push('/setup')
     } finally {
@@ -39,7 +108,6 @@ export default function ConsentPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="px-6 py-4 border-b border-neutral-300">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
@@ -52,158 +120,70 @@ export default function ConsentPage() {
       </header>
 
       <main className="px-6 py-12">
-        <div className="max-w-2xl mx-auto">
-          {/* Title */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-neutral-900 mb-4">
-              Privacy & Data Consent
-            </h1>
-            <p className="text-xl text-neutral-600">
-              We believe in transparency. Here's exactly how we'll use your data.
+        <div className="max-w-3xl mx-auto space-y-10">
+          <section className="text-center space-y-4">
+            <h1 className="text-4xl font-bold text-neutral-900">Privacy &amp; Data Consent</h1>
+            <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
+              We believe in transparency. Here's exactly how we handle your information at every step of your WeightWin journey.
             </p>
-          </div>
+          </section>
 
-          {/* Consent Cards */}
-          <div className="space-y-6 mb-8">
-            {/* Photo OCR Processing */}
-            <Card className="border-neutral-300">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-4 flex-1">
-                    <div className="w-12 h-12 bg-primary-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Eye className="w-6 h-6 text-primary-600" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-neutral-900 mb-1">
-                        Photo OCR Processing
-                      </h3>
-                      <p className="text-sm text-neutral-500 mb-2">Required for weight detection</p>
-                      <p className="text-neutral-700 mb-4">
-                        We process your scale photos using AI to automatically detect and extract weight numbers. 
-                        Photos are processed securely and are not stored permanently.
-                      </p>
-                      <div className="space-y-2 text-sm text-neutral-600">
-                        <div className="flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4 text-success-600" />
-                          <span>What we do: Scan photos for numbers, extract weight data</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4 text-success-600" />
-                          <span>What we don't do: Store photos, share with third parties, use for other purposes</span>
-                        </div>
-                      </div>
+          <section className="space-y-6">
+            {dataHighlights.map(({ icon, title, bullets }) => (
+              <Card key={title} className="border-neutral-300">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="text-3xl" aria-hidden>{icon}</div>
+                    <div className="space-y-3">
+                      <h2 className="text-xl font-semibold text-neutral-900">{title}</h2>
+                      <ul className="space-y-2 text-neutral-700 list-disc list-inside">
+                        {bullets.map(bullet => (
+                          <li key={bullet}>{bullet}</li>
+                        ))}
+                      </ul>
                     </div>
                   </div>
-                  <Switch
-                    checked={consents.ocrProcessing}
-                    onCheckedChange={() => handleConsentChange('ocrProcessing')}
-                    className="ml-4"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            ))}
+          </section>
 
-            {/* Data Storage */}
-            <Card className="border-neutral-300">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-4 flex-1">
-                    <div className="w-12 h-12 bg-primary-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Database className="w-6 h-6 text-primary-600" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-neutral-900 mb-1">
-                        Data Storage
-                      </h3>
-                      <p className="text-sm text-neutral-500 mb-2">Required for challenge tracking</p>
-                      <p className="text-neutral-700 mb-4">
-                        We store your weight data and challenge progress to track your 7-day journey. 
-                        Data is encrypted and stored securely on our servers.
-                      </p>
-                      <div className="space-y-2 text-sm text-neutral-600">
-                        <div className="flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4 text-success-600" />
-                          <span>Duration: Data retained for 2 years or until you delete your account</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4 text-success-600" />
-                          <span>Your control: Export or delete your data anytime in Settings</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={consents.dataStorage}
-                    onCheckedChange={() => handleConsentChange('dataStorage')}
-                    className="ml-4"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+          <Card className="border-neutral-300">
+            <CardContent className="p-6 space-y-3">
+              <h2 className="text-xl font-semibold text-neutral-900">⚡ Your Rights</h2>
+              <ul className="space-y-2 text-neutral-700 list-disc list-inside">
+                {rights.map(item => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
 
-            {/* Share with Nutritionist */}
-            <Card className="border-neutral-300">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-4 flex-1">
-                    <div className="w-12 h-12 bg-primary-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Share2 className="w-6 h-6 text-primary-600" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-neutral-900 mb-1">
-                        Share with Nutritionist
-                      </h3>
-                      <p className="text-sm text-neutral-500 mb-2">Optional - only after completion</p>
-                      <p className="text-neutral-700 mb-4">
-                        When you book your free nutrition session, share your 7-day weight data with your 
-                        chosen nutritionist to help them provide personalized advice.
-                      </p>
-                      <div className="space-y-2 text-sm text-neutral-600">
-                        <div className="flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4 text-success-600" />
-                          <span>When: Only after you complete the challenge and book a session</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4 text-success-600" />
-                          <span>What's shared: Weight trends, completion dates (no photos)</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={consents.shareWithNutritionist}
-                    onCheckedChange={() => handleConsentChange('shareWithNutritionist')}
-                    className="ml-4"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <Card className="border-neutral-300">
+            <CardContent className="p-6 space-y-3">
+              <h2 className="text-xl font-semibold text-neutral-900">🔒 Our Commitments</h2>
+              <ul className="space-y-2 text-neutral-700 list-disc list-inside">
+                {commitments.map(item => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
 
-          {/* Summary */}
-          <Card className="border-neutral-300 mb-8">
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold text-neutral-900 mb-4">Summary</h3>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-success-600" />
-                  <span className="text-neutral-700">WeightWin is not designed for collecting PII or securing sensitive data</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-success-600" />
-                  <span className="text-neutral-700">All data processing complies with privacy regulations</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-success-600" />
-                  <span className="text-neutral-700">You can change these settings or delete your data anytime</span>
-                </div>
-              </div>
-              <div className="flex gap-4 mt-6">
-                <a href="#" className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center gap-1">
+          <Card className="border-neutral-300">
+            <CardContent className="p-6 space-y-3">
+              <h2 className="text-xl font-semibold text-neutral-900">📋 The Fine Print</h2>
+              <ul className="space-y-2 text-neutral-700 list-disc list-inside">
+                {finePrint.map(item => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+              <div className="flex flex-wrap gap-4 pt-4">
+                <a href="#" className="text-primary-600 hover:text-primary-700 text-sm font-medium inline-flex items-center gap-1">
                   Privacy Policy
                   <ExternalLink className="w-3 h-3" />
                 </a>
-                <a href="#" className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center gap-1">
+                <a href="#" className="text-primary-600 hover:text-primary-700 text-sm font-medium inline-flex items-center gap-1">
                   Terms of Service
                   <ExternalLink className="w-3 h-3" />
                 </a>
@@ -211,9 +191,42 @@ export default function ConsentPage() {
             </CardContent>
           </Card>
 
-          {/* Continue Button */}
-          <div className="text-center">
-            <Button onClick={handleContinue} loading={loading} className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 text-lg font-semibold rounded-lg">
+          <section className="space-y-6">
+            {implementationNotes.map(({ title, items, Icon }) => (
+              <Card key={title} className="border-dashed border-neutral-300">
+                <CardContent className="p-6 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Icon className="w-5 h-5 text-primary-600" />
+                    <h3 className="text-lg font-semibold text-neutral-900">{title}</h3>
+                  </div>
+                  <ul className="space-y-2 text-neutral-700 list-disc list-inside">
+                    {items.map(item => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            ))}
+          </section>
+
+          <Card className="border-neutral-300">
+            <CardContent className="p-6 space-y-4">
+              <div className="flex items-center gap-3">
+                <Mail className="w-5 h-5 text-primary-600" />
+                <h3 className="text-lg font-semibold text-neutral-900">Questions?</h3>
+              </div>
+              <p className="text-neutral-700">
+                We're here to help. Email us anytime at <a className="text-primary-600 font-medium" href="mailto:privacy@weightwin.com">privacy@weightwin.com</a> and our team will respond promptly.
+              </p>
+            </CardContent>
+          </Card>
+
+          <div className="text-center pt-4">
+            <Button
+              onClick={handleContinue}
+              loading={loading}
+              className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 text-lg font-semibold rounded-lg"
+            >
               Continue to Setup
             </Button>
           </div>
