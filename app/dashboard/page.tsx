@@ -103,68 +103,78 @@ export default function DashboardPage() {
       </header>
 
       <main className="px-6 py-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           {/* Main Heading */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-10">
             <h1 className="text-3xl font-bold text-neutral-900 mb-2">
               Ready for today's weigh-in?
             </h1>
           </div>
 
-          {/* Cards Grid */}
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
-            {/* Your Progress Card */}
-            <Card className="border-neutral-300">
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-neutral-900 mb-4">Your Progress</h3>
-                <StreakPills currentDay={currentDay} className="mb-4" />
-                <div className="w-full bg-neutral-200 rounded-full h-2">
-                  <div 
-                    className="bg-primary-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${(currentDay / 7) * 100}%` }}
-                  ></div>
-                </div>
-                <p className="text-sm text-neutral-600 mt-2">
-                  {Math.round((currentDay / 7) * 100)}% complete
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Your Reward Card */}
-            <RewardCountdown currentDay={currentDay} />
-
-            {/* Take Today's Photo Card */}
-            <Card className="border-neutral-300">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <Camera className="w-6 h-6 text-primary-600" />
-                  <h3 className="text-lg font-semibold text-neutral-900">Take today's photo</h3>
-                </div>
-                <p className="text-neutral-700 mb-4">
-                  Snap a photo of your scale to track day {currentDay}.
-                </p>
-                {canTrackToday && !isCompleted && (
-                  <Button
-                    onClick={handleTakePhoto}
-                    loading={isNavigating}
-                    className="w-full bg-primary-600 hover:bg-primary-700 text-white py-4 h-auto"
-                  >
-                    <div className="flex flex-col items-center justify-center gap-1">
-                      <Camera className="w-5 h-5" />
-                      <span>Take Photo</span>
-                    </div>
-                  </Button>
-                )}
-                {isCompleted && (
-                  <div className="text-center py-4">
-                    <p className="text-success-600 font-medium">Challenge Complete!</p>
+          {/* Responsive Grid Layout */}
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-4">
+            {/* Take Today's Photo - centered focus */}
+            <div className="xl:col-start-1 xl:col-end-3 order-1">
+              <Card className="border-neutral-300 h-full">
+                <CardContent className="p-8">
+                  <div className="flex items-center gap-3 mb-4 justify-center">
+                    <Camera className="w-7 h-7 text-primary-600" />
+                    <h3 className="text-xl font-semibold text-neutral-900">Take today's photo</h3>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                  <p className="text-neutral-700 mb-6 text-center max-w-md mx-auto">
+                    Snap a photo of your scale to track day {currentDay}. This keeps your streak going and helps us calculate your reward.
+                  </p>
+                  {canTrackToday && !isCompleted && (
+                    <Button
+                      onClick={handleTakePhoto}
+                      loading={isNavigating}
+                      className="w-full bg-primary-600 hover:bg-primary-700 text-white py-5 h-auto text-lg"
+                    >
+                      <div className="flex items-center justify-center gap-2">
+                        <Camera className="w-5 h-5" />
+                        <span>Take Photo</span>
+                      </div>
+                    </Button>
+                  )}
+                  {isCompleted && (
+                    <div className="text-center py-4">
+                      <p className="text-success-600 font-medium">Challenge Complete!</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
 
-            {/* Daily Tips Card */}
-            <DailyTips />
+            {/* Your Reward - keep on the right */}
+            <div className="xl:col-start-3 xl:col-end-5 order-2 xl:order-1">
+              <RewardCountdown currentDay={currentDay} />
+            </div>
+
+            {/* Progress centered below photo */}
+            <div className="xl:col-start-1 xl:col-end-3 order-3">
+              <Card className="border-neutral-300 h-full">
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold text-neutral-900 mb-4 text-center">Your Progress</h3>
+                  <div className="flex justify-center mb-6">
+                    <StreakPills currentDay={currentDay} className="" />
+                  </div>
+                  <div className="w-full bg-neutral-200 rounded-full h-2">
+                    <div 
+                      className="bg-primary-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${(currentDay / 7) * 100}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-sm text-neutral-600 mt-3 text-center">
+                    {Math.round((currentDay / 7) * 100)}% complete
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Daily Tips - right column */}
+            <div className="xl:col-start-3 xl:col-end-5 order-4">
+              <DailyTips />
+            </div>
           </div>
         </div>
       </main>
