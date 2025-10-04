@@ -102,80 +102,73 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <main className="px-6 py-8">
-        <div className="max-w-6xl mx-auto">
-          {/* Main Heading */}
-          <div className="text-center mb-10">
-            <h1 className="text-3xl font-bold text-neutral-900 mb-2">
-              Ready for today's weigh-in?
-            </h1>
+      <main className="px-4 py-10">
+        <div className="max-w-6xl mx-auto space-y-6">
+          <div className="text-center">
+            <h1 className="text-3xl font-semibold text-neutral-900">Ready for today's weigh-in?</h1>
           </div>
 
-          {/* Responsive Grid Layout */}
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-4">
-            {/* Take Today's Photo - centered focus */}
-            <div className="xl:col-start-1 xl:col-end-3 order-1">
-              <Card className="border-neutral-300 h-full">
-                <CardContent className="p-8">
-                  <div className="flex items-center gap-3 mb-4 justify-center">
-                    <Camera className="w-7 h-7 text-primary-600" />
-                    <h3 className="text-xl font-semibold text-neutral-900">Take today's photo</h3>
-                  </div>
-                  <p className="text-neutral-700 mb-6 text-center max-w-md mx-auto">
-                    Snap a photo of your scale to track day {currentDay}. This keeps your streak going and helps us calculate your reward.
-                  </p>
-                  {canTrackToday && !isCompleted && (
-                    <Button
-                      onClick={handleTakePhoto}
-                      loading={isNavigating}
-                      className="w-full bg-primary-600 hover:bg-primary-700 text-white py-5 h-auto text-lg"
-                    >
-                      <div className="flex items-center justify-center gap-2">
-                        <Camera className="w-5 h-5" />
-                        <span>Take Photo</span>
-                      </div>
-                    </Button>
+          {/* Take Photo */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-0 overflow-hidden">
+            <div className="p-6">
+              <div className="mb-6 text-center space-y-2">
+                <h2 className="text-lg font-semibold text-slate-900">Take today's photo</h2>
+                <p className="text-sm text-slate-600 max-w-xl mx-auto">
+                  Snap a photo of your scale to track day {currentDay}. This keeps your streak alive
+                  and helps us calculate your reward.
+                </p>
+              </div>
+              <button
+                onClick={handleTakePhoto}
+                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleTakePhoto()}
+                className="w-full aspect-square rounded-2xl grid place-content-center bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-lg transition-transform duration-300 hover:scale-[1.01] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500"
+                disabled={!canTrackToday || isCompleted}
+              >
+                <div className="flex flex-col items-center gap-3">
+                  <span className="text-4xl">📷</span>
+                  <span className="text-lg font-semibold">Take Photo</span>
+                  {!canTrackToday || isCompleted ? (
+                    <span className="text-xs text-white/80">Challenge complete!</span>
+                  ) : (
+                    <span className="text-xs text-white/80">Tap to capture today's weigh-in</span>
                   )}
-                  {isCompleted && (
-                    <div className="text-center py-4">
-                      <p className="text-success-600 font-medium">Challenge Complete!</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                </div>
+              </button>
             </div>
+          </section>
 
-            {/* Your Reward - keep on the right */}
-            <div className="xl:col-start-3 xl:col-end-5 order-2 xl:order-1">
-              <RewardCountdown currentDay={currentDay} />
+          {/* Progress */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-6">
+            <div className="space-y-5">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-semibold text-slate-900">Your Progress</h3>
+                <span className="text-sm text-slate-500">{Math.round((currentDay / 7) * 100)}% complete</span>
+              </div>
+              <div className="flex justify-center">
+                <StreakPills currentDay={currentDay} />
+              </div>
+              <div className="h-3 w-full rounded-full bg-slate-200 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-[width] duration-700 ease-out"
+                  style={{ width: `${(currentDay / 7) * 100}%` }}
+                  role="progressbar"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={(currentDay / 7) * 100}
+                />
+              </div>
             </div>
+          </section>
 
-            {/* Progress centered below photo */}
-            <div className="xl:col-start-1 xl:col-end-3 order-3">
-              <Card className="border-neutral-300 h-full">
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold text-neutral-900 mb-4 text-center">Your Progress</h3>
-                  <div className="flex justify-center mb-6">
-                    <StreakPills currentDay={currentDay} className="" />
-                  </div>
-                  <div className="w-full bg-neutral-200 rounded-full h-2">
-                    <div 
-                      className="bg-primary-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${(currentDay / 7) * 100}%` }}
-                    ></div>
-                  </div>
-                  <p className="text-sm text-neutral-600 mt-3 text-center">
-                    {Math.round((currentDay / 7) * 100)}% complete
-                  </p>
-                </CardContent>
-              </Card>
+          {/* Reward & Tips */}
+          <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden aspect-square">
+              <RewardCountdown currentDay={currentDay} className="h-full border-none" />
             </div>
-
-            {/* Daily Tips - right column */}
-            <div className="xl:col-start-3 xl:col-end-5 order-4">
-              <DailyTips />
+            <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden aspect-square">
+              <DailyTips className="h-full border-none" />
             </div>
-          </div>
+          </section>
         </div>
       </main>
     </div>
