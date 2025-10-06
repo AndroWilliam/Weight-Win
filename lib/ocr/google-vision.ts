@@ -93,6 +93,7 @@ async function extractWeightFromImageProduction(imageBase64: string): Promise<OC
     const detections = result.textAnnotations
     
     console.log('[OCR Production] API response received. Detections:', detections?.length || 0)
+    console.log('[OCR Production] Full API result:', JSON.stringify(result, null, 2))
     
     if (!detections || detections.length === 0) {
       console.log('[OCR Production] No text detected in image')
@@ -104,6 +105,7 @@ async function extractWeightFromImageProduction(imageBase64: string): Promise<OC
     
     const fullText = detections[0].description || ''
     console.log('[OCR Production] Raw text detected:', fullText)
+    console.log('[OCR Production] All detections:', detections.map(d => d.description).join(', '))
     
     const weight = parseWeightFromText(fullText)
     
@@ -146,10 +148,15 @@ const MIN_HUMAN_WEIGHT_KG = 20
  * Prioritizes the most prominent number (usually the actual weight reading)
  */
 export function parseWeightFromText(text: string): number | null {
-  // Clean the text: remove newlines, extra spaces
-  const cleanText = text.replace(/\n/g, ' ').trim()
+  // Clean the text: remove newlines, extra spaces, common scale text
+  let cleanText = text.replace(/\n/g, ' ').trim()
   
-  console.log('[OCR Parser] Raw text:', cleanText)
+  // Remove common scale-related text that might interfere
+  cleanText = cleanText.replace(/\b(kg|KG|Kg|lb|LB|Lb|lbs|LBS)\b/gi, ' ')
+  cleanText = cleanText.replace(/\s+/g, ' ').trim() // Normalize spaces
+  
+  console.log('[OCR Parser] Raw text:', text)
+  console.log('[OCR Parser] Cleaned text:', cleanText)
   
   // Extract all numbers (with possible decimal separators) from the text
   const numberMatches = cleanText.match(/\d+[.,]?\d*/g)
