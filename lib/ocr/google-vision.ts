@@ -104,31 +104,131 @@ async function extractWeightFromImageProduction(imageBase64: string): Promise<OC
   }
 }
 
-// Helper function to extract numbers from OCR text
+// Constants for weight validation
+const MAX_HUMAN_WEIGHT_KG = 400
+const MIN_HUMAN_WEIGHT_KG = 20
+
+/**
+ * Helper function to extract and validate weight from OCR text
+ * Handles common digital scale display formats and smart decimal detection
+ */
 export function parseWeightFromText(text: string): number | null {
-  // Look for patterns like "85.5 kg", "85.5kg", "85,5", etc.
-  const patterns = [
-    /(\d+\.?\d*)\s*kg/i,
-    /(\d+,\d*)\s*kg/i,
-    /(\d+\.?\d*)\s*kgs/i,
-    /(\d+\.?\d*)\s*kilogram/i,
-    /(\d+\.?\d*)\s*lbs?/i, // Also support pounds
-    /^(\d+\.?\d*)$/ // Just a number
-  ]
+  // Clean the text: remove newlines, extra spaces
+  const cleanText = text.replace(/\n/g, ' ').trim()
   
-  for (const pattern of patterns) {
-    const match = text.match(pattern)
-    if (match) {
-      const value = parseFloat(match[1].replace(',', '.'))
-      // Convert pounds to kg if needed
-      if (pattern.toString().includes('lbs')) {
-        return value * 0.453592
+  // Extract all numbers (with possible decimal separators) from the text
+  const numberMatches = cleanText.match(/\d+[.,]?\d*/g)
+  
+  if (!numberMatches || numberMatches.length === 0) {
+    return null
+  }
+  
+  // Try each number and find the most likely weight
+  for (const numStr of numberMatches) {
+    // Replace comma with dot for decimal
+    let normalizedNum = numStr.replace(',', '.')
+    let parsedValue = parseFloat(normalizedNum)
+    
+    // Skip if not a valid number
+    if (isNaN(parsedValue)) continue
+    
+    // Skip numbers that are clearly times (4 digits starting with 0, like 0800, 0630)
+    if (numStr.match(/^0\d{3}$/)) {
+      continue
+    }
+    
+    // Skip 4-digit numbers in date/year range (1900-2099)
+    if (parsedValue >= 1900 && parsedValue < 2100) {
+      continue
+    }
+    
+    // Smart decimal detection for digital scales
+    // If number is > MAX_WEIGHT and has no decimal, it's likely missing a decimal point
+    if (parsedValue > MAX_HUMAN_WEIGHT_KG) {
+      // Check if this could be a number without a decimal point
+      // Example: "974" should be "97.4", "1234" should be "123.4", "5000" should be "500.0"
+      const reinterpreted = smartDecimalDetection(normalizedNum, parsedValue)
+      if (reinterpreted !== null && isValidWeight(reinterpreted)) {
+        return roundToOneDecimal(reinterpreted)
       }
-      return value
+      // If can't reinterpret, skip this number
+      continue
+    }
+    
+    // Check if the value is in valid weight range
+    if (isValidWeight(parsedValue)) {
+      return roundToOneDecimal(parsedValue)
+    }
+    
+    // Check if this could be in pounds (lbs) - typically 40-880 lbs range
+    if (parsedValue >= 40 && parsedValue <= 880) {
+      const kgValue = parsedValue * 0.453592
+      if (isValidWeight(kgValue)) {
+        return roundToOneDecimal(kgValue)
+      }
     }
   }
   
   return null
+}
+
+/**
+ * Smart decimal detection for digital scales
+ * Assumes most digital scales show weight with 1 decimal place
+ */
+function smartDecimalDetection(numStr: string, value: number): number | null {
+  // If number has no decimal point and is > MAX_WEIGHT
+  if (!numStr.includes('.') && value > MAX_HUMAN_WEIGHT_KG) {
+    const digits = numStr.split('')
+    
+    // For 5+ digit numbers (5000, 8000, etc.), these can't realistically be weights
+    // Even "5000" -> "500.0" is above our max
+    if (digits.length >= 5) {
+      return null
+    }
+    
+    // Try inserting decimal before last digit
+    // "974" -> "97.4", "1234" -> "123.4", "500" -> "50.0"
+    if (digits.length >= 2) {
+      const attempt1 = [...digits]
+      attempt1.splice(attempt1.length - 1, 0, '.')
+      const reinterpretedStr = attempt1.join('')
+      const reinterpretedValue = parseFloat(reinterpretedStr)
+      
+      if (!isNaN(reinterpretedValue) && isValidWeight(reinterpretedValue)) {
+        return reinterpretedValue
+      }
+    }
+    
+    // For 4-digit numbers, also try inserting decimal before last 2 digits
+    // "1234" could be "12.34" - less common but possible
+    if (digits.length === 4) {
+      const attempt2 = [...digits]
+      attempt2.splice(attempt2.length - 2, 0, '.')
+      const altStr = attempt2.join('')
+      const altValue = parseFloat(altStr)
+      
+      if (!isNaN(altValue) && isValidWeight(altValue)) {
+        return altValue
+      }
+    }
+  }
+  
+  return null
+}
+
+/**
+ * Validate if a weight is within reasonable human weight range
+ */
+function isValidWeight(weight: number): boolean {
+  return weight >= MIN_HUMAN_WEIGHT_KG && weight <= MAX_HUMAN_WEIGHT_KG
+}
+
+/**
+ * Round weight to 1 decimal place (standard for digital scales)
+ */
+function roundToOneDecimal(weight: number): number {
+  return Math.round(weight * 10) / 10
 }
 
 // Production Google Vision API implementation (commented out)
