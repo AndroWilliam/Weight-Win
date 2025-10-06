@@ -151,12 +151,18 @@ export function parseWeightFromText(text: string): number | null {
   // Clean the text: remove newlines, extra spaces, common scale text
   let cleanText = text.replace(/\n/g, ' ').trim()
   
+  // Special fix for LED display decimal detection issue:
+  // Google Vision often reads "97.4" as "974." (decimal at the end instead of middle)
+  // Pattern: 3 digits followed by a period with nothing after it
+  cleanText = cleanText.replace(/\b(\d)(\d)(\d)\.\s*$/g, '$1$2.$3')  // "974." → "97.4"
+  cleanText = cleanText.replace(/\b(\d)(\d)(\d)\.\s+/g, '$1$2.$3 ') // "974. " → "97.4 "
+  
   // Remove common scale-related text that might interfere
   cleanText = cleanText.replace(/\b(kg|KG|Kg|lb|LB|Lb|lbs|LBS)\b/gi, ' ')
   cleanText = cleanText.replace(/\s+/g, ' ').trim() // Normalize spaces
   
   console.log('[OCR Parser] Raw text:', text)
-  console.log('[OCR Parser] Cleaned text:', cleanText)
+  console.log('[OCR Parser] Cleaned text (after decimal fix):', cleanText)
   
   // Extract all numbers (with possible decimal separators) from the text
   const numberMatches = cleanText.match(/\d+[.,]?\d*/g)

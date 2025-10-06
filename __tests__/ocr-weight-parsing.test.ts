@@ -140,5 +140,24 @@ describe('OCR Weight Parsing with Smart Decimal Detection', () => {
       expect(result).toBe(200.0)
     })
   })
+
+  describe('LED display decimal detection fix', () => {
+    test('should fix "974." (decimal at end) to "97.4"', () => {
+      // Google Vision often reads LED decimals at the wrong position
+      expect(parseWeightFromText('974.')).toBe(97.4)
+      expect(parseWeightFromText('974. ')).toBe(97.4)
+      expect(parseWeightFromText('855.')).toBe(85.5)
+    })
+
+    test('should fix "724." to "72.4"', () => {
+      expect(parseWeightFromText('724.')).toBe(72.4)
+    })
+
+    test('should not break normal decimals', () => {
+      // Normal decimal placement should still work
+      expect(parseWeightFromText('97.4')).toBe(97.4)
+      expect(parseWeightFromText('85.5')).toBe(85.5)
+    })
+  })
 })
 
