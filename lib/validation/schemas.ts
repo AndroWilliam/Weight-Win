@@ -11,7 +11,7 @@ export const trackingSchema = z.object({
 // Weight processing schema  
 export const weightProcessSchema = z.object({
   imageBase64: z.string().min(1),
-  photoUrl: z.string().url()
+  photoUrl: z.string().min(1) // Can be either a URL or a storage path
 });
 
 // ID extraction schema
