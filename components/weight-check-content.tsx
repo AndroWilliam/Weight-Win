@@ -289,10 +289,17 @@ export function WeightCheckContent() {
         
         console.log('OCR API Response:', result)
         
+        // If error includes debug details, log them
+        if (result.error?.details?.rawText) {
+          console.log('🔍 RAW OCR TEXT FROM GOOGLE VISION:', result.error.details.rawText)
+        }
+        
         if (!ocrRes.ok || !result.success) {
           const errorMsg = result.error?.message || result.error || 'Failed to process weight'
+          const rawText = result.error?.details?.rawText || 'No raw text available'
           console.error('OCR failed with error:', errorMsg)
-          throw new Error(errorMsg)
+          console.error('Raw text from OCR:', rawText)
+          throw new Error(errorMsg + (rawText !== 'No raw text available' ? `\n\nRaw OCR text: "${rawText}"` : ''))
         }
         
         // Success - show success state

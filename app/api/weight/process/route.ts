@@ -48,8 +48,9 @@ export const POST = withHandler(async (req, ctx, requestId) => {
   const ocrResult = await extractWeightFromImage(imageBase64)
   
   if (!ocrResult.success || !ocrResult.weight) {
-    logger.info("OCR failed", { requestId, error: ocrResult.error })
-    return NextResponse.json(fail('OCR_FAILED', ocrResult.error || 'Unable to extract weight from image', undefined, requestId), { status: 400 })
+    logger.info("OCR failed", { requestId, error: ocrResult.error, rawText: ocrResult.rawText })
+    // Include raw OCR text in error details for debugging
+    return NextResponse.json(fail('OCR_FAILED', ocrResult.error || 'Unable to extract weight from image', { rawText: ocrResult.rawText }, requestId), { status: 400 })
   }
   
   // Save weight entry to database
