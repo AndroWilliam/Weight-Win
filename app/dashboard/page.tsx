@@ -33,11 +33,21 @@ export default function DashboardPage() {
           return
         }
         
+        // Check if user has completed setup
+        const settingsResponse = await fetch('/api/settings/get')
+        const settingsData = await settingsResponse.json()
+        
+        if (!settingsData.success || !settingsData.setupCompleted) {
+          // User hasn't completed setup, redirect to setup flow
+          router.push('/setup')
+          return
+        }
+        
         // Get challenge progress from database
         const { data: progressResult, error } = await supabase
           .rpc('get_challenge_progress', { p_user_id: user.id })
         
-        if (error || !progressResult) {
+        if (error) {
           console.error('Error loading challenge progress:', error)
           router.push('/commit')
           return
@@ -46,7 +56,8 @@ export default function DashboardPage() {
         // The function returns a table, so get the first row
         const progress = Array.isArray(progressResult) ? progressResult[0] : progressResult
         
-        // Update local storage and state
+        // If status is 'not_started', they haven't started the challenge yet
+        // But they have completed setup, so show the dashboard with Day 1 ready
         const challengeData = {
           currentDay: progress.current_day,
           startDate: progress.challenge_start_date,
@@ -55,7 +66,7 @@ export default function DashboardPage() {
           completedDays: progress.completed_days || [],
           daysRemaining: progress.days_remaining,
           currentStreak: progress.current_streak,
-          settings: JSON.parse(localStorage.getItem('userSettings') || '{}')
+          settings: settingsData.settings || {}
         }
         
         localStorage.setItem('challengeData', JSON.stringify(challengeData))

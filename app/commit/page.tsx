@@ -27,18 +27,48 @@ export default function CommitPage() {
   const router = useRouter()
 
   useEffect(() => {
-    // Load user settings and consents from localStorage
-    const savedSettings = localStorage.getItem('userSettings')
-    const savedConsents = localStorage.getItem('userConsents')
-    
-    if (savedSettings) {
-      setSettings(JSON.parse(savedSettings))
+    async function loadSettings() {
+      try {
+        // Try to load from database first
+        const response = await fetch('/api/settings/get')
+        const data = await response.json()
+        
+        if (data.success && data.settings) {
+          // Settings found in database
+          setSettings({
+            weightUnit: data.settings.weightUnit,
+            reminderTime: data.settings.reminderTime,
+            timezone: data.settings.timezone,
+            locationPermission: data.settings.locationPermission
+          })
+          setConsents({
+            ocrProcessing: data.settings.consentOcr,
+            dataStorage: data.settings.consentStorage,
+            shareWithNutritionist: data.settings.consentNutritionist
+          })
+          setIsLoading(false)
+          return
+        }
+        
+        // Fallback to localStorage (for backward compatibility)
+        const savedSettings = localStorage.getItem('userSettings')
+        const savedConsents = localStorage.getItem('userConsents')
+        
+        if (savedSettings) {
+          setSettings(JSON.parse(savedSettings))
+        }
+        if (savedConsents) {
+          setConsents(JSON.parse(savedConsents))
+        }
+        
+        setIsLoading(false)
+      } catch (error) {
+        console.error('Error loading settings:', error)
+        setIsLoading(false)
+      }
     }
-    if (savedConsents) {
-      setConsents(JSON.parse(savedConsents))
-    }
     
-    setIsLoading(false)
+    loadSettings()
   }, [])
 
   const handleStartChallenge = () => {
