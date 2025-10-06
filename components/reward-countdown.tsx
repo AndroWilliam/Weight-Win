@@ -18,6 +18,9 @@ export function RewardCountdown({ currentDay, className }: RewardCountdownProps)
 
   const isCompleted = currentDay > 7
   const daysRemaining = Math.max(0, 7 - currentDay)
+  
+  // Also accept daysRemaining from props if provided
+  const actualDaysRemaining = (props as any).daysRemaining ?? daysRemaining
 
   useEffect(() => {
     if (isCompleted) return
@@ -69,9 +72,12 @@ export function RewardCountdown({ currentDay, className }: RewardCountdownProps)
       <div className="text-center space-y-4">
         <span className="text-4xl">🎁</span>
         <h3 id="reward-heading" className="text-2xl font-semibold text-slate-900">Your Reward</h3>
-        <p className="text-slate-700">
-          Complete {daysRemaining} day{daysRemaining !== 1 ? 's' : ''} to unlock your free 30-minute session with a certified nutritionist.
-        </p>
+                <p className="text-slate-700">
+                  {actualDaysRemaining > 0 
+                    ? `Only ${actualDaysRemaining} more day${actualDaysRemaining !== 1 ? 's' : ''} to go for your reward 🔥`
+                    : "Complete your final check-in to unlock your reward!"
+                  }
+                </p>
       </div>
     </section>
   )

@@ -53,44 +53,45 @@ export const POST = withHandler(async (req, ctx, requestId) => {
     return NextResponse.json(fail('OCR_FAILED', ocrResult.error || 'Unable to extract weight from image', { rawText: ocrResult.rawText }, requestId), { status: 400 })
   }
   
-  // Save weight entry to database
-  const { data: weightEntry, error: insertError } = await supabase
-    .from('weight_entries')
-    .insert({
-      user_id: user.id,
-      weight_kg: ocrResult.weight,
-      photo_url: photoUrl,
-      ocr_confidence: ocrResult.confidence,
-      recorded_at: new Date().toISOString()
+  // Record daily check-in using new database function
+  const { data: checkInResult, error: checkInError } = await supabase
+    .rpc('record_daily_weight_checkin', {
+      p_user_id: user.id,
+      p_weight_kg: ocrResult.weight,
+      p_photo_url: photoUrl,
+      p_ocr_confidence: ocrResult.confidence
     })
-    .select()
     .single()
   
-  if (insertError) {
-    logger.error('Failed to save weight entry', insertError, { requestId, userId: user.id })
+  if (checkInError) {
+    logger.error('Failed to record daily check-in', checkInError, { requestId, userId: user.id })
     return NextResponse.json(fail('DATABASE_ERROR', 'Failed to save weight entry', undefined, requestId), { status: 500 })
   }
   
-  // Update user streak
-  const { data: streakResult } = await supabase
-    .rpc('update_user_streak', { p_user_id: user.id })
-  
-  // Get weight change summary
-  const { data: weightSummary } = await supabase
-    .rpc('get_weight_change_summary', { p_user_id: user.id })
+  // Get challenge progress
+  const { data: progressData } = await supabase
+    .rpc('get_challenge_progress', { p_user_id: user.id })
+    .single()
   
   logger.info("Weight processed successfully", { 
     requestId, 
     weight: ocrResult.weight, 
     confidence: ocrResult.confidence,
-    entryId: weightEntry.id 
+    dayNumber: checkInResult.day_number,
+    isNewDay: checkInResult.is_new_day,
+    currentStreak: checkInResult.current_streak
   })
 
   return NextResponse.json(ok({
     weight: ocrResult.weight,
     confidence: ocrResult.confidence,
-    weightEntry,
-    streak: streakResult,
-    summary: weightSummary
+    dayNumber: checkInResult.day_number,
+    isNewDay: checkInResult.is_new_day,
+    currentStreak: checkInResult.current_streak,
+    daysRemaining: checkInResult.days_remaining,
+    progress: progressData,
+    message: checkInResult.is_new_day 
+      ? `Day ${checkInResult.day_number} completed! 🎉` 
+      : `Weight updated for today (Day ${checkInResult.day_number})`
   }, requestId))
 })

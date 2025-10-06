@@ -21,20 +21,59 @@ export default function DashboardPage() {
   const router = useRouter()
 
   useEffect(() => {
-    const savedChallenge = localStorage.getItem('challengeData')
-    if (savedChallenge) {
-      setChallengeData(JSON.parse(savedChallenge))
-    } else {
-      router.push('/commit')
-      return
+    async function loadChallengeProgress() {
+      try {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        
+        // Get user
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          router.push('/auth/login')
+          return
+        }
+        
+        // Get challenge progress from database
+        const { data: progress, error } = await supabase
+          .rpc('get_challenge_progress', { p_user_id: user.id })
+          .single()
+        
+        if (error) {
+          console.error('Error loading challenge progress:', error)
+          router.push('/commit')
+          return
+        }
+        
+        // Update local storage and state
+        const challengeData = {
+          currentDay: progress.current_day,
+          startDate: progress.challenge_start_date,
+          completed: progress.challenge_status === 'completed',
+          checkedInToday: progress.checked_in_today,
+          completedDays: progress.completed_days || [],
+          daysRemaining: progress.days_remaining,
+          currentStreak: progress.current_streak,
+          settings: JSON.parse(localStorage.getItem('userSettings') || '{}')
+        }
+        
+        localStorage.setItem('challengeData', JSON.stringify(challengeData))
+        setChallengeData(challengeData)
+        setIsLoading(false)
+      } catch (error) {
+        console.error('Error loading challenge:', error)
+        router.push('/commit')
+      }
     }
-    setIsLoading(false)
+    
+    loadChallengeProgress()
   }, [router])
 
   const currentDay = challengeData?.currentDay || 1
-  const isCompleted = currentDay > 7
-  const canTrackToday = currentDay <= 7
-  const progressPercent = Math.min(100, Math.round((currentDay / 7) * 100))
+  const isCompleted = challengeData?.completed || currentDay > 7
+  const checkedInToday = challengeData?.checkedInToday || false
+  const canTrackToday = currentDay <= 7 && !isCompleted
+  const daysCompleted = challengeData?.completedDays?.length || 0
+  const progressPercent = Math.min(100, Math.round((daysCompleted / 7) * 100))
 
   const handleTakePhoto = () => {
     setIsNavigating(true)
@@ -89,10 +128,15 @@ export default function DashboardPage() {
             <span>Home</span>
           </div>
 
-          <div className="text-center space-y-2 mb-8">
-            <h2 className="text-3xl font-semibold text-neutral-900">Day {Math.min(currentDay, 7)} of 7</h2>
-            <p className="text-neutral-600">Ready for today's weigh-in?</p>
-          </div>
+                  <div className="text-center space-y-2 mb-8">
+                    <h2 className="text-3xl font-semibold text-neutral-900">Day {Math.min(currentDay, 7)} of 7</h2>
+                    <p className="text-neutral-600">
+                      {checkedInToday 
+                        ? "Come back tomorrow for your weigh-in 🔥🎉" 
+                        : "Ready for today's weigh-in?"
+                      }
+                    </p>
+                  </div>
 
           {/* Take Photo Card - Full Width at Top */}
           <section className="rounded-2xl border border-slate-200 bg-gradient-to-br from-indigo-50 to-violet-50 p-8 shadow-sm" aria-labelledby="take-photo-heading">
@@ -103,20 +147,25 @@ export default function DashboardPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
-              <div className="space-y-2">
-                <h3 id="take-photo-heading" className="text-2xl font-semibold text-slate-900">Take today's photo</h3>
-                <p className="text-slate-600">
-                  Snap a photo of your scale to track day {currentDay}
-                </p>
-              </div>
-              <Button
-                onClick={handleTakePhoto}
-                loading={isNavigating}
-                disabled={!canTrackToday || isCompleted}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg text-base font-medium"
-              >
-                {isCompleted ? 'Challenge complete!' : 'Take Photo'}
-              </Button>
+                      <div className="space-y-2">
+                        <h3 id="take-photo-heading" className="text-2xl font-semibold text-slate-900">
+                          {checkedInToday ? "Today's check-in complete!" : "Take today's photo"}
+                        </h3>
+                        <p className="text-slate-600">
+                          {checkedInToday 
+                            ? `You've recorded your weight for day ${currentDay}. Come back tomorrow! 🎉`
+                            : `Snap a photo of your scale to track day ${currentDay}`
+                          }
+                        </p>
+                      </div>
+                      <Button
+                        onClick={handleTakePhoto}
+                        loading={isNavigating}
+                        disabled={!canTrackToday || isCompleted || checkedInToday}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isCompleted ? 'Challenge complete!' : checkedInToday ? 'Already checked in ✓' : 'Take Photo'}
+                      </Button>
             </div>
           </section>
 
@@ -148,10 +197,14 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          {/* Bottom Cards - Reward and Daily Tips Side by Side */}
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Reward Card */}
-            <RewardCountdown currentDay={currentDay} className="bg-gradient-to-br from-green-50 to-emerald-50" />
+                  {/* Bottom Cards - Reward and Daily Tips Side by Side */}
+                  <div className="grid gap-6 lg:grid-cols-2">
+                    {/* Reward Card */}
+                    <RewardCountdown 
+                      currentDay={currentDay} 
+                      daysRemaining={challengeData?.daysRemaining || 7} 
+                      className="bg-gradient-to-br from-green-50 to-emerald-50" 
+                    />
 
             {/* Daily Tips Card */}
             <DailyTips className="bg-gradient-to-br from-indigo-50 to-violet-50" />
