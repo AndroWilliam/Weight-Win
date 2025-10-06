@@ -6,9 +6,10 @@ import { Clock } from "lucide-react"
 interface RewardCountdownProps {
   currentDay: number
   className?: string
+  daysRemaining?: number
 }
 
-export function RewardCountdown({ currentDay, className }: RewardCountdownProps) {
+export function RewardCountdown({ currentDay, className, daysRemaining: propsDaysRemaining }: RewardCountdownProps) {
   const [timeLeft, setTimeLeft] = useState<{
     days: number
     hours: number
@@ -17,10 +18,10 @@ export function RewardCountdown({ currentDay, className }: RewardCountdownProps)
   }>({ days: 0, hours: 0, minutes: 0, seconds: 0 })
 
   const isCompleted = currentDay > 7
-  const daysRemaining = Math.max(0, 7 - currentDay)
+  const calculatedDaysRemaining = Math.max(0, 7 - currentDay)
   
-  // Also accept daysRemaining from props if provided
-  const actualDaysRemaining = (props as any).daysRemaining ?? daysRemaining
+  // Use daysRemaining from props if provided, otherwise calculate
+  const actualDaysRemaining = propsDaysRemaining ?? calculatedDaysRemaining
 
   useEffect(() => {
     if (isCompleted) return
