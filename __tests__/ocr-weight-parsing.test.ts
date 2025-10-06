@@ -110,6 +110,23 @@ describe('OCR Weight Parsing with Smart Decimal Detection', () => {
       expect(parseWeightFromText('Time: 0800, Weight: 85.5 kg')).toBe(85.5)
       expect(parseWeightFromText('0630 morning weigh-in: 72.5 kg')).toBe(72.5)
     })
+    
+    test('should prioritize actual weight over max capacity labels', () => {
+      // Should pick 98.5 (with decimal) over 400 (max capacity)
+      expect(parseWeightFromText('Max: 400 kg, Display: 98.5 kg')).toBe(98.5)
+      expect(parseWeightFromText('Max-400kg 0-0.2kg 98.5')).toBe(98.5)
+      
+      // Should pick 72.3 over 180 (max capacity)
+      expect(parseWeightFromText('Max: 180 kg, Weight: 72.3 kg')).toBe(72.3)
+    })
+    
+    test('should prioritize numbers with decimals', () => {
+      // 85.5 has decimal, 85 doesn't - prefer 85.5
+      expect(parseWeightFromText('85 85.5 kg')).toBe(85.5)
+      
+      // Both valid, but 97.4 has better priority (typical range + decimal)
+      expect(parseWeightFromText('400 97.4')).toBe(97.4)
+    })
   })
 
   describe('Pounds to kg conversion (if applicable)', () => {

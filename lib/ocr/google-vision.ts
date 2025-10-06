@@ -143,19 +143,27 @@ const MIN_HUMAN_WEIGHT_KG = 20
 /**
  * Helper function to extract and validate weight from OCR text
  * Handles common digital scale display formats and smart decimal detection
+ * Prioritizes the most prominent number (usually the actual weight reading)
  */
 export function parseWeightFromText(text: string): number | null {
   // Clean the text: remove newlines, extra spaces
   const cleanText = text.replace(/\n/g, ' ').trim()
   
+  console.log('[OCR Parser] Raw text:', cleanText)
+  
   // Extract all numbers (with possible decimal separators) from the text
   const numberMatches = cleanText.match(/\d+[.,]?\d*/g)
   
   if (!numberMatches || numberMatches.length === 0) {
+    console.log('[OCR Parser] No numbers found in text')
     return null
   }
   
-  // Try each number and find the most likely weight
+  console.log('[OCR Parser] Found numbers:', numberMatches)
+  
+  // Parse and categorize all numbers
+  const candidates: Array<{value: number, original: string, hasDecimal: boolean, priority: number}> = []
+  
   for (const numStr of numberMatches) {
     // Replace comma with dot for decimal
     let normalizedNum = numStr.replace(',', '.')
@@ -166,42 +174,98 @@ export function parseWeightFromText(text: string): number | null {
     
     // Skip numbers that are clearly times (4 digits starting with 0, like 0800, 0630)
     if (numStr.match(/^0\d{3}$/)) {
+      console.log('[OCR Parser] Skipping time value:', numStr)
       continue
     }
     
     // Skip 4-digit numbers in date/year range (1900-2099)
     if (parsedValue >= 1900 && parsedValue < 2100) {
+      console.log('[OCR Parser] Skipping year/date:', parsedValue)
       continue
     }
     
+    // Calculate priority score for this number
+    let priority = 0
+    const hasDecimal = numStr.includes('.') || numStr.includes(',')
+    
+    // Higher priority for numbers with decimals (more likely to be precise readings)
+    if (hasDecimal) priority += 10
+    
+    // Higher priority for numbers in the typical human weight range (40-150 kg)
+    if (parsedValue >= 40 && parsedValue <= 150) priority += 20
+    if (parsedValue >= 50 && parsedValue <= 120) priority += 10 // Sweet spot
+    
+    // Lower priority for round numbers that might be specifications
+    // "Max: 400", "Max: 180" etc. are usually capacity labels
+    if (parsedValue === 400 || parsedValue === 180 || parsedValue === 200 || parsedValue === 150) {
+      priority -= 30
+      console.log('[OCR Parser] Detected possible max capacity label:', parsedValue)
+    }
+    
     // Smart decimal detection for digital scales
-    // If number is > MAX_WEIGHT and has no decimal, it's likely missing a decimal point
     if (parsedValue > MAX_HUMAN_WEIGHT_KG) {
-      // Check if this could be a number without a decimal point
-      // Example: "974" should be "97.4", "1234" should be "123.4", "5000" should be "500.0"
       const reinterpreted = smartDecimalDetection(normalizedNum, parsedValue)
       if (reinterpreted !== null && isValidWeight(reinterpreted)) {
-        return roundToOneDecimal(reinterpreted)
+        candidates.push({
+          value: reinterpreted,
+          original: numStr,
+          hasDecimal: true,
+          priority: priority + 15 // Bonus for successful reinterpretation
+        })
+        console.log('[OCR Parser] Reinterpreted', parsedValue, 'as', reinterpreted)
+        continue
       }
-      // If can't reinterpret, skip this number
+      // If can't reinterpret, skip
+      console.log('[OCR Parser] Skipping out-of-range value:', parsedValue)
       continue
     }
     
     // Check if the value is in valid weight range
     if (isValidWeight(parsedValue)) {
-      return roundToOneDecimal(parsedValue)
+      candidates.push({
+        value: parsedValue,
+        original: numStr,
+        hasDecimal,
+        priority
+      })
+      console.log('[OCR Parser] Valid candidate:', parsedValue, 'kg, priority:', priority)
     }
     
-    // Check if this could be in pounds (lbs) - typically 40-880 lbs range
+    // Check if this could be in pounds (lbs)
     if (parsedValue >= 40 && parsedValue <= 880) {
       const kgValue = parsedValue * 0.453592
       if (isValidWeight(kgValue)) {
-        return roundToOneDecimal(kgValue)
+        // Lower priority for pound conversions (prefer kg)
+        candidates.push({
+          value: kgValue,
+          original: numStr + ' (lbs)',
+          hasDecimal: false,
+          priority: priority - 5
+        })
+        console.log('[OCR Parser] Pounds candidate:', parsedValue, 'lbs →', kgValue.toFixed(1), 'kg')
       }
     }
   }
   
-  return null
+  // No valid candidates found
+  if (candidates.length === 0) {
+    console.log('[OCR Parser] No valid weight candidates found')
+    return null
+  }
+  
+  // Sort by priority (highest first)
+  candidates.sort((a, b) => b.priority - a.priority)
+  
+  console.log('[OCR Parser] All candidates (sorted by priority):')
+  candidates.forEach((c, i) => {
+    console.log(`  ${i + 1}. ${c.value.toFixed(1)} kg (from "${c.original}") - priority: ${c.priority}`)
+  })
+  
+  // Return the highest priority candidate
+  const winner = candidates[0]
+  console.log('[OCR Parser] Selected weight:', winner.value.toFixed(1), 'kg')
+  
+  return roundToOneDecimal(winner.value)
 }
 
 /**
