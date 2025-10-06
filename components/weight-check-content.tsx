@@ -14,6 +14,7 @@ export function WeightCheckContent() {
   const [isCameraLoading, setIsCameraLoading] = useState(false)
   const [weight, setWeight] = useState<number | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isAuthChecking, setIsAuthChecking] = useState(true)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -21,6 +22,31 @@ export function WeightCheckContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const day = searchParams.get('day') || '1'
+  
+  // Check authentication on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (!user) {
+          console.log('No authenticated user, redirecting to login')
+          router.push('/auth/login')
+          return
+        }
+        
+        console.log('User authenticated:', user.id)
+        setIsAuthChecking(false)
+      } catch (error) {
+        console.error('Auth check error:', error)
+        router.push('/auth/login')
+      }
+    }
+    
+    checkAuth()
+  }, [router])
 
   const handleTakePhoto = async () => {
     try {
@@ -231,7 +257,8 @@ export function WeightCheckContent() {
         const { data: { user } } = await supabase.auth.getUser()
         
         if (!user) {
-          throw new Error('Not authenticated')
+          console.error('User not authenticated during photo upload')
+          throw new Error('Please log in to continue')
         }
         
         // Upload to Supabase Storage
@@ -260,12 +287,16 @@ export function WeightCheckContent() {
         
         const result = await ocrRes.json()
         
+        console.log('OCR API Response:', result)
+        
         if (!ocrRes.ok || !result.success) {
-          throw new Error(result.error || 'Failed to process weight')
+          const errorMsg = result.error?.message || result.error || 'Failed to process weight'
+          console.error('OCR failed with error:', errorMsg)
+          throw new Error(errorMsg)
         }
         
         // Success - show success state
-        setWeight(result.weight)
+        setWeight(result.data.weight)
         setCurrentStep('success')
         setIsProcessing(false)
         
@@ -274,11 +305,14 @@ export function WeightCheckContent() {
           router.push('/progress')
         }, 2000)
         
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error processing weight:', error)
         setIsProcessing(false)
         setCurrentStep('error')
-        setErrorMessage('Please use a different photo ensuring that the scale is visible without any shadows.')
+        
+        // Use the actual error message from the API or OCR
+        const errorMsg = error.message || 'Failed to process weight. Please try again.'
+        setErrorMessage(errorMsg)
         
         // Allow retry after showing error
         setTimeout(() => {
@@ -320,6 +354,18 @@ export function WeightCheckContent() {
       }
     }
   }, [])
+
+  // Show loading while checking auth
+  if (isAuthChecking) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-neutral-600">Checking authentication...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -566,7 +612,7 @@ export function WeightCheckContent() {
                     <AlertCircle className="w-8 h-8 text-red-600" />
                   </div>
                   <h3 className="text-lg font-semibold text-red-900 mb-2">Unable to Read Weight</h3>
-                  <p className="text-red-700">{errorMessage}</p>
+                  <p className="text-red-700 whitespace-pre-line">{errorMessage}</p>
                 </div>
               </CardContent>
             </Card>
