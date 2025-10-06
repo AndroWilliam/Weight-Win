@@ -54,24 +54,27 @@ export const POST = withHandler(async (req, ctx, requestId) => {
   }
   
   // Record daily check-in using new database function
-  const { data: checkInResult, error: checkInError } = await supabase
+  const { data: checkInData, error: checkInError } = await supabase
     .rpc('record_daily_weight_checkin', {
       p_user_id: user.id,
       p_weight_kg: ocrResult.weight,
       p_photo_url: photoUrl,
       p_ocr_confidence: ocrResult.confidence
     })
-    .single()
   
-  if (checkInError) {
-    logger.error('Failed to record daily check-in', checkInError, { requestId, userId: user.id })
-    return NextResponse.json(fail('DATABASE_ERROR', 'Failed to save weight entry', undefined, requestId), { status: 500 })
+  if (checkInError || !checkInData) {
+    logger.error('Failed to record daily check-in', checkInError, { requestId, userId: user.id, checkInData })
+    return NextResponse.json(fail('DATABASE_ERROR', 'Failed to save weight entry', { error: checkInError?.message, data: checkInData }, requestId), { status: 500 })
   }
   
+  // The function returns a table, so get the first row
+  const checkInResult = Array.isArray(checkInData) ? checkInData[0] : checkInData
+  
   // Get challenge progress
-  const { data: progressData } = await supabase
+  const { data: progressResult } = await supabase
     .rpc('get_challenge_progress', { p_user_id: user.id })
-    .single()
+  
+  const progressData = Array.isArray(progressResult) ? progressResult[0] : progressResult
   
   logger.info("Weight processed successfully", { 
     requestId, 

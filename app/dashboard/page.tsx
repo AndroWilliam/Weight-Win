@@ -34,15 +34,17 @@ export default function DashboardPage() {
         }
         
         // Get challenge progress from database
-        const { data: progress, error } = await supabase
+        const { data: progressResult, error } = await supabase
           .rpc('get_challenge_progress', { p_user_id: user.id })
-          .single()
         
-        if (error) {
+        if (error || !progressResult) {
           console.error('Error loading challenge progress:', error)
           router.push('/commit')
           return
         }
+        
+        // The function returns a table, so get the first row
+        const progress = Array.isArray(progressResult) ? progressResult[0] : progressResult
         
         // Update local storage and state
         const challengeData = {
