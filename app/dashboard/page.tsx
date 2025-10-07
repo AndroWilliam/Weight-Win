@@ -161,10 +161,14 @@ export default function DashboardPage() {
       <main className="px-4 py-8">
         <div className="mx-auto max-w-5xl space-y-6">
           {/* Home breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-neutral-600">
-            <span className="text-lg">🏠</span>
-            <span>Home</span>
-          </div>
+          <button 
+            onClick={() => router.push('/')}
+            className="flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-900 transition-colors duration-200 group"
+            aria-label="Go to home page"
+          >
+            <span className="text-lg group-hover:scale-110 transition-transform duration-200">🏠</span>
+            <span className="group-hover:underline">Home</span>
+          </button>
 
                   <div className="text-center space-y-2 mb-8">
                     <h2 className="text-3xl font-semibold text-neutral-900">Day {Math.min(currentDay, 7)} of 7</h2>
