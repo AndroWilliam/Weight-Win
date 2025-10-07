@@ -13,37 +13,31 @@ CREATE TABLE IF NOT EXISTS public.admins (
 ALTER TABLE public.admins ENABLE ROW LEVEL SECURITY;
 
 -- 3. Admin check function (idempotent)
--- Drop existing function if it exists (handle both signatures)
--- Use CASCADE to drop dependent policies too
+-- Drop existing function if it exists with CASCADE
 DROP FUNCTION IF EXISTS public.is_admin(UUID) CASCADE;
 DROP FUNCTION IF EXISTS public.is_admin() CASCADE;
 
--- Create the function with explicit signature
-CREATE FUNCTION public.is_admin(uid UUID)
+-- Create a single function with nullable parameter
+-- If uid is NULL, use auth.uid() as default
+CREATE FUNCTION public.is_admin(uid UUID DEFAULT NULL)
 RETURNS BOOLEAN
-LANGUAGE SQL
+LANGUAGE PLPGSQL
 SECURITY DEFINER
 STABLE
 AS $$
-  SELECT EXISTS(
+BEGIN
+  -- If no uid provided, use current user
+  IF uid IS NULL THEN
+    uid := auth.uid();
+  END IF;
+  
+  -- Check if user is admin
+  RETURN EXISTS(
     SELECT 1 
     FROM public.admins a 
     WHERE a.user_id = uid
   );
-$$;
-
--- Create convenience overload with no parameters (uses current user)
-CREATE FUNCTION public.is_admin()
-RETURNS BOOLEAN
-LANGUAGE SQL
-SECURITY DEFINER
-STABLE
-AS $$
-  SELECT EXISTS(
-    SELECT 1 
-    FROM public.admins a 
-    WHERE a.user_id = auth.uid()
-  );
+END;
 $$;
 
 -- 4. RLS policies for admins table (only admins can read/write admins table)
@@ -57,11 +51,9 @@ CREATE POLICY "admins_write" ON public.admins
   FOR ALL
   USING (public.is_admin(auth.uid()));
 
--- 5. Grant execute permission on is_admin functions (both signatures)
+-- 5. Grant execute permission on is_admin function
 GRANT EXECUTE ON FUNCTION public.is_admin(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.is_admin(UUID) TO anon;
-GRANT EXECUTE ON FUNCTION public.is_admin() TO authenticated;
-GRANT EXECUTE ON FUNCTION public.is_admin() TO anon;
 
 -- 6. Add RLS policy for nutritionist_applications (admin bypass)
 -- Admins can read all applications, users can only read their own
