@@ -14,8 +14,9 @@ ALTER TABLE public.admins ENABLE ROW LEVEL SECURITY;
 
 -- 3. Admin check function (idempotent)
 -- Drop existing function if it exists (handle both signatures)
-DROP FUNCTION IF EXISTS public.is_admin(UUID);
-DROP FUNCTION IF EXISTS public.is_admin();
+-- Use CASCADE to drop dependent policies too
+DROP FUNCTION IF EXISTS public.is_admin(UUID) CASCADE;
+DROP FUNCTION IF EXISTS public.is_admin() CASCADE;
 
 -- Create the function with explicit signature
 CREATE FUNCTION public.is_admin(uid UUID)
