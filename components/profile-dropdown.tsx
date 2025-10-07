@@ -10,7 +10,6 @@ import {
   Shield,
   ChevronDown
 } from 'lucide-react'
-import { checkIsAdminClient } from '@/lib/admin/guard'
 
 interface ProfileDropdownProps {
   userInitials?: string
@@ -23,11 +22,18 @@ export function ProfileDropdown({ userInitials, isAdmin: initialIsAdmin = false 
   const dropdownRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
-  // Check admin status on mount
+  // Check admin status on mount via API
   useEffect(() => {
     async function loadAdminStatus() {
-      const adminStatus = await checkIsAdminClient()
-      setIsAdmin(adminStatus)
+      try {
+        const response = await fetch('/api/admin/check')
+        const data = await response.json()
+        if (data.success) {
+          setIsAdmin(data.isAdmin)
+        }
+      } catch (error) {
+        console.error('Failed to check admin status:', error)
+      }
     }
     loadAdminStatus()
   }, [])
