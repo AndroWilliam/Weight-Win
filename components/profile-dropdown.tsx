@@ -10,16 +10,27 @@ import {
   Shield,
   ChevronDown
 } from 'lucide-react'
+import { checkIsAdminClient } from '@/lib/admin/guard'
 
 interface ProfileDropdownProps {
   userInitials?: string
   isAdmin?: boolean
 }
 
-export function ProfileDropdown({ userInitials, isAdmin = false }: ProfileDropdownProps) {
+export function ProfileDropdown({ userInitials, isAdmin: initialIsAdmin = false }: ProfileDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(initialIsAdmin)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+
+  // Check admin status on mount
+  useEffect(() => {
+    async function loadAdminStatus() {
+      const adminStatus = await checkIsAdminClient()
+      setIsAdmin(adminStatus)
+    }
+    loadAdminStatus()
+  }, [])
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -66,7 +77,7 @@ export function ProfileDropdown({ userInitials, isAdmin = false }: ProfileDropdo
       label: 'Admin',
       href: '/admin',
       show: isAdmin,
-      comingSoon: true
+      comingSoon: false
     }
   ]
 
