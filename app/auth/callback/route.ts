@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams, origin } = new URL(request.url)
     const code = searchParams.get("code")
-    const next = searchParams.get("next") ?? "/consent"
+    let next = searchParams.get("next") ?? "/setup"
 
     console.log("[v0] Callback params:", { code: code ? "present" : "missing", next, origin })
 
@@ -36,6 +36,38 @@ export async function GET(request: NextRequest) {
     }
 
     console.log("[v0] Authentication successful, user:", data.user?.email)
+    
+    // Check if user has completed setup
+    if (data.user) {
+      console.log("[v0] Checking if user has completed setup...")
+      
+      // Check for existing settings in database
+      const { data: settings, error: settingsError } = await supabase
+        .from('user_settings')
+        .select('setup_completed')
+        .eq('user_id', data.user.id)
+        .single()
+      
+      if (!settingsError && settings?.setup_completed) {
+        console.log("[v0] User has completed setup, redirecting to dashboard")
+        next = "/dashboard"
+      } else {
+        // Fallback: check if user has any weight entries (existing user)
+        const { data: weightEntries, error: weightError } = await supabase
+          .from('weight_entries')
+          .select('id')
+          .eq('user_id', data.user.id)
+          .limit(1)
+        
+        if (!weightError && weightEntries && weightEntries.length > 0) {
+          console.log("[v0] Existing user detected (has weight entries), redirecting to dashboard")
+          next = "/dashboard"
+        } else {
+          console.log("[v0] New user, redirecting to setup flow")
+          next = "/setup"
+        }
+      }
+    }
 
     // Get the correct base URL for redirects
     const forwardedHost = request.headers.get("x-forwarded-host")

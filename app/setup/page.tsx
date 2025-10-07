@@ -44,13 +44,32 @@ export default function SetupPage() {
   const router = useRouter()
 
   useEffect(() => {
+    // Check if user has already completed setup
+    async function checkSetupStatus() {
+      try {
+        const response = await fetch('/api/settings/get')
+        const data = await response.json()
+        
+        if (data.success && data.setupCompleted) {
+          // User already completed setup, redirect to dashboard
+          console.log('[Setup] User already completed setup, redirecting to dashboard')
+          router.push('/dashboard')
+          return
+        }
+      } catch (error) {
+        console.error('[Setup] Error checking setup status:', error)
+      }
+    }
+    
+    checkSetupStatus()
+    
     // Auto-detect timezone
     const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
     setTimezone(detectedTimezone)
     if (!baseTimezones.includes(detectedTimezone)) {
       setTimezones((prev) => [detectedTimezone, ...prev])
     }
-  }, [])
+  }, [router])
 
   const requestLocationPermission = async () => {
     if (!navigator.geolocation) {
@@ -90,7 +109,7 @@ export default function SetupPage() {
 
   const handleContinue = () => {
     setIsLoading(true)
-    // Save settings to localStorage or send to server
+    // Save settings to localStorage
     const settings = {
       weightUnit,
       reminderTime,
@@ -98,7 +117,7 @@ export default function SetupPage() {
       locationPermission
     }
     localStorage.setItem('userSettings', JSON.stringify(settings))
-    router.push('/commit')
+    router.push('/consent')
   }
 
   return (

@@ -58,8 +58,15 @@ export default function ConsentPage() {
   const handleContinue = async () => {
     try {
       setLoading(true)
+      // Save consent to localStorage
+      const consents = {
+        ocrProcessing: true,
+        dataStorage: true,
+        shareWithNutritionist: true
+      }
+      localStorage.setItem('userConsents', JSON.stringify(consents))
       await new Promise(r => setTimeout(r, 250))
-      router.push('/setup')
+      router.push('/commit')
     } finally {
       setLoading(false)
     }
