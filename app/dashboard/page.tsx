@@ -49,7 +49,20 @@ export default function DashboardPage() {
         
         if (error) {
           console.error('Error loading challenge progress:', error)
-          router.push('/commit')
+          // If RPC fails, create default challenge data for Day 1
+          const defaultChallengeData = {
+            currentDay: 1,
+            startDate: null,
+            completed: false,
+            checkedInToday: false,
+            completedDays: [],
+            daysRemaining: 7,
+            currentStreak: 0,
+            settings: settingsData.settings || {}
+          }
+          localStorage.setItem('challengeData', JSON.stringify(defaultChallengeData))
+          setChallengeData(defaultChallengeData)
+          setIsLoading(false)
           return
         }
         
@@ -59,13 +72,13 @@ export default function DashboardPage() {
         // If status is 'not_started', they haven't started the challenge yet
         // But they have completed setup, so show the dashboard with Day 1 ready
         const challengeData = {
-          currentDay: progress.current_day,
+          currentDay: progress.current_day || 1,
           startDate: progress.challenge_start_date,
           completed: progress.challenge_status === 'completed',
-          checkedInToday: progress.checked_in_today,
+          checkedInToday: progress.checked_in_today || false,
           completedDays: progress.completed_days || [],
-          daysRemaining: progress.days_remaining,
-          currentStreak: progress.current_streak,
+          daysRemaining: progress.days_remaining || 7,
+          currentStreak: progress.current_streak || 0,
           settings: settingsData.settings || {}
         }
         
@@ -74,7 +87,19 @@ export default function DashboardPage() {
         setIsLoading(false)
       } catch (error) {
         console.error('Error loading challenge:', error)
-        router.push('/commit')
+        // On unexpected error, show default Day 1 state instead of redirecting
+        const defaultChallengeData = {
+          currentDay: 1,
+          startDate: null,
+          completed: false,
+          checkedInToday: false,
+          completedDays: [],
+          daysRemaining: 7,
+          currentStreak: 0,
+          settings: {}
+        }
+        setChallengeData(defaultChallengeData)
+        setIsLoading(false)
       }
     }
     

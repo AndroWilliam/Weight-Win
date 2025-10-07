@@ -29,8 +29,31 @@ export async function GET(req: NextRequest) {
       )
     }
     
-    // If no settings found, return null (user hasn't completed setup)
+    // If no settings found, check if user has any weight entries (existing users)
     if (!settings) {
+      // Fallback: check if user has completed any weight check-ins
+      const { data: weightEntries, error: weightError } = await supabase
+        .from('weight_entries')
+        .select('id')
+        .eq('user_id', user.id)
+        .limit(1)
+      
+      if (weightError) {
+        console.error('Error checking weight entries:', weightError)
+      }
+      
+      // If user has weight entries, they're an existing user who completed setup before
+      // the user_settings table was created
+      if (weightEntries && weightEntries.length > 0) {
+        return NextResponse.json({
+          success: true,
+          settings: null, // No settings saved, but setup is complete
+          setupCompleted: true, // Existing user
+          isLegacyUser: true // Flag to indicate they need to save settings on next visit
+        })
+      }
+      
+      // New user who hasn't completed setup
       return NextResponse.json({
         success: true,
         settings: null,

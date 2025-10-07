@@ -71,20 +71,56 @@ export default function CommitPage() {
     loadSettings()
   }, [])
 
-  const handleStartChallenge = () => {
+  const handleStartChallenge = async () => {
     setIsSubmitting(true)
-    // Save challenge start data
-    const challengeData = {
-      startDate: new Date().toISOString(),
-      settings,
-      consents,
-      currentDay: 1,
-      completed: false
-    }
-    localStorage.setItem('challengeData', JSON.stringify(challengeData))
     
-    // Redirect to dashboard
-    router.push('/dashboard')
+    try {
+      // Save settings to database
+      if (settings && consents) {
+        const response = await fetch('/api/settings/save', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            weightUnit: settings.weightUnit,
+            reminderTime: settings.reminderTime,
+            timezone: settings.timezone,
+            locationPermission: settings.locationPermission,
+            consentOcr: consents.ocrProcessing,
+            consentStorage: consents.dataStorage,
+            consentNutritionist: consents.shareWithNutritionist,
+            setupCompleted: true
+          })
+        })
+        
+        const data = await response.json()
+        
+        if (!data.success) {
+          console.error('Failed to save settings:', data.error)
+          alert('Failed to save settings. Please try again.')
+          setIsSubmitting(false)
+          return
+        }
+      }
+      
+      // Save to localStorage as backup
+      const challengeData = {
+        startDate: new Date().toISOString(),
+        settings,
+        consents,
+        currentDay: 1,
+        completed: false
+      }
+      localStorage.setItem('challengeData', JSON.stringify(challengeData))
+      
+      // Redirect to dashboard
+      router.push('/dashboard')
+    } catch (error) {
+      console.error('Error starting challenge:', error)
+      alert('Failed to start challenge. Please try again.')
+      setIsSubmitting(false)
+    }
   }
 
   const handleBackToSettings = () => {
