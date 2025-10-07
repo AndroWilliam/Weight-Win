@@ -32,7 +32,8 @@ CREATE POLICY "admins_read" ON public.admins
   FOR SELECT
   USING (public.is_admin(auth.uid()));
 
-DROP POLICY IF EXISTS "admins_write" ON public.admins
+DROP POLICY IF EXISTS "admins_write" ON public.admins;
+CREATE POLICY "admins_write" ON public.admins
   FOR ALL
   USING (public.is_admin(auth.uid()));
 
