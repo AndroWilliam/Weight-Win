@@ -21,6 +21,8 @@ const UploadCard = memo(function UploadCard({
   prefix, // userId prefix will be added internally
   idType, // 'national_id' | 'passport' - for ID extraction
   onIdExtracted, // callback when ID is extracted
+  onIdTypeDetected, // callback when we auto-detect ID type
+  onNotify, // optional toast/notification hook
 }: {
   formFieldName: 'cvPath' | 'idPath'
   title: string
@@ -28,6 +30,8 @@ const UploadCard = memo(function UploadCard({
   prefix: 'cv' | 'id'
   idType?: 'national_id' | 'passport'
   onIdExtracted?: (extractedId: string) => void
+  onIdTypeDetected?: (type: 'national_id' | 'passport') => void
+  onNotify?: (opts: { title: string; description?: string }) => void
 }) {
   const { setValue } = useFormContext()
   const [state, setState] = useState<'idle' | 'uploading' | 'scanning' | 'success' | 'error'>('idle')
@@ -90,8 +94,8 @@ const UploadCard = memo(function UploadCard({
 
       setState('scanning')
 
-      // Call OCR based on document type
-      if (prefix === 'id' && idType && onIdExtracted) {
+      // Call OCR for ID documents (auto-detect type if needed)
+      if (prefix === 'id') {
         console.log('[UploadCard] Starting ID extraction for:', { prefix, idType, hasCallback: !!onIdExtracted })
         // ID extraction for National ID or Passport
         const reader = new FileReader()
@@ -103,27 +107,31 @@ const UploadCard = memo(function UploadCard({
               idType 
             })
             
-            const idExtractionResponse = await fetch('/api/ocr/id-extract', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ imageBase64: base64, idType })
-            })
+            const tryExtract = async (tryType: 'national_id' | 'passport') => {
+              const res = await fetch('/api/ocr/id-extract', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ imageBase64: base64, idType: tryType })
+              })
+              if (!res.ok) return null
+              const json = await res.json()
+              return json?.success ? { id: json.extractedId as string, type: tryType } : null
+            }
 
-            console.log('[UploadCard] API response status:', idExtractionResponse.status)
+            // Prefer the currently selected idType, but auto-fallback
+            const preference: Array<'national_id' | 'passport'> = idType ? [idType, idType === 'national_id' ? 'passport' : 'national_id'] : ['national_id', 'passport']
+            let extracted: { id: string; type: 'national_id' | 'passport' } | null = null
+            for (const t of preference) {
+              extracted = await tryExtract(t)
+              if (extracted) break
+            }
 
-            if (idExtractionResponse.ok) {
-              const result = await idExtractionResponse.json()
-              console.log('[UploadCard] API response data:', result)
-              
-              if (result.success && result.extractedId) {
-                console.log('[UploadCard] Calling onIdExtracted with:', result.extractedId)
-                onIdExtracted(result.extractedId)
-              } else {
-                console.log('[UploadCard] No extracted ID in response')
-              }
+            if (extracted) {
+              onIdTypeDetected?.(extracted.type)
+              if (onIdExtracted) onIdExtracted(extracted.id)
+              onNotify?.({ title: 'ID number detected', description: 'Please review the national ID number before submitting the application.' })
             } else {
-              const errorData = await idExtractionResponse.json()
-              console.error('[UploadCard] API error response:', errorData)
+              onNotify?.({ title: 'Could not read ID number', description: 'Please type it manually and ensure the photo is clear.' })
             }
           } catch (error) {
             console.error('[UploadCard] ID extraction error:', error)
@@ -289,11 +297,14 @@ const UploadCard = memo(function UploadCard({
           </DialogHeader>
           <div className="mt-2">
             {isPdf ? (
-              <iframe
-                src={preview}
-                className="w-full h-[70vh] rounded border"
-                title="PDF preview"
-              />
+              <div className="space-y-3">
+                <object data={preview} type="application/pdf" className="w-full h-[70vh] rounded border">
+                  <p className="text-sm text-slate-600 p-3">Your browser could not preview the PDF. <a href={preview} target="_blank" rel="noreferrer" className="text-blue-600 underline">Open in new tab</a>.</p>
+                </object>
+                <div className="text-right">
+                  <a href={preview} target="_blank" rel="noreferrer" className="text-sm text-blue-600 underline">Open original</a>
+                </div>
+              </div>
             ) : (
               <img src={preview} alt="Document preview" className="w-full max-h-[70vh] object-contain rounded border" />
             )}

@@ -315,13 +315,18 @@ export default function ApplyNutritionistPage() {
                       accept="application/pdf,image/jpeg,image/png"
                       prefix="id"
                       idType={idType}
+                      onIdTypeDetected={(detected) => {
+                        // lock radio group to detected type
+                        setValue('idType', detected, { shouldValidate: true, shouldDirty: true })
+                      }}
                       onIdExtracted={(extractedId) => {
                         setValue('idNumber', extractedId, { shouldValidate: true, shouldDirty: true })
                         toast({
                           title: 'ID Number Extracted',
-                          description: `Auto-filled: ${extractedId}`,
+                          description: 'Please review the national ID number before submitting the application.',
                         })
                       }}
+                      onNotify={(opts) => toast(opts)}
                     />
                     {showError('idPath') && (
                       <p className="text-sm text-red-600">{errors.idPath.message}</p>
