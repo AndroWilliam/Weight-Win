@@ -89,7 +89,14 @@ const UploadCard = memo(function UploadCard({
       
       if (previewResponse.ok) {
         const { signedUrl } = await previewResponse.json()
+        console.log('[UploadCard] Preview URL created:', signedUrl)
         setPreview(signedUrl)
+        
+        // For images, pre-load to ensure it's ready
+        if (f.type.startsWith('image/')) {
+          const img = new Image()
+          img.src = signedUrl
+        }
       }
 
       setState('scanning')
@@ -298,15 +305,45 @@ const UploadCard = memo(function UploadCard({
           <div className="mt-2">
             {isPdf ? (
               <div className="space-y-3">
-                <object data={preview} type="application/pdf" className="w-full h-[70vh] rounded border">
-                  <p className="text-sm text-slate-600 p-3">Your browser could not preview the PDF. <a href={preview} target="_blank" rel="noreferrer" className="text-blue-600 underline">Open in new tab</a>.</p>
-                </object>
-                <div className="text-right">
-                  <a href={preview} target="_blank" rel="noreferrer" className="text-sm text-blue-600 underline">Open original</a>
-                </div>
+                {preview ? (
+                  <>
+                    <iframe 
+                      src={`${preview}#view=FitH`}
+                      className="w-full h-[70vh] rounded border bg-white"
+                      title="PDF preview"
+                    />
+                    <div className="flex justify-between items-center text-sm">
+                      <p className="text-slate-600">
+                        If the preview doesn't load, try opening in a new tab
+                      </p>
+                      <a 
+                        href={preview} 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        className="text-blue-600 underline hover:text-blue-700"
+                      >
+                        Open in new tab ↗
+                      </a>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex items-center justify-center h-[70vh] bg-slate-50 rounded border">
+                    <p className="text-slate-500">Loading preview...</p>
+                  </div>
+                )}
               </div>
             ) : (
-              <img src={preview} alt="Document preview" className="w-full max-h-[70vh] object-contain rounded border" />
+              preview ? (
+                <img 
+                  src={preview} 
+                  alt="Document preview" 
+                  className="w-full max-h-[70vh] object-contain rounded border bg-white" 
+                />
+              ) : (
+                <div className="flex items-center justify-center h-[70vh] bg-slate-50 rounded border">
+                  <p className="text-slate-500">Loading preview...</p>
+                </div>
+              )
             )}
           </div>
         </DialogContent>

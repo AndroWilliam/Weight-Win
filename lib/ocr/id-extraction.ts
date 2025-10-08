@@ -116,22 +116,61 @@ async function extractIdFromImageProduction(
 
 // Parse ID numbers from OCR text
 function parseIDFromText(text: string, expectedType: 'national_id' | 'passport'): string | null {
+  console.log('[parseIDFromText] Input text:', text)
+  console.log('[parseIDFromText] Expected type:', expectedType)
+  
   if (expectedType === 'national_id') {
     // Egyptian National ID patterns
     // Looking for 14-digit numbers, often at the bottom of the card
     const patterns = [
-      // Standard 14-digit pattern
+      // Arabic numerals pattern (most common in Egyptian IDs)
+      /([٠-٩]{14})/g,
+      // Mixed Arabic/English pattern
+      /([٠-٩0-9]{14})/g,
+      // With spaces between digits (Arabic)
+      /([٠-٩]\s*[٠-٩]\s*[٠-٩]\s*[٠-٩]\s*[٠-٩]\s*[٠-٩]\s*[٠-٩]\s*[٠-٩]\s*[٠-٩]\s*[٠-٩]\s*[٠-٩]\s*[٠-٩]\s*[٠-٩]\s*[٠-٩])/g,
+      // Standard 14-digit pattern (English)
       /\b(\d{14})\b/g,
       // With spaces or dashes
       /\b(\d{2}[-\s]?\d{3}[-\s]?\d{2}[-\s]?\d{1}[-\s]?\d{6})\b/g,
-      // Arabic numerals (٠١٢٣٤٥٦٧٨٩) converted to English
-      /\b([٠-٩]{14})\b/g
     ]
     
+    // Also look for patterns that might be split across lines
+    const allNumbers = text.match(/[٠-٩0-9]+/g) || []
+    console.log('[parseIDFromText] All numbers found:', allNumbers)
+    
+    // Try to find a 14-digit sequence by concatenating adjacent numbers
+    for (let i = 0; i < allNumbers.length; i++) {
+      let combined = convertArabicNumerals(allNumbers[i].replace(/\s/g, ''))
+      
+      // Check if this single number is already 14 digits
+      if (combined.length === 14 && isValidEgyptianNationalID(combined)) {
+        console.log('[parseIDFromText] Found valid ID from single number:', combined)
+        return combined
+      }
+      
+      // Try combining with next numbers if needed
+      let j = i + 1
+      while (combined.length < 14 && j < allNumbers.length) {
+        combined += convertArabicNumerals(allNumbers[j].replace(/\s/g, ''))
+        j++
+      }
+      
+      if (combined.length >= 14) {
+        const candidate = combined.substring(0, 14)
+        if (isValidEgyptianNationalID(candidate)) {
+          console.log('[parseIDFromText] Found valid ID from combined numbers:', candidate)
+          return candidate
+        }
+      }
+    }
+    
+    // Try the patterns
     for (const pattern of patterns) {
       const matches = text.matchAll(pattern)
       for (const match of matches) {
         let id = match[1]
+        console.log('[parseIDFromText] Pattern match:', id)
         
         // Convert Arabic numerals to English
         id = convertArabicNumerals(id)
@@ -141,6 +180,7 @@ function parseIDFromText(text: string, expectedType: 'national_id' | 'passport')
         
         // Validate Egyptian National ID format
         if (isValidEgyptianNationalID(id)) {
+          console.log('[parseIDFromText] Valid ID found:', id)
           return id
         }
       }

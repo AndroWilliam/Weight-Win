@@ -53,6 +53,7 @@ export default function ApplyNutritionistPage() {
     return !!errors[field] && isSubmitted
   }
   const idType = watch('idType') ?? 'national_id'
+  const [idTypeLocked, setIdTypeLocked] = useState(false)
 
   const onSubmit = async (data: ApplyInput) => {
     try {
@@ -240,23 +241,29 @@ export default function ApplyNutritionistPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-3">
-                  <Label>ID Type</Label>
+                  <div className="flex items-center gap-2">
+                    <Label>ID Type</Label>
+                    {idTypeLocked && (
+                      <span className="text-xs text-slate-500">(Auto-detected from document)</span>
+                    )}
+                  </div>
                   <Controller
                     control={control}
                     name="idType"
                     render={({ field }) => (
                       <RadioGroup
                         value={field.value}
-                        onValueChange={field.onChange}
+                        onValueChange={idTypeLocked ? undefined : field.onChange}
                         className="flex gap-6"
+                        disabled={idTypeLocked}
                       >
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="national_id" id="national_id" />
-                          <Label htmlFor="national_id">National ID</Label>
+                          <RadioGroupItem value="national_id" id="national_id" disabled={idTypeLocked} />
+                          <Label htmlFor="national_id" className={idTypeLocked ? "opacity-60" : ""}>National ID</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="passport" id="passport" />
-                          <Label htmlFor="passport">Passport</Label>
+                          <RadioGroupItem value="passport" id="passport" disabled={idTypeLocked} />
+                          <Label htmlFor="passport" className={idTypeLocked ? "opacity-60" : ""}>Passport</Label>
                         </div>
                       </RadioGroup>
                     )}
@@ -318,15 +325,17 @@ export default function ApplyNutritionistPage() {
                       onIdTypeDetected={(detected) => {
                         // lock radio group to detected type
                         setValue('idType', detected, { shouldValidate: true, shouldDirty: true })
+                        setIdTypeLocked(true)
                       }}
                       onIdExtracted={(extractedId) => {
                         setValue('idNumber', extractedId, { shouldValidate: true, shouldDirty: true })
-                        toast({
+                        const toastId = toast({
                           title: 'ID Number Extracted',
                           description: 'Please review the national ID number before submitting the application.',
+                          duration: 5000, // Auto-dismiss after 5 seconds
                         })
                       }}
-                      onNotify={(opts) => toast(opts)}
+                      onNotify={(opts) => toast({ ...opts, duration: 5000 })}
                     />
                     {showError('idPath') && (
                       <p className="text-sm text-red-600">{errors.idPath.message}</p>
