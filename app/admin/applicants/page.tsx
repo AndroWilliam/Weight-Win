@@ -8,7 +8,7 @@ export default async function ApplicantsPage() {
   // Fetch all nutritionist applications
   const { data: rows, error } = await supabase
     .from('nutritionist_applications')
-    .select('id, created_at, first_name, family_name, email, mobile_e164, id_type, id_number, ocr_status, status, cv_file_path, id_file_path')
+    .select('id, created_at, first_name, family_name, email, mobile_e164:phone_e164, id_type, id_number, ocr_status, status, cv_file_path, id_file_path')
     .order('created_at', { ascending: false })
     .limit(100)
   
