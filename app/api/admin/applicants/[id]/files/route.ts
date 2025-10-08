@@ -19,19 +19,21 @@ export async function GET(
     const applicationId = params.id
     const supabase = await createClient()
 
-    // Fetch application details
-    const { data: application, error: fetchError } = await supabase
-      .from('nutritionist_applications')
-      .select('cv_file_path, id_file_path')
-      .eq('id', applicationId)
-      .single()
+    // Fetch document paths from application_documents (authoritative source)
+    const { data: docs, error: docsError } = await supabase
+      .from('application_documents')
+      .select('kind, file_path')
+      .eq('application_id', applicationId)
 
-    if (fetchError || !application) {
+    if (docsError) {
       return NextResponse.json(
-        { error: 'Application not found', success: false },
-        { status: 404 }
+        { error: 'Failed to fetch documents', success: false },
+        { status: 500 }
       )
     }
+
+    const cvPath = docs?.find(d => d.kind === 'cv')?.file_path || null
+    const idPath = docs?.find(d => d.kind === 'id')?.file_path || null
 
     // Generate signed URLs (valid for 1 hour)
     const expiresIn = 3600 // 1 hour
@@ -39,17 +41,17 @@ export async function GET(
     let cvUrl = null
     let idUrl = null
 
-    if (application.cv_file_path) {
+    if (cvPath) {
       const { data: cvData } = await supabase.storage
         .from('applicant-docs')
-        .createSignedUrl(application.cv_file_path, expiresIn)
+        .createSignedUrl(cvPath, expiresIn)
       cvUrl = cvData?.signedUrl || null
     }
 
-    if (application.id_file_path) {
+    if (idPath) {
       const { data: idData } = await supabase.storage
         .from('applicant-docs')
-        .createSignedUrl(application.id_file_path, expiresIn)
+        .createSignedUrl(idPath, expiresIn)
       idUrl = idData?.signedUrl || null
     }
 

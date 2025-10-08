@@ -70,8 +70,9 @@ async function extractIdFromImageProduction(
     const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, '')
     
     const [result] = await client.textDetection({
-      image: {
-        content: cleanBase64
+      image: { content: cleanBase64 },
+      imageContext: {
+        languageHints: ['ar', 'en', 'ar-EG']
       }
     })
     
@@ -84,7 +85,8 @@ async function extractIdFromImageProduction(
     }
     
     const fullText = detections[0].description || ''
-    const extractedId = parseIDFromText(fullText, expectedType)
+    const normalizedText = normalizeArabicDigits(fullText)
+    const extractedId = parseIDFromText(normalizedText, expectedType)
     
     if (!extractedId) {
       return {
@@ -178,6 +180,18 @@ function convertArabicNumerals(text: string): string {
   }
   
   return text.replace(/[٠-٩]/g, (match) => arabicToEnglish[match] || match)
+}
+
+// Normalize Arabic digits and common separators into ASCII
+function normalizeArabicDigits(text: string): string {
+  // Convert Arabic-Indic numerals to ASCII
+  let normalized = convertArabicNumerals(text)
+  // Replace Arabic comma/diacritics and weird spaces
+  normalized = normalized
+    .replace(/[٬٫،]/g, ',') // Arabic comma/decimal to comma
+    .replace(/[\u200f\u200e\u202a-\u202e]/g, '') // RTL/LRM marks
+    .replace(/[\u066b\u066c]/g, '') // Arabic decimal/group separators
+  return normalized
 }
 
 // Validate Egyptian National ID (14 digits, specific format)
