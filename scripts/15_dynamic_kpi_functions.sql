@@ -14,6 +14,11 @@ AS $$
 DECLARE
   week_ago DATE := CURRENT_DATE - INTERVAL '7 days';
 BEGIN
+  -- Check if user is admin
+  IF NOT is_admin() THEN
+    RAISE EXCEPTION 'Access denied: Admin privileges required';
+  END IF;
+  
   RETURN QUERY
   SELECT 
     -- New applicants (pending or new status)
@@ -44,6 +49,11 @@ DECLARE
   today_start TIMESTAMP := CURRENT_DATE;
   today_end TIMESTAMP := CURRENT_DATE + INTERVAL '1 day';
 BEGIN
+  -- Check if user is admin
+  IF NOT is_admin() THEN
+    RAISE EXCEPTION 'Access denied: Admin privileges required';
+  END IF;
+  
   RETURN QUERY
   SELECT 
     -- Active users today (users who weighed in today)
@@ -80,6 +90,11 @@ AS $$
 DECLARE
   week_ago DATE := CURRENT_DATE - INTERVAL '7 days';
 BEGIN
+  -- Check if user is admin
+  IF NOT is_admin() THEN
+    RAISE EXCEPTION 'Access denied: Admin privileges required';
+  END IF;
+  
   RETURN QUERY
   SELECT 
     -- Nutritionist application KPIs
@@ -105,10 +120,8 @@ GRANT EXECUTE ON FUNCTION get_user_activity_kpis() TO authenticated;
 GRANT EXECUTE ON FUNCTION get_admin_kpis() TO authenticated;
 GRANT SELECT ON admin_kpi_summary TO authenticated;
 
--- Add RLS policies for admin-only access
-CREATE POLICY "Only admins can view admin KPIs" ON admin_kpi_summary
-  FOR SELECT TO authenticated
-  USING (is_admin());
+-- Note: Admin access is enforced within the functions themselves
+-- No RLS policy needed on the view since functions handle authorization
 
 -- Test the functions
 -- SELECT * FROM get_nutritionist_kpis();
