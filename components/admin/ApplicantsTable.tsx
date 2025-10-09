@@ -132,49 +132,54 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
         {/* Table */}
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-slate-50">
+            <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">Submitted</th>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">Full Name</th>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">Email</th>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">Mobile</th>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">ID Type</th>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">OCR</th>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">Status</th>
-                <th className="px-4 py-2.5 text-right text-xs font-medium text-slate-600">Actions</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Submitted</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Full Name</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Email</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Mobile</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">ID Type</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">OCR</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-4 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredRows.map((row) => (
-                <tr 
+                <tr
                   key={row.id}
                   className="hover:bg-slate-50 transition-colors"
                 >
-                  <td className="px-4 py-3 text-sm text-slate-900">
-                    {new Date(row.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  <td className="px-6 py-4 text-sm font-medium text-slate-900">
+                    {new Date(row.created_at).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      timeZone: 'UTC'
+                    })}
                   </td>
-                  <td className="px-4 py-3 text-sm font-medium text-slate-900">
+                  <td className="px-6 py-4 text-sm font-semibold text-slate-900">
                     {row.first_name} {row.family_name}
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-600">
+                  <td className="px-6 py-4 text-sm text-slate-600">
                     {row.email}
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-600">
+                  <td className="px-6 py-4 text-sm text-slate-600">
                     {row.mobile_e164}
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-600">
-                    {row.id_type.replace('_', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                  <td className="px-6 py-4 text-sm text-slate-600 capitalize">
+                    {row.id_type.replace('_', ' ')}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-6 py-4">
                     {getOCRBadge(row.ocr_status)}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-6 py-4">
                     {getStatusBadge(row.status)}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-6 py-4 text-right">
                     <button
                       onClick={() => setSelectedApplicant(row)}
-                      className="inline-flex items-center gap-1 px-2 py-1 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                      className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all duration-200"
                     >
                       <Eye className="w-4 h-4" />
                       Review
@@ -187,20 +192,20 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between">
+        <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
           <p className="text-sm text-slate-600">
             Showing {filteredRows.length} of {rows.length} applicants
           </p>
           <div className="flex items-center gap-2">
-            <button 
+            <button
               disabled
-              className="px-3 py-1 text-sm text-slate-400 cursor-not-allowed"
+              className="px-4 py-2 text-sm text-slate-400 cursor-not-allowed border border-slate-200 rounded-lg"
             >
               Previous
             </button>
-            <button 
+            <button
               disabled
-              className="px-3 py-1 text-sm bg-slate-900 text-white rounded cursor-not-allowed"
+              className="px-4 py-2 text-sm bg-slate-900 text-white rounded-lg cursor-not-allowed"
             >
               Next
             </button>

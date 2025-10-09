@@ -9,12 +9,12 @@ interface KPICardProps {
 
 function KPICard({ label, value, icon, iconBg }: KPICardProps) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-6 flex items-center justify-between">
-      <div>
-        <p className="text-sm text-slate-600 mb-1">{label}</p>
-        <p className="text-3xl font-bold text-slate-900">{value}</p>
+    <div className="bg-white rounded-xl border border-slate-200 p-6 flex items-center justify-between shadow-sm">
+      <div className="flex-1">
+        <p className="text-sm font-medium text-slate-600 mb-2">{label}</p>
+        <p className="text-3xl font-bold text-slate-900 leading-none">{value}</p>
       </div>
-      <div className={`w-12 h-12 ${iconBg} rounded-lg flex items-center justify-center flex-shrink-0`}>
+      <div className={`w-14 h-14 ${iconBg} rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm`}>
         {icon}
       </div>
     </div>
