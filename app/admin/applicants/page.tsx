@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { ApplicantsTable } from '@/components/admin/ApplicantsTable'
-import { KPICards } from '@/components/admin/KPICards'
+import { ApplicantsKPICards } from '@/components/admin/ApplicantsKPICards'
 
 export default async function ApplicantsPage() {
   const supabase = await createClient()
@@ -24,32 +24,22 @@ export default async function ApplicantsPage() {
 
   // Get dynamic KPIs from database
   const { data: kpiData, error: kpiError } = await supabase
-    .rpc('get_admin_kpis')
+    .rpc('get_applicants_kpis')
     .single()
 
   if (kpiError) {
     console.error('[Applicants Page] Error fetching KPIs:', kpiError)
-    // Fallback to static calculation if KPI function fails
-    const applications = rows ?? []
-    const newApplicants = applications.filter(app => app.status === 'pending' || app.status === 'new').length
-    const inReview = applications.filter(app => app.status === 'reviewing' || app.status === 'in_review').length
-    
-    const weekAgo = new Date()
-    weekAgo.setDate(weekAgo.getDate() - 7)
-    const approvedThisWeek = applications.filter(app => 
-      app.status === 'approved' && new Date(app.created_at) >= weekAgo
-    ).length
-
+    // Fallback to 0 values if KPI function fails
     return (
       <>
-        <KPICards
-          newApplicants={newApplicants}
-          inReview={inReview}
-          approvedThisWeek={approvedThisWeek}
-          activeUsersToday={247}
+        <ApplicantsKPICards
+          newApplicants={0}
+          rejectedApplicants={0}
+          approvedThisWeek={0}
+          activeUsersToday={0}
         />
         
-        <ApplicantsTable rows={applications} />
+        <ApplicantsTable rows={rows ?? []} />
       </>
     )
   }
@@ -58,9 +48,9 @@ export default async function ApplicantsPage() {
 
   return (
     <>
-      <KPICards
+      <ApplicantsKPICards
         newApplicants={kpiData?.new_applicants || 0}
-        inReview={kpiData?.in_review || 0}
+        rejectedApplicants={kpiData?.rejected_applicants || 0}
         approvedThisWeek={kpiData?.approved_this_week || 0}
         activeUsersToday={kpiData?.active_users_today || 0}
       />

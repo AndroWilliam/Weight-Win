@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { UsersTable } from '@/components/admin/UsersTable'
-import { KPICards } from '@/components/admin/KPICards'
+import { UsersKPICards } from '@/components/admin/UsersKPICards'
 
 export default async function UsersPage() {
   const supabase = await createClient()
@@ -24,40 +24,22 @@ export default async function UsersPage() {
 
   // Get dynamic KPIs from database
   const { data: kpiData, error: kpiError } = await supabase
-    .rpc('get_admin_kpis')
+    .rpc('get_users_kpis')
     .single()
 
   if (kpiError) {
     console.error('[Users Page] Error fetching KPIs:', kpiError)
-    // Fallback to static calculation if KPI function fails
-    const users = rows ?? []
-    const activeUsersToday = users.filter(u => {
-      if (!u.last_weigh_in_at) return false
-      const lastWeighIn = new Date(u.last_weigh_in_at)
-      const today = new Date()
-      return lastWeighIn.toDateString() === today.toDateString()
-    }).length
-
-    const inReview = users.filter(u => u.challenge_status === 'active' && (u.total_weigh_ins || 0) < 7).length
-    
-    const weekAgo = new Date()
-    weekAgo.setDate(weekAgo.getDate() - 7)
-    const approvedThisWeek = users.filter(u => 
-      (u.total_weigh_ins || 0) >= 7 && u.last_weigh_in_at && new Date(u.last_weigh_in_at) >= weekAgo
-    ).length
-
-    const newApplicants = users.filter(u => (u.total_weigh_ins || 0) === 0).length
-
+    // Fallback to 0 values if KPI function fails
     return (
       <>
-        <KPICards
-          newApplicants={newApplicants}
-          inReview={inReview}
-          approvedThisWeek={approvedThisWeek}
-          activeUsersToday={activeUsersToday}
+        <UsersKPICards
+          newUsersThisWeek={0}
+          usersInProgress={0}
+          completedThisWeek={0}
+          activeUsersToday={0}
         />
         
-        <UsersTable rows={users} />
+        <UsersTable rows={rows ?? []} />
       </>
     )
   }
@@ -66,10 +48,10 @@ export default async function UsersPage() {
 
   return (
     <>
-      <KPICards
-        newApplicants={kpiData?.new_users_this_week || 0}
-        inReview={kpiData?.in_review || 0}
-        approvedThisWeek={kpiData?.completed_challenges_this_week || 0}
+      <UsersKPICards
+        newUsersThisWeek={kpiData?.new_users_this_week || 0}
+        usersInProgress={kpiData?.users_in_progress || 0}
+        completedThisWeek={kpiData?.completed_this_week || 0}
         activeUsersToday={kpiData?.active_users_today || 0}
       />
       
