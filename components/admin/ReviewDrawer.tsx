@@ -198,10 +198,6 @@ export function ReviewDrawer({ applicant, onClose }: ReviewDrawerProps) {
                 <p className="text-xs text-neutral-600 font-medium">Application Status</p>
                 <p className="text-sm text-neutral-900 capitalize">{applicant.status}</p>
               </div>
-              <div>
-                <p className="text-xs text-neutral-600 font-medium">OCR Status</p>
-                <p className="text-sm text-neutral-900">{applicant.ocr_status || 'Not processed'}</p>
-              </div>
             </div>
           </section>
 

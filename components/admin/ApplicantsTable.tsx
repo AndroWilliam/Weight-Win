@@ -40,23 +40,6 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
     return matchesSearch && matchesStatus
   })
 
-  const getOCRBadge = (ocrStatus: string | null) => {
-    if (!ocrStatus) return <span className="text-xs text-slate-400">N/A</span>
-    
-    const styles = {
-      complete: 'bg-green-100 text-green-700',
-      pending: 'bg-yellow-100 text-yellow-700',
-      failed: 'bg-red-100 text-red-700',
-    }
-    
-    const style = styles[ocrStatus.toLowerCase() as keyof typeof styles] || 'bg-slate-100 text-slate-700'
-    
-    return (
-      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${style}`}>
-        {ocrStatus.charAt(0).toUpperCase() + ocrStatus.slice(1)}
-      </span>
-    )
-  }
 
   const getStatusBadge = (status: string) => {
     const styles = {
@@ -139,7 +122,6 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
                 <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">Email</th>
                 <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">Mobile</th>
                 <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">ID Type</th>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">OCR</th>
                 <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">Status</th>
                 <th className="px-4 py-2.5 text-right text-xs font-medium text-slate-600">Actions</th>
               </tr>
@@ -164,9 +146,6 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
                   </td>
                   <td className="px-4 py-3 text-sm text-slate-600">
                     {row.id_type.replace('_', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
-                  </td>
-                  <td className="px-4 py-3">
-                    {getOCRBadge(row.ocr_status)}
                   </td>
                   <td className="px-4 py-3">
                     {getStatusBadge(row.status)}

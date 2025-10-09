@@ -16,25 +16,17 @@ const supa = createClient(
 
 const UploadCard = memo(function UploadCard({
   formFieldName, // 'cvPath' | 'idPath'
-  title, // string (dynamic for ID/Passport)
+  title, // string
   accept, // 'application/pdf,image/*'
   prefix, // userId prefix will be added internally
-  idType, // 'national_id' | 'passport' - for ID extraction
-  onIdExtracted, // callback when ID is extracted
-  onIdTypeDetected, // callback when we auto-detect ID type
-  onNotify, // optional toast/notification hook
 }: {
   formFieldName: 'cvPath' | 'idPath'
   title: string
   accept: string
   prefix: 'cv' | 'id'
-  idType?: 'national_id' | 'passport'
-  onIdExtracted?: (extractedId: string) => void
-  onIdTypeDetected?: (type: 'national_id' | 'passport') => void
-  onNotify?: (opts: { title: string; description?: string }) => void
 }) {
   const { setValue } = useFormContext()
-  const [state, setState] = useState<'idle' | 'uploading' | 'scanning' | 'success' | 'error'>('idle')
+  const [state, setState] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle')
   const [pct, setPct] = useState(0)
   const [path, setPath] = useState<string>()
   const [preview, setPreview] = useState<string>() // signed URL
@@ -95,71 +87,16 @@ const UploadCard = memo(function UploadCard({
         // For images, pre-load to ensure it's ready
         if (f.type.startsWith('image/')) {
           const img = new Image()
+          img.onload = () => console.log('[UploadCard] Image preloaded successfully')
+          img.onerror = () => console.error('[UploadCard] Image failed to preload')
           img.src = signedUrl
         }
-      }
-
-      setState('scanning')
-
-      // Call OCR for ID documents (auto-detect type if needed)
-      if (prefix === 'id') {
-        console.log('[UploadCard] Starting ID extraction for:', { prefix, idType, hasCallback: !!onIdExtracted })
-        // ID extraction for National ID or Passport
-        const reader = new FileReader()
-        reader.onloadend = async () => {
-          try {
-            const base64 = reader.result as string
-            console.log('[UploadCard] Base64 ready, calling API:', { 
-              base64Length: base64.length, 
-              idType 
-            })
-            
-            const tryExtract = async (tryType: 'national_id' | 'passport') => {
-              const res = await fetch('/api/ocr/id-extract', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ imageBase64: base64, idType: tryType })
-              })
-              if (!res.ok) return null
-              const json = await res.json()
-              return json?.success ? { id: json.extractedId as string, type: tryType } : null
-            }
-
-            // Prefer the currently selected idType, but auto-fallback
-            const preference: Array<'national_id' | 'passport'> = idType ? [idType, idType === 'national_id' ? 'passport' : 'national_id'] : ['national_id', 'passport']
-            let extracted: { id: string; type: 'national_id' | 'passport' } | null = null
-            for (const t of preference) {
-              extracted = await tryExtract(t)
-              if (extracted) break
-            }
-
-            if (extracted) {
-              onIdTypeDetected?.(extracted.type)
-              if (onIdExtracted) onIdExtracted(extracted.id)
-              onNotify?.({ title: 'ID number detected', description: 'Please review the national ID number before submitting the application.' })
-            } else {
-              onNotify?.({ title: 'Could not read ID number', description: 'Please type it manually and ensure the photo is clear.' })
-            }
-          } catch (error) {
-            console.error('[UploadCard] ID extraction error:', error)
-          }
-        }
-        reader.readAsDataURL(f)
       } else {
-        // Regular OCR for CV
-        const ocrResponse = await fetch(`/api/ocr/${prefix === 'cv' ? 'cv' : 'id'}`, {
-          method: 'POST',
-          body: JSON.stringify({ path: p }),
-          headers: { 'Content-Type': 'application/json' }
-        })
-
-        if (!ocrResponse.ok) {
-          throw new Error('OCR processing failed')
-        }
+        console.error('[UploadCard] Failed to create preview URL:', previewResponse.status)
       }
 
       setState('success')
-      // Auto-open preview after successful processing
+      // Auto-open preview after successful upload
       setIsPreviewOpen(true)
     } catch (e) {
       console.error('Upload error:', e)
@@ -298,7 +235,7 @@ const UploadCard = memo(function UploadCard({
       
       {/* Preview dialog */}
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl" key={preview}>
           <DialogHeader>
             <DialogTitle>Document preview</DialogTitle>
           </DialogHeader>
@@ -311,6 +248,8 @@ const UploadCard = memo(function UploadCard({
                       src={`${preview}#view=FitH`}
                       className="w-full h-[70vh] rounded border bg-white"
                       title="PDF preview"
+                      onLoad={() => console.log('[UploadCard] PDF loaded successfully')}
+                      onError={() => console.error('[UploadCard] PDF failed to load')}
                     />
                     <div className="flex justify-between items-center text-sm">
                       <p className="text-slate-600">
@@ -337,7 +276,9 @@ const UploadCard = memo(function UploadCard({
                 <img 
                   src={preview} 
                   alt="Document preview" 
-                  className="w-full max-h-[70vh] object-contain rounded border bg-white" 
+                  className="w-full max-h-[70vh] object-contain rounded border bg-white"
+                  onLoad={() => console.log('[UploadCard] Image loaded successfully')}
+                  onError={() => console.error('[UploadCard] Image failed to load')}
                 />
               ) : (
                 <div className="flex items-center justify-center h-[70vh] bg-slate-50 rounded border">

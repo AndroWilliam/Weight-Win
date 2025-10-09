@@ -1,164 +1,245 @@
-<!-- 9d485153-87b3-426c-a029-e1b9d248e08a 57d54985-cd3e-42b4-a424-2d2b9f0116b9 -->
-# Admin Dashboard KPI Redesign & Dynamic Data Implementation
+<!-- 9d485153-87b3-426c-a029-e1b9d248e08a d3fd58d7-58c1-4e11-9e6d-c0bc157a932c -->
+# Simplify Nutritionist Application - Remove OCR & Fix Preview
 
 ## Overview
 
-Redesign the admin dashboard to match the Figma design with proper spacing, context-aware KPI cards, and accurate dynamic data from the database.
+Remove all OCR functionality from the nutritionist application process, simplify to basic document uploads (CV + National ID), fix the document preview loading issue, and clean up admin interface.
 
-## Database Changes (Run in Supabase SQL Editor)
+## Problems to Fix
 
-### 1. Update Application Status Enum
-
-**File**: `scripts/16_add_rejected_status.sql` (new)
-
-- Add 'rejected' to the `application_status` enum
-- Update existing policies to handle rejected status
-- Ensure backward compatibility with existing data
-```sql
--- Add 'rejected' to application_status enum
-ALTER TYPE application_status ADD VALUE IF NOT EXISTS 'rejected';
-
--- Update any constraints or triggers if needed
-```
-
-
-### 2. Update KPI Functions for Context-Aware Metrics
-
-**File**: `scripts/17_context_aware_kpis.sql` (new)
-
-Create separate KPI functions for Applicants and Users contexts:
-
-**For Applicants Tab:**
-
-- `get_applicants_kpis()` returns:
-  - `new_applicants`: Count of applications with status = 'new' (all time, until reviewed)
-  - `rejected_applicants`: Count of applications with status = 'rejected' (all time or this week)
-  - `approved_this_week`: Count of applications with status = 'approved' AND approved in last 7 days
-  - `active_users_today`: Count of users who completed weigh-in today (from weight_entries WHERE DATE(recorded_at) = CURRENT_DATE)
-
-**For Users Tab:**
-
-- `get_users_kpis()` returns:
-  - `new_users_this_week`: Count of users who started challenge in last 7 days
-  - `users_in_progress`: Count of users with active challenge and < 7 weigh-ins
-  - `completed_this_week`: Count of users who completed challenge (7+ weigh-ins) in last 7 days
-  - `active_users_today`: Count of users who completed weigh-in today
-
-Both functions must include `is_admin()` check for security.
+1. Document preview gets stuck on "Loading preview..." and never shows the actual document
+2. OCR functionality is overcomplicated and not needed
+3. ID type auto-detection and auto-fill creates confusion
+4. Admin page shows OCR status column that's not needed
 
 ## Frontend Changes
 
-### 3. Create Context-Aware KPI Components
+### 1. Simplify UploadCard Component
 
-**File**: `components/admin/ApplicantsKPICards.tsx` (new)
+**File**: `components/UploadCard.tsx`
 
-- Create dedicated KPI component for Applicants tab
-- Props: `newApplicants`, `rejectedApplicants`, `approvedThisWeek`, `activeUsersToday`
-- Labels match Figma:
-  - "New Applicants" (blue icon)
-  - "Rejected Applicants" (red/orange icon - change from "In Review")
-  - "Approved This Week" (green icon)
-  - "Active Users Today" (indigo icon)
-- Use same styling as current KPICards with mb-12 spacing
+**Remove:**
 
-**File**: `components/admin/UsersKPICards.tsx` (new)
+- All OCR-related logic (ID extraction, auto-detection)
+- `onIdExtracted`, `onIdTypeDetected`, `onNotify` props
+- ID scanning state and API calls to `/api/ocr/id-extract`
+- Toast notifications for ID review
 
-- Create dedicated KPI component for Users tab
-- Props: `newUsersThisWeek`, `usersInProgress`, `completedThisWeek`, `activeUsersToday`
-- Labels match Figma:
-  - "New Applicants" → "New Users This Week" (blue icon)
-  - "In Review" → "Users In Progress" (orange icon)
-  - "Approved This Week" → "Completed This Week" (green icon)
-  - "Active Users Today" (indigo icon)
+**Keep:**
 
-### 4. Update Admin Pages
+- File upload with progress
+- Preview generation (but fix the loading issue)
+- File validation (size, type)
+- Upload to Supabase storage
 
-**File**: `app/admin/applicants/page.tsx`
+**Fix Preview Issue:**
 
-- Replace `get_admin_kpis()` with `get_applicants_kpis()` RPC call
-- Replace `<KPICards />` with `<ApplicantsKPICards />`
-- Map KPI data correctly:
-  - `new_applicants` → count where status = 'new'
-  - `rejected_applicants` → count where status = 'rejected'
-  - `approved_this_week` → count where status = 'approved' AND DATE(created_at) >= CURRENT_DATE - 7
-  - `active_users_today` → count from weight_entries today
-- Remove fallback static "247" value
-- Handle errors with fallback to 0 values
+The preview gets stuck because:
 
-**File**: `app/admin/users/page.tsx`
+1. The signed URL is created correctly
+2. But the Dialog component might not be properly rendering the preview
+3. Need to ensure the preview URL is valid and the iframe/image loads properly
 
-- Replace `get_admin_kpis()` with `get_users_kpis()` RPC call
-- Replace `<KPICards />` with `<UsersKPICards />`
-- Map KPI data correctly:
-  - `new_users_this_week` → users who started challenge in last 7 days
-  - `users_in_progress` → active challenges with < 7 weigh-ins
-  - `completed_this_week` → users with 7+ weigh-ins in last 7 days
-  - `active_users_today` → users who weighed in today
-- Remove fallback calculation logic
-- Handle errors with fallback to 0 values
+**Changes:**
 
-### 5. Update Application Table to Handle Rejected Status
+```typescript
+// Simplified props
+interface UploadCardProps {
+  formFieldName: 'cvPath' | 'idPath'
+  title: string
+  accept: string
+  prefix: 'cv' | 'id'
+}
+
+// Remove OCR scanning logic
+// Keep only: upload → generate preview → show success
+```
+
+### 2. Update Nutritionist Application Page
+
+**File**: `app/apply/nutritionist/page.tsx`
+
+**Remove:**
+
+- `idTypeLocked` state
+- `onIdTypeDetected` callback
+- `onIdExtracted` callback  
+- Auto-lock ID type logic
+- Toast notifications for ID extraction
+
+**Simplify:**
+
+- Keep manual ID type selection (National ID / Passport)
+- Keep manual ID number input
+- Remove auto-fill and auto-detection features
+
+**Changes:**
+
+```tsx
+// Remove these from UploadCard usage:
+- idType={idType}
+- onIdExtracted={(id) => setValue('idNumber', id)}
+- onIdTypeDetected={(type) => { setValue('idType', type); setIdTypeLocked(true); }}
+- onNotify={(opts) => toast(opts)}
+
+// Simplify to:
+<UploadCard
+  formFieldName="idPath"
+  title="National ID Photo"
+  accept="image/*,application/pdf"
+  prefix="id"
+/>
+```
+
+### 3. Fix Document Preview Modal
+
+**File**: `components/UploadCard.tsx`
+
+**Debug and Fix:**
+
+- Ensure signed URL is properly passed to Dialog
+- Check if iframe src is set correctly for PDFs
+- Check if img src is set correctly for images
+- Add error handling for failed preview loads
+- Add fallback "Open in new tab" link if preview fails
+
+**Potential fixes:**
+
+```tsx
+// For PDFs - use iframe with proper attributes
+<iframe 
+  src={preview} 
+  className="w-full h-full"
+  title="Document preview"
+  onLoad={() => console.log('PDF loaded')}
+  onError={() => console.log('PDF failed to load')}
+/>
+
+// For images - use img with proper loading
+<img 
+  src={preview} 
+  alt="Preview"
+  className="max-w-full h-auto"
+  onLoad={() => console.log('Image loaded')}
+  onError={() => console.log('Image failed to load')}
+/>
+
+// Add fallback link
+<a href={preview} target="_blank" rel="noopener noreferrer">
+  Open in new tab
+</a>
+```
+
+### 4. Update Admin Applicants Table
 
 **File**: `components/admin/ApplicantsTable.tsx`
 
-- Update status badge colors to include 'rejected' (red badge)
-- Update status filter dropdown to include "Rejected" option
-- Ensure rejected applications are displayed correctly
+**Remove:**
 
-### 6. Remove Old Generic KPI Component
+- OCR Status column from table header
+- `getOCRBadge()` function
+- OCR status display in table rows
 
-**File**: `components/admin/KPICards.tsx`
+**Keep:**
 
-- Can be deleted after migration is complete (or kept for reference)
+- All other columns (Submitted, Full Name, Email, Mobile, ID Type, Status, Actions)
+- Status badges (New, In Review, Approved, Rejected)
+- Review drawer functionality
 
-## Design Alignment
+**Changes:**
 
-### Spacing (Already Done ✓)
+```tsx
+// Remove from table headers
+<th>OCR</th>
 
-- KPI cards have `mb-12` margin below them
-- Proper separation from tables below
+// Remove from table rows
+<td>{getOCRBadge(row.ocr_status)}</td>
+```
 
-### Tab-Specific KPIs
+### 5. Update Review Drawer
 
-- Applicants tab shows nutritionist-related metrics
-- Users tab shows user challenge metrics
-- Both show "Active Users Today" for consistency
+**File**: `components/admin/ReviewDrawer.tsx`
 
-### Dynamic Data
+**Remove:**
 
-- All KPI values come from real database queries
-- No hardcoded static values (like 247)
-- Proper error handling with 0 fallbacks
+- OCR Status field display
+- OCR confidence display
+- Any OCR-related information
 
-## Testing Checklist
+**Keep:**
+
+- Applicant details
+- Document previews (CV and ID)
+- Action buttons (Approve, Reject, etc.)
+
+## Database Changes
+
+### 6. Clean Up Database Schema (Optional)
+
+**File**: `scripts/18_remove_ocr_fields.sql` (new)
+
+Since OCR is no longer used, we can optionally clean up the database:
+
+```sql
+-- Optional: Remove OCR-related columns from nutritionist_applications
+-- (Keep for now if there's existing data, can clean up later)
+
+-- ALTER TABLE nutritionist_applications 
+-- DROP COLUMN IF EXISTS ocr_status,
+-- DROP COLUMN IF EXISTS id_validation_status,
+-- DROP COLUMN IF EXISTS id_validation_confidence;
+```
+
+**Decision:** Keep these columns in the database for now (don't break existing data), but stop using them in the UI.
+
+## API Changes
+
+### 7. Update Application Submission API
+
+**File**: `app/api/applications/submit/route.ts`
+
+**Remove:**
+
+- Any OCR status updates
+- ID validation logic
+
+**Keep:**
+
+- File path storage
+- Application creation
+- Status management
+
+## Testing Plan
 
 After implementation:
 
-1. Run SQL scripts in Supabase SQL Editor in order (16, 17)
-2. Verify 'rejected' status exists in application_status enum
-3. Test `get_applicants_kpis()` function returns correct data
-4. Test `get_users_kpis()` function returns correct data
-5. Verify Applicants tab shows correct KPI labels and values
-6. Verify Users tab shows correct KPI labels and values
-7. Test that rejecting an application updates "Rejected Applicants" count
-8. Test that approving an application updates "Approved This Week" count
-9. Verify "Active Users Today" shows 0 when no users weighed in today
-10. Verify proper spacing between KPI cards and tables
+1. Test file upload for CV (PDF/image)
+2. Test file upload for National ID (PDF/image)
+3. **Verify preview modal shows document correctly** (not stuck on loading)
+4. Test manual ID type selection
+5. Test manual ID number input
+6. Verify admin table doesn't show OCR column
+7. Test application submission end-to-end
+8. Verify admin can review applications without OCR fields
 
-## SQL Scripts Summary
+## Preview Fix Priority
 
-**Script 16: Add Rejected Status**
+The main issue is the preview getting stuck on "Loading preview...". Investigation steps:
 
-```sql
-ALTER TYPE application_status ADD VALUE IF NOT EXISTS 'rejected';
-```
+1. **Check Console Logs**: Look for errors when preview opens
+2. **Check Network Tab**: Verify signed URL request succeeds
+3. **Check Dialog Component**: Ensure it properly renders children
+4. **Check File Type Detection**: Verify PDF vs image detection works
+5. **Add Debug Logging**: Log when preview state changes
 
-**Script 17: Context-Aware KPI Functions**
+Most likely cause: The Dialog component state or the preview URL isn't properly triggering a re-render when the signed URL arrives.
 
-- `get_applicants_kpis()` - returns nutritionist application metrics
-- `get_users_kpis()` - returns user challenge metrics
-- Both include admin authorization checks
-- Grant execute permissions to authenticated users
+**Fix approach:**
+
+- Add `key={preview}` to Dialog to force re-render
+- Use `useEffect` to update preview when signed URL changes
+- Add loading/error states to iframe/img elements
+- Provide fallback download link
 
 ### To-dos
 
