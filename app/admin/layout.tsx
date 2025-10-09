@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { userIsAdmin } from '@/lib/admin/guard'
+import { createClient } from '@/lib/supabase/server'
 import { AdminHeader } from '@/components/admin/AdminHeader'
-import { AdminTabs } from '@/components/admin/AdminTabs'
 
 export default async function AdminLayout({
   children,
@@ -16,15 +16,22 @@ export default async function AdminLayout({
     redirect('/')
   }
 
+  // Get user info for header
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  const userInitials = user?.email 
+    ? user.email.substring(0, 2).toUpperCase() 
+    : 'AD'
+
   return (
     <div className="min-h-screen bg-slate-50">
-      <AdminHeader />
-      <div className="mx-auto max-w-7xl px-6">
-        <AdminTabs />
-        <main className="pb-12">
-          {children}
-        </main>
-      </div>
+      <AdminHeader userInitials={userInitials} />
+      
+      {/* Content */}
+      <main className="mx-auto max-w-7xl px-6 py-6">
+        {children}
+      </main>
     </div>
   )
 }

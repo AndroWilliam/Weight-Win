@@ -22,28 +22,47 @@ export default async function ApplicantsPage() {
     )
   }
 
-  // Calculate KPIs
-  const applications = rows ?? []
-  const newApplicants = applications.filter(app => app.status === 'pending' || app.status === 'new').length
-  const inReview = applications.filter(app => app.status === 'reviewing' || app.status === 'in_review').length
-  
-  // Get approved this week (last 7 days)
-  const weekAgo = new Date()
-  weekAgo.setDate(weekAgo.getDate() - 7)
-  const approvedThisWeek = applications.filter(app => 
-    app.status === 'approved' && new Date(app.created_at) >= weekAgo
-  ).length
+  // Get dynamic KPIs from database
+  const { data: kpiData, error: kpiError } = await supabase
+    .rpc('get_admin_kpis')
+    .single()
 
-  // Get active users count (mock for now)
-  const activeUsersToday = 247 // TODO: Query from user_streaks where last_check_in = today
+  if (kpiError) {
+    console.error('[Applicants Page] Error fetching KPIs:', kpiError)
+    // Fallback to static calculation if KPI function fails
+    const applications = rows ?? []
+    const newApplicants = applications.filter(app => app.status === 'pending' || app.status === 'new').length
+    const inReview = applications.filter(app => app.status === 'reviewing' || app.status === 'in_review').length
+    
+    const weekAgo = new Date()
+    weekAgo.setDate(weekAgo.getDate() - 7)
+    const approvedThisWeek = applications.filter(app => 
+      app.status === 'approved' && new Date(app.created_at) >= weekAgo
+    ).length
+
+    return (
+      <>
+        <KPICards
+          newApplicants={newApplicants}
+          inReview={inReview}
+          approvedThisWeek={approvedThisWeek}
+          activeUsersToday={247}
+        />
+        
+        <ApplicantsTable rows={applications} />
+      </>
+    )
+  }
+
+  const applications = rows ?? []
 
   return (
     <>
       <KPICards
-        newApplicants={newApplicants}
-        inReview={inReview}
-        approvedThisWeek={approvedThisWeek}
-        activeUsersToday={activeUsersToday}
+        newApplicants={kpiData?.new_applicants || 0}
+        inReview={kpiData?.in_review || 0}
+        approvedThisWeek={kpiData?.approved_this_week || 0}
+        activeUsersToday={kpiData?.active_users_today || 0}
       />
       
       <ApplicantsTable rows={applications} />
