@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, memo, useCallback } from 'react'
+import { useState, memo, useCallback, useEffect } from 'react'
 import { uploadWithProgress } from '@/lib/storageUpload'
 import { useFormContext } from 'react-hook-form'
 import { createClient } from '@supabase/supabase-js'
@@ -33,6 +33,14 @@ const UploadCard = memo(function UploadCard({
   const [originalName, setOriginalName] = useState<string>()
   const [errorMessage, setErrorMessage] = useState<string>()
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+
+  // Effect to handle preview opening when URL is ready
+  useEffect(() => {
+    if (preview && state === 'success' && !isPreviewOpen) {
+      console.log('[UploadCard] Preview URL ready, opening modal')
+      setIsPreviewOpen(true)
+    }
+  }, [preview, state, isPreviewOpen])
 
   const onPick = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const chosen = e.target.files?.[0]
@@ -82,22 +90,31 @@ const UploadCard = memo(function UploadCard({
       if (previewResponse.ok) {
         const { signedUrl } = await previewResponse.json()
         console.log('[UploadCard] Preview URL created:', signedUrl)
+        
+        // Set preview URL first
         setPreview(signedUrl)
         
         // For images, pre-load to ensure it's ready
         if (f.type.startsWith('image/')) {
           const img = new Image()
-          img.onload = () => console.log('[UploadCard] Image preloaded successfully')
-          img.onerror = () => console.error('[UploadCard] Image failed to preload')
+          img.onload = () => {
+            console.log('[UploadCard] Image preloaded successfully')
+            setState('success')
+          }
+          img.onerror = () => {
+            console.error('[UploadCard] Image failed to preload')
+            setState('success')
+          }
           img.src = signedUrl
+        } else {
+          // For PDFs, set success state immediately
+          setState('success')
         }
       } else {
         console.error('[UploadCard] Failed to create preview URL:', previewResponse.status)
+        setState('success')
+        // Don't open preview if URL creation failed
       }
-
-      setState('success')
-      // Auto-open preview after successful upload
-      setIsPreviewOpen(true)
     } catch (e) {
       console.error('Upload error:', e)
       setState('error')
@@ -235,44 +252,43 @@ const UploadCard = memo(function UploadCard({
       
       {/* Preview dialog */}
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="max-w-3xl" key={preview}>
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>Document preview</DialogTitle>
           </DialogHeader>
           <div className="mt-2">
-            {isPdf ? (
+            {!preview ? (
+              <div className="flex items-center justify-center h-[70vh] bg-slate-50 rounded border">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                  <p className="text-slate-500">Loading preview...</p>
+                </div>
+              </div>
+            ) : isPdf ? (
               <div className="space-y-3">
-                {preview ? (
-                  <>
-                    <iframe 
-                      src={`${preview}#view=FitH`}
-                      className="w-full h-[70vh] rounded border bg-white"
-                      title="PDF preview"
-                      onLoad={() => console.log('[UploadCard] PDF loaded successfully')}
-                      onError={() => console.error('[UploadCard] PDF failed to load')}
-                    />
-                    <div className="flex justify-between items-center text-sm">
-                      <p className="text-slate-600">
-                        If the preview doesn't load, try opening in a new tab
-                      </p>
-                      <a 
-                        href={preview} 
-                        target="_blank" 
-                        rel="noreferrer" 
-                        className="text-blue-600 underline hover:text-blue-700"
-                      >
-                        Open in new tab ↗
-                      </a>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex items-center justify-center h-[70vh] bg-slate-50 rounded border">
-                    <p className="text-slate-500">Loading preview...</p>
-                  </div>
-                )}
+                <iframe 
+                  src={`${preview}#view=FitH`}
+                  className="w-full h-[70vh] rounded border bg-white"
+                  title="PDF preview"
+                  onLoad={() => console.log('[UploadCard] PDF loaded successfully')}
+                  onError={() => console.error('[UploadCard] PDF failed to load')}
+                />
+                <div className="flex justify-between items-center text-sm">
+                  <p className="text-slate-600">
+                    If the preview doesn't load, try opening in a new tab
+                  </p>
+                  <a 
+                    href={preview} 
+                    target="_blank" 
+                    rel="noreferrer" 
+                    className="text-blue-600 underline hover:text-blue-700"
+                  >
+                    Open in new tab ↗
+                  </a>
+                </div>
               </div>
             ) : (
-              preview ? (
+              <div className="space-y-3">
                 <img 
                   src={preview} 
                   alt="Document preview" 
@@ -280,11 +296,20 @@ const UploadCard = memo(function UploadCard({
                   onLoad={() => console.log('[UploadCard] Image loaded successfully')}
                   onError={() => console.error('[UploadCard] Image failed to load')}
                 />
-              ) : (
-                <div className="flex items-center justify-center h-[70vh] bg-slate-50 rounded border">
-                  <p className="text-slate-500">Loading preview...</p>
+                <div className="flex justify-between items-center text-sm">
+                  <p className="text-slate-600">
+                    If the preview doesn't load, try opening in a new tab
+                  </p>
+                  <a 
+                    href={preview} 
+                    target="_blank" 
+                    rel="noreferrer" 
+                    className="text-blue-600 underline hover:text-blue-700"
+                  >
+                    Open in new tab ↗
+                  </a>
                 </div>
-              )
+              </div>
             )}
           </div>
         </DialogContent>
