@@ -1,7 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, Eye, Bell } from 'lucide-react'
+import { Search, Eye, Bell, ChevronDown } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem } from '@/components/ui/dropdown-menu'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 
 interface UserProgress {
   user_id: string
@@ -79,164 +85,119 @@ export function UsersTable({ rows }: UsersTableProps) {
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return 'Never'
-    const date = new Date(dateStr)
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })
+    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   }
 
   if (rows.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-        <p className="text-slate-600">No users found</p>
-      </div>
+      <Card>
+        <CardContent className="p-12 text-center">
+          <p className="text-slate-600">No users found</p>
+        </CardContent>
+      </Card>
     )
   }
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-      {/* Toolbar */}
-      <div className="p-4 border-b border-slate-200">
-        <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold text-slate-900">Users</h2>
-          
-          <div className="flex items-center gap-3">
-            {/* Search */}
-            <div className="relative">
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-xl">Users</CardTitle>
+          <div className="flex items-center gap-2">
+            <div className="relative w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search by name or email..."
+              <Input
+                placeholder="Search by email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-1.5 w-64 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="pl-9"
               />
             </div>
-
-            {/* User Filter */}
-            <select
-              value={userFilter}
-              onChange={(e) => setUserFilter(e.target.value)}
-              className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="all">All Users</option>
-              <option value="active">Active</option>
-              <option value="completed">Completed</option>
-            </select>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="flex items-center gap-2">
+                  {userFilter === 'all' ? 'All Users' : userFilter.charAt(0).toUpperCase() + userFilter.slice(1)}
+                  <ChevronDown className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuRadioGroup value={userFilter} onValueChange={setUserFilter}>
+                  <DropdownMenuRadioItem value="all">All Users</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="active">Active</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="completed">Completed</DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
-      </div>
-
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-slate-50">
-            <tr>
-              <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">User</th>
-              <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">Email</th>
-              <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">Progress</th>
-              <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">Streak</th>
-              <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">Last Weigh-in</th>
-              <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">Days to Reward</th>
-              <th className="px-4 py-2.5 text-right text-xs font-medium text-slate-600">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>User</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead className="w-[200px]">Progress</TableHead>
+              <TableHead className="w-[240px]">Streak</TableHead>
+              <TableHead>Last Weigh-in</TableHead>
+              <TableHead>Days to Reward</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {filteredRows.map((row) => {
               const userName = row.email.split('@')[0].split('.').map(part => 
                 part.charAt(0).toUpperCase() + part.slice(1)
               ).join(' ')
               
               return (
-                <tr 
-                  key={row.user_id}
-                  className="hover:bg-slate-50 transition-colors"
-                >
-                  <td className="px-4 py-3 text-sm font-medium text-slate-900">
-                    {userName}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-slate-600">
-                    {row.email}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex gap-0.5 w-32">
-                        {getProgressBarSegments(row.total_weigh_ins)}
-                      </div>
-                      <span className="text-xs font-medium text-slate-700">
-                        {row.progress_percent}%
-                      </span>
+                <TableRow key={row.user_id}>
+                  <TableCell className="font-medium">{userName}</TableCell>
+                  <TableCell>{row.email}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Progress value={row.progress_percent} className="w-24 h-1.5" />
+                      <span className="text-xs font-medium text-slate-600">{row.progress_percent}%</span>
                     </div>
-                  </td>
-                  <td className="px-4 py-3">
+                  </TableCell>
+                  <TableCell>
                     <div className="flex gap-1">
                       {getStreakChips(row.total_weigh_ins)}
                     </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-slate-600">
-                    {formatDate(row.last_weigh_in_at)}
-                  </td>
-                  <td className="px-4 py-3">
+                  </TableCell>
+                  <TableCell>{formatDate(row.last_weigh_in_at)}</TableCell>
+                  <TableCell>
                     {row.days_to_reward === 0 || row.total_weigh_ins >= 7 ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                        Completed ✓
-                      </span>
+                      <span className="font-semibold text-green-600">Completed</span>
                     ) : (
-                      <span className="text-sm font-medium text-slate-900">
+                      <span className="font-semibold text-slate-800">
                         {row.days_to_reward} {row.days_to_reward === 1 ? 'day' : 'days'}
                       </span>
                     )}
-                  </td>
-                  <td className="px-4 py-3 text-right">
+                  </TableCell>
+                  <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <button
-                        disabled
-                        className="inline-flex items-center gap-1 px-2 py-1 text-sm font-medium text-slate-400 cursor-not-allowed"
-                      >
+                      <Button variant="ghost" size="sm" disabled>
                         <Eye className="w-4 h-4" />
-                      </button>
-                      <button
-                        disabled
-                        className="inline-flex items-center gap-1 px-2 py-1 text-sm font-medium text-slate-400 cursor-not-allowed"
-                      >
+                      </Button>
+                      <Button variant="ghost" size="sm" disabled>
                         <Bell className="w-4 h-4" />
-                        Nudge
-                      </button>
+                      </Button>
                     </div>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )
             })}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
 
-      {/* Footer */}
-      <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between">
-        <p className="text-sm text-slate-600">
-          Showing {filteredRows.length} of {rows.length} users
-        </p>
-        <div className="flex items-center gap-2">
-          <button 
-            disabled
-            className="px-3 py-1 text-sm text-slate-400 cursor-not-allowed"
-          >
-            Previous
-          </button>
-          <button 
-            disabled
-            className="px-3 py-1 text-sm bg-slate-900 text-white rounded cursor-not-allowed"
-          >
-            Next
-          </button>
-        </div>
-      </div>
-
-      {/* Empty State */}
-      {filteredRows.length === 0 && searchTerm && (
-        <div className="p-8 text-center text-slate-600">
-          No results found for "{searchTerm}"
-        </div>
-      )}
-    </div>
+        {filteredRows.length === 0 && searchTerm && (
+          <div className="p-8 text-center text-slate-600">
+            No results found for "{searchTerm}"
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 

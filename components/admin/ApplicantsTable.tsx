@@ -1,8 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, Eye, Download } from 'lucide-react'
+import { Search, Eye, Download, ChevronDown } from 'lucide-react'
 import { ReviewDrawer } from './ReviewDrawer'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem } from '@/components/ui/dropdown-menu'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface Applicant {
   id: string
@@ -52,7 +58,7 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
     const style = styles[ocrStatus.toLowerCase() as keyof typeof styles] || 'bg-slate-100 text-slate-700'
     
     return (
-      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${style}`}>
+      <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${style}`}>
         {ocrStatus.charAt(0).toUpperCase() + ocrStatus.slice(1)}
       </span>
     )
@@ -72,7 +78,7 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
     const displayStatus = status.replace('_', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
     
     return (
-      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${style}`}>
+      <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${style}`}>
         {displayStatus}
       </span>
     )
@@ -80,145 +86,103 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
 
   if (rows.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-        <p className="text-slate-600">No applications found</p>
-      </div>
+      <Card>
+        <CardContent className="p-12 text-center">
+          <p className="text-slate-600">No applications found</p>
+        </CardContent>
+      </Card>
     )
   }
 
   return (
     <>
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-        {/* Toolbar */}
-        <div className="p-4 border-b border-slate-200">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="text-lg font-semibold text-slate-900">Applicants</h2>
-            
-            <div className="flex items-center gap-3">
-              {/* Search */}
-              <div className="relative">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xl">Applicants</CardTitle>
+            <div className="flex items-center gap-2">
+              <div className="relative w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input
-                  type="text"
+                <Input
                   placeholder="Search by name or email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-1.5 w-64 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="pl-9"
                 />
               </div>
-
-              {/* Status Filter */}
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="all">All Status</option>
-                <option value="new">New</option>
-                <option value="in_review">In Review</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
-              </select>
-
-              {/* Export Button */}
-              <button className="inline-flex items-center gap-2 px-3 py-1.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    {statusFilter === 'all' ? 'All Status' : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuRadioGroup value={statusFilter} onValueChange={setStatusFilter}>
+                    <DropdownMenuRadioItem value="all">All Status</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="new">New</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="in_review">In Review</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="approved">Approved</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="rejected">Rejected</DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button variant="outline" className="flex items-center gap-2">
                 <Download className="w-4 h-4" />
                 Export CSV
-              </button>
+              </Button>
             </div>
           </div>
-        </div>
-
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Submitted</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Full Name</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Mobile</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">ID Type</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">OCR</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-4 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Submitted</TableHead>
+                <TableHead>Full Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Mobile</TableHead>
+                <TableHead>ID Type</TableHead>
+                <TableHead>OCR</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {filteredRows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="hover:bg-slate-50 transition-colors"
-                >
-                  <td className="px-6 py-4 text-sm font-medium text-slate-900">
-                    {new Date(row.created_at).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                      timeZone: 'UTC'
-                    })}
-                  </td>
-                  <td className="px-6 py-4 text-sm font-semibold text-slate-900">
+                <TableRow key={row.id}>
+                  <TableCell>
+                    {new Date(row.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </TableCell>
+                  <TableCell className="font-medium">
                     {row.first_name} {row.family_name}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-600">
-                    {row.email}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-600">
-                    {row.mobile_e164}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-600 capitalize">
-                    {row.id_type.replace('_', ' ')}
-                  </td>
-                  <td className="px-6 py-4">
-                    {getOCRBadge(row.ocr_status)}
-                  </td>
-                  <td className="px-6 py-4">
-                    {getStatusBadge(row.status)}
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button
-                      onClick={() => setSelectedApplicant(row)}
-                      className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all duration-200"
-                    >
+                  </TableCell>
+                  <TableCell>{row.email}</TableCell>
+                  <TableCell>{row.mobile_e164}</TableCell>
+                  <TableCell>
+                    {row.id_type.replace('_', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                  </TableCell>
+                  <TableCell>{getOCRBadge(row.ocr_status)}</TableCell>
+                  <TableCell>{getStatusBadge(row.status)}</TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="sm" onClick={() => setSelectedApplicant(row)} className="flex items-center gap-1">
                       <Eye className="w-4 h-4" />
                       Review
-                    </button>
-                  </td>
-                </tr>
+                    </Button>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+          
+          {filteredRows.length === 0 && (
+             <div className="p-8 text-center text-slate-600">
+               No results found for "{searchTerm}"
+             </div>
+           )}
 
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
-          <p className="text-sm text-slate-600">
-            Showing {filteredRows.length} of {rows.length} applicants
-          </p>
-          <div className="flex items-center gap-2">
-            <button
-              disabled
-              className="px-4 py-2 text-sm text-slate-400 cursor-not-allowed border border-slate-200 rounded-lg"
-            >
-              Previous
-            </button>
-            <button
-              disabled
-              className="px-4 py-2 text-sm bg-slate-900 text-white rounded-lg cursor-not-allowed"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-
-        {/* Empty State */}
-        {filteredRows.length === 0 && searchTerm && (
-          <div className="p-8 text-center text-slate-600">
-            No results found for "{searchTerm}"
-          </div>
-        )}
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Review Drawer */}
       {selectedApplicant && (
