@@ -103,7 +103,7 @@ const UploadCard = memo(function UploadCard({
       setState('error')
       setErrorMessage(e instanceof Error ? e.message : 'Upload failed. Please try again.')
     }
-  }, [formFieldName, prefix, idType, onIdExtracted, setValue])
+  }, [formFieldName, prefix, setValue])
 
   const getStateStyles = () => {
     switch (state) {
