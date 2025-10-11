@@ -28,11 +28,32 @@ export async function POST(req: Request) {
     console.log('[applications/submit] Creating Supabase client...')
     const supabase = await createClient()
     console.log('[applications/submit] Supabase client created successfully')
+
+    // Test database connection
+    console.log('[applications/submit] Testing database connection...')
+    const { data: testData, error: testError } = await supabase
+      .from('nutritionist_applications')
+      .select('id')
+      .limit(1)
+    
+    console.log('[applications/submit] Database test result:', { testData, testError })
+    
+    if (testError) {
+      console.error('[applications/submit] Database connection failed:', testError)
+      return NextResponse.json({ 
+        ok: false, 
+        error: 'Database connection failed',
+        details: testError.message,
+        code: testError.code,
+        hint: testError.hint
+      }, { status: 500 })
+    }
     
     return NextResponse.json({ 
       ok: true, 
-      message: "Supabase client creation successful",
-      receivedData: payload
+      message: "Database connection successful",
+      receivedData: payload,
+      testData: testData
     })
   } catch (e) {
     console.error('[applications/submit] Error:', e)
