@@ -25,9 +25,13 @@ export async function POST(req: Request) {
     const payload = schema.parse(body)
     console.log('[applications/submit] Schema validation passed:', payload)
     
+    console.log('[applications/submit] Creating Supabase client...')
+    const supabase = await createClient()
+    console.log('[applications/submit] Supabase client created successfully')
+    
     return NextResponse.json({ 
       ok: true, 
-      message: "Schema validation successful",
+      message: "Supabase client creation successful",
       receivedData: payload
     })
   } catch (e) {
