@@ -1,0 +1,15 @@
+---
+alwaysApply: true
+---
+# AI Dev Tasks Workflow (Cursor)
+Use these files to structure PRDs, generate tasks, and process tasks step-by-step:
+- [create-prd.md](mdc:docs/ai-dev-tasks/create-prd.md)
+- [generate-tasks.md](mdc:docs/ai-dev-tasks/generate-tasks.md)
+- [process-task-list.md](mdc:docs/ai-dev-tasks/process-task-list.md)
+
+How to use in Cursor chat:
+1) Create PRD: reference [create-prd.md](mdc:docs/ai-dev-tasks/create-prd.md)
+2) Generate tasks from PRD: reference [generate-tasks.md](mdc:docs/ai-dev-tasks/generate-tasks.md)
+3) Execute tasks with approvals: reference [process-task-list.md](mdc:docs/ai-dev-tasks/process-task-list.md)
+
+Source: https://github.com/snarktank/ai-dev-tasks.git

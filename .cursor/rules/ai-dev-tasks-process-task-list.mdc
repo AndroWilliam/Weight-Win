@@ -1,0 +1,6 @@
+---
+alwaysApply: false
+description: Use this to execute tasks incrementally with approvals
+---
+Use [process-task-list.md](mdc:docs/ai-dev-tasks/process-task-list.md) to work through tasks one at a time, pausing for review.
+Source: https://github.com/snarktank/ai-dev-tasks.git

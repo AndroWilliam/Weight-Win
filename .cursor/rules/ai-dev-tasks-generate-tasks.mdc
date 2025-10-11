@@ -1,0 +1,6 @@
+---
+alwaysApply: false
+description: Use this to generate a detailed task list from a PRD
+---
+Use [generate-tasks.md](mdc:docs/ai-dev-tasks/generate-tasks.md) to convert a PRD into step-by-step implementation tasks.
+Source: https://github.com/snarktank/ai-dev-tasks.git

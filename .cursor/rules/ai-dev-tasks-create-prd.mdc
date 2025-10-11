@@ -1,0 +1,6 @@
+---
+alwaysApply: false
+description: Use this to generate a Product Requirements Document (PRD)
+---
+Use [create-prd.md](mdc:docs/ai-dev-tasks/create-prd.md) to produce a PRD for any new feature in this repo.
+Source: https://github.com/snarktank/ai-dev-tasks.git
