@@ -21,10 +21,14 @@ export async function POST(req: Request) {
     const body = await req.json()
     console.log('[applications/submit] Request body received:', body)
     
+    console.log('[applications/submit] Validating schema...')
+    const payload = schema.parse(body)
+    console.log('[applications/submit] Schema validation passed:', payload)
+    
     return NextResponse.json({ 
       ok: true, 
-      message: "Request parsing successful",
-      receivedData: body
+      message: "Schema validation successful",
+      receivedData: payload
     })
   } catch (e) {
     console.error('[applications/submit] Error:', e)
