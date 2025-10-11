@@ -5,6 +5,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { ThemeProvider } from '@/components/theme-provider'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -30,14 +31,21 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <body className="font-sans antialiased">
-        <ErrorBoundary>
-          {children}
-          <Toaster />
-          <Analytics />
-          <SpeedInsights />
-        </ErrorBoundary>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ErrorBoundary>
+            {children}
+            <Toaster />
+            <Analytics />
+            <SpeedInsights />
+          </ErrorBoundary>
+        </ThemeProvider>
       </body>
     </html>
   )

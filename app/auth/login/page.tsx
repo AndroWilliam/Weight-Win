@@ -38,31 +38,31 @@ export default function LoginPage() {
           </div>
         </header>
 
-        <div className="flex min-h-[calc(100vh-120px)] w-full items-center justify-center p-6">
+        <div className="flex min-h-[calc(100vh-120px)] w-full items-center justify-center p-4 sm:p-6">
           <div className="w-full max-w-md">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <span className="text-white font-bold text-2xl">W</span>
-              </div>
-              <h1 className="text-h1 text-neutral-900 mb-2">Welcome to WeightWin</h1>
-              <p className="text-body text-neutral-700">
-                Start your 7-day weight tracking challenge
-              </p>
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <span className="text-white font-bold text-lg sm:text-2xl">W</span>
             </div>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2">Welcome to WeightWin</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Start your 7-day weight tracking challenge
+            </p>
+          </div>
 
-            <Card className="border-neutral-300">
-              <CardContent className="p-8">
+            <Card className="border-border">
+              <CardContent className="p-6 sm:p-8">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-2xl">🚀</span>
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-lg sm:text-2xl">🚀</span>
                   </div>
-                  <h2 className="text-xl font-semibold text-neutral-900 mb-2">Demo Mode</h2>
-                  <p className="text-neutral-600 mb-6">
+                  <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-2">Demo Mode</h2>
+                  <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
                     Supabase authentication is not configured. You can still explore the app in demo mode.
                   </p>
                   <Button
                     onClick={() => window.location.href = '/consent'}
-                    className="w-full bg-primary-600 hover:bg-primary-700 text-white py-3 text-body font-semibold rounded-lg"
+                    className="w-full bg-primary hover:bg-primary/90 text-white py-3 text-sm sm:text-base font-medium rounded-lg"
                   >
                     Continue to Demo
                   </Button>
@@ -215,25 +215,25 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="px-4 py-6">
+      <header className="px-4 sm:px-6 py-4 sm:py-6">
         <div className="max-w-6xl mx-auto flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-2 text-neutral-700 hover:text-neutral-900">
+          <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
             <ArrowLeft className="w-4 h-4" />
-            <span className="text-body">Back to home</span>
+            <span className="text-sm sm:text-base">Back to home</span>
           </Link>
         </div>
       </header>
 
-      <div className="flex min-h-[calc(100vh-120px)] w-full items-center justify-center p-6">
+      <div className="flex min-h-[calc(100vh-120px)] w-full items-center justify-center p-4 sm:p-6">
         <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <span className="text-white font-bold text-2xl">W</span>
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <span className="text-white font-bold text-lg sm:text-2xl">W</span>
             </div>
-            <h1 className="text-h1 text-neutral-900 mb-2">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2">
               {isSignUp ? "Create your account" : "Welcome back"}
             </h1>
-            <p className="text-body text-neutral-700">
+            <p className="text-sm sm:text-base text-muted-foreground">
               {isSignUp 
                 ? "Start your 7-day weight tracking challenge" 
                 : "Sign in to continue your challenge"
@@ -243,26 +243,26 @@ export default function LoginPage() {
 
           <Card className="border-neutral-300">
             <CardContent className="p-8">
-              <form onSubmit={handleEmailAuth} className="space-y-6">
+              <form onSubmit={handleEmailAuth} className="space-y-4 sm:space-y-6">
                 {error && (
-                  <div className="p-4 text-sm text-danger-600 bg-danger-50 border border-danger-200 rounded-lg">
+                  <div className="p-3 sm:p-4 text-xs sm:text-sm text-red-600 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                     {error}
                   </div>
                 )}
 
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   <div>
-                    <Label htmlFor="email" className="text-body font-medium text-neutral-900">
+                    <Label htmlFor="email" className="text-sm sm:text-base font-medium text-foreground">
                       Email address
                     </Label>
                     <div className="relative mt-2">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
                         id="email"
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="pl-10 border-neutral-300 focus:border-primary-600 focus:ring-primary-600"
+                        className="pl-10 border-border focus:border-primary focus:ring-primary"
                         placeholder="Enter your email"
                         required
                       />
@@ -270,17 +270,17 @@ export default function LoginPage() {
                   </div>
 
                   <div>
-                    <Label htmlFor="password" className="text-body font-medium text-neutral-900">
+                    <Label htmlFor="password" className="text-sm sm:text-base font-medium text-foreground">
                       Password
                     </Label>
                     <div className="relative mt-2">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
                         id="password"
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10 border-neutral-300 focus:border-primary-600 focus:ring-primary-600"
+                        className="pl-10 border-border focus:border-primary focus:ring-primary"
                         placeholder="Enter your password"
                         required
                       />
@@ -291,31 +291,31 @@ export default function LoginPage() {
                 <Button
                   type="submit"
                   loading={isLoading}
-                  className="w-full bg-primary-600 hover:bg-primary-700 text-white py-3 text-body font-semibold rounded-lg"
+                  className="w-full bg-primary hover:bg-primary/90 text-white py-3 text-sm sm:text-base font-medium rounded-lg disabled:opacity-50"
                 >
                   {isSignUp ? "Create Account" : "Sign In"}
                 </Button>
               </form>
 
-              <div className="mt-6">
+              <div className="mt-4 sm:mt-6">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-neutral-300" />
+                    <div className="w-full border-t border-border" />
                   </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-neutral-500">Or continue with</span>
+                  <div className="relative flex justify-center text-xs sm:text-sm">
+                    <span className="px-2 bg-background text-muted-foreground">Or continue with</span>
                   </div>
                 </div>
 
-                <div className="mt-6 space-y-3">
+                <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
                   <Button
                     onClick={handleGoogleLogin}
                     loading={isLoading}
                     variant="outline"
-                    className="w-full border-neutral-300 hover:bg-neutral-50 py-4 text-body font-medium rounded-lg h-auto"
+                    className="w-full border-border hover:bg-muted py-3 sm:py-4 text-sm sm:text-base font-medium rounded-lg h-auto disabled:opacity-50"
                   >
                     <div className="flex flex-col items-center justify-center gap-1">
-                      <svg className="w-5 h-5" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                         <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                         <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -330,7 +330,7 @@ export default function LoginPage() {
                       onClick={handleDevLogin}
                       loading={isLoading}
                       variant="outline"
-                      className="w-full border-neutral-300 hover:bg-neutral-50 py-3 text-body font-medium rounded-lg"
+                      className="w-full border-border hover:bg-muted py-3 text-sm sm:text-base font-medium rounded-lg disabled:opacity-50"
                     >
                       Skip Login (Dev Mode)
                     </Button>
@@ -338,13 +338,13 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <div className="mt-6 text-center">
-                <p className="text-body text-neutral-700">
+              <div className="mt-4 sm:mt-6 text-center">
+                <p className="text-sm sm:text-base text-muted-foreground">
                   {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
                   <button
                     type="button"
                     onClick={() => setIsSignUp(!isSignUp)}
-                    className="text-primary-600 hover:text-primary-700 font-medium"
+                    className="text-primary hover:text-primary/80 font-medium"
                   >
                     {isSignUp ? "Sign in" : "Sign up"}
                   </button>

@@ -125,25 +125,25 @@ const UploadCard = memo(function UploadCard({
   const getStateStyles = () => {
     switch (state) {
       case 'success':
-        return 'border-emerald-500 bg-emerald-50'
+        return 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
       case 'error':
-        return 'border-rose-500 bg-rose-50'
+        return 'border-rose-500 bg-rose-50 dark:bg-rose-900/20'
       case 'uploading':
       case 'scanning':
-        return 'border-blue-300 bg-blue-50'
+        return 'border-blue-300 bg-blue-50 dark:bg-blue-900/20'
       default:
-        return 'border-dashed border-slate-300 bg-slate-50'
+        return 'border-dashed border-border bg-muted'
     }
   }
 
   const isPdf = preview?.includes('pdf') || path?.toLowerCase().endsWith('.pdf')
 
   return (
-    <div className={`rounded-xl border-2 ${getStateStyles()} p-6 transition-all duration-200`}>
+    <div className={`rounded-xl border-2 ${getStateStyles()} p-4 sm:p-6 transition-all duration-200`}>
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-medium text-slate-900">{title}</h3>
+        <h3 className="text-sm sm:text-base font-medium text-foreground">{title}</h3>
         {state === 'uploading' && (
-          <span className="text-sm text-blue-600 font-medium">{pct}%</span>
+          <span className="text-xs sm:text-sm text-blue-600 font-medium">{pct}%</span>
         )}
         {state === 'scanning' && (
           <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
@@ -164,7 +164,7 @@ const UploadCard = memo(function UploadCard({
             className="hidden"
             onChange={onPick}
           />
-          <span className="px-4 py-2 rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-colors">
+          <span className="px-3 sm:px-4 py-2 rounded-md border border-border bg-background text-foreground hover:bg-muted transition-colors text-sm sm:text-base">
             Upload file
           </span>
         </label>
@@ -172,13 +172,13 @@ const UploadCard = memo(function UploadCard({
 
       {state === 'uploading' && (
         <div className="space-y-2">
-          <div className="h-2 rounded bg-slate-200">
+          <div className="h-2 rounded bg-muted">
             <div
               className="h-2 rounded bg-blue-600 transition-all duration-300"
               style={{ width: `${pct}%` }}
             />
           </div>
-          <p className="text-sm text-slate-600">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Uploading... {Math.round((pct / 100) * 10) / 10}MB of 10MB max
           </p>
         </div>
@@ -187,7 +187,7 @@ const UploadCard = memo(function UploadCard({
       {state === 'scanning' && (
         <div className="flex items-center gap-2">
           <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
-          <p className="text-sm text-slate-600">Running OCR...</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">Running OCR...</p>
         </div>
       )}
 
@@ -195,26 +195,26 @@ const UploadCard = memo(function UploadCard({
         <div className="flex flex-col items-center gap-3">
           <div className="flex items-center gap-3">
             {isPdf ? (
-              <div className="flex items-center gap-2 p-2 bg-slate-100 rounded-md">
-                <FileText className="w-4 h-4 text-slate-600" />
-                <span className="text-sm text-slate-700 truncate max-w-[220px]" title={originalName || ''}>{originalName || 'Document'}</span>
+              <div className="flex items-center gap-2 p-2 bg-muted rounded-md">
+                <FileText className="w-4 h-4 text-muted-foreground" />
+                <span className="text-xs sm:text-sm text-foreground truncate max-w-[180px] sm:max-w-[220px]" title={originalName || ''}>{originalName || 'Document'}</span>
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <img
                   src={preview}
                   alt="preview"
-                  className="h-14 w-14 rounded object-cover border border-slate-200"
+                  className="h-12 w-12 sm:h-14 sm:w-14 rounded object-cover border border-border"
                 />
-                <span className="text-sm text-slate-700 truncate max-w-[220px]" title={originalName || ''}>{originalName || 'Image'}</span>
+                <span className="text-xs sm:text-sm text-foreground truncate max-w-[180px] sm:max-w-[220px]" title={originalName || ''}>{originalName || 'Image'}</span>
               </div>
             )}
           </div>
-          <div className="mt-1 flex justify-center gap-3">
+          <div className="mt-1 flex justify-center gap-2 sm:gap-3">
             <button
               type="button"
               onClick={() => setIsPreviewOpen(true)}
-              className="px-3 py-1.5 rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-colors text-sm"
+              className="px-2 sm:px-3 py-1.5 rounded-md border border-border bg-background text-foreground hover:bg-muted transition-colors text-xs sm:text-sm"
             >
               Preview
             </button>
@@ -225,7 +225,7 @@ const UploadCard = memo(function UploadCard({
                 className="hidden"
                 onChange={onPick}
               />
-              <span className="px-3 py-1.5 rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-colors text-sm">
+              <span className="px-2 sm:px-3 py-1.5 rounded-md border border-border bg-background text-foreground hover:bg-muted transition-colors text-xs sm:text-sm">
                 Replace
               </span>
             </label>
@@ -235,7 +235,7 @@ const UploadCard = memo(function UploadCard({
 
       {state === 'error' && (
         <div className="space-y-2">
-          <p className="text-sm text-rose-600">{errorMessage}</p>
+          <p className="text-xs sm:text-sm text-rose-600">{errorMessage}</p>
           <label className="inline-flex cursor-pointer">
             <input
               type="file"
@@ -243,7 +243,7 @@ const UploadCard = memo(function UploadCard({
               className="hidden"
               onChange={onPick}
             />
-            <span className="px-3 py-1 rounded border border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors text-sm">
+            <span className="px-3 py-1 rounded border border-rose-300 bg-rose-50 dark:bg-rose-900/20 text-rose-700 hover:bg-rose-100 dark:hover:bg-rose-900/30 transition-colors text-xs sm:text-sm">
               Retry
             </span>
           </label>
@@ -252,36 +252,36 @@ const UploadCard = memo(function UploadCard({
       
       {/* Preview dialog */}
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl border-border">
           <DialogHeader>
-            <DialogTitle>Document preview</DialogTitle>
+            <DialogTitle className="text-sm sm:text-base text-foreground">Document preview</DialogTitle>
           </DialogHeader>
           <div className="mt-2">
             {!preview ? (
-              <div className="flex items-center justify-center h-[70vh] bg-slate-50 rounded border">
+              <div className="flex items-center justify-center h-[70vh] bg-muted rounded border border-border">
                 <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-                  <p className="text-slate-500">Loading preview...</p>
+                  <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Loading preview...</p>
                 </div>
               </div>
             ) : isPdf ? (
               <div className="space-y-3">
                 <iframe 
                   src={`${preview}#view=FitH`}
-                  className="w-full h-[70vh] rounded border bg-white"
+                  className="w-full h-[70vh] rounded border border-border bg-background"
                   title="PDF preview"
                   onLoad={() => console.log('[UploadCard] PDF loaded successfully')}
                   onError={() => console.error('[UploadCard] PDF failed to load')}
                 />
-                <div className="flex justify-between items-center text-sm">
-                  <p className="text-slate-600">
+                <div className="flex justify-between items-center text-xs sm:text-sm">
+                  <p className="text-muted-foreground">
                     If the preview doesn't load, try opening in a new tab
                   </p>
                   <a 
                     href={preview} 
                     target="_blank" 
                     rel="noreferrer" 
-                    className="text-blue-600 underline hover:text-blue-700"
+                    className="text-primary underline hover:text-primary/80"
                   >
                     Open in new tab ↗
                   </a>
@@ -292,19 +292,19 @@ const UploadCard = memo(function UploadCard({
                 <img 
                   src={preview} 
                   alt="Document preview" 
-                  className="w-full max-h-[70vh] object-contain rounded border bg-white"
+                  className="w-full max-h-[70vh] object-contain rounded border border-border bg-background"
                   onLoad={() => console.log('[UploadCard] Image loaded successfully')}
                   onError={() => console.error('[UploadCard] Image failed to load')}
                 />
-                <div className="flex justify-between items-center text-sm">
-                  <p className="text-slate-600">
+                <div className="flex justify-between items-center text-xs sm:text-sm">
+                  <p className="text-muted-foreground">
                     If the preview doesn't load, try opening in a new tab
                   </p>
                   <a 
                     href={preview} 
                     target="_blank" 
                     rel="noreferrer" 
-                    className="text-blue-600 underline hover:text-blue-700"
+                    className="text-primary underline hover:text-primary/80"
                   >
                     Open in new tab ↗
                   </a>

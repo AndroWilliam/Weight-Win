@@ -131,8 +131,8 @@ export default function CommitPage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-neutral-600">Loading your settings...</p>
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading your settings...</p>
         </div>
       </div>
     )
@@ -142,7 +142,7 @@ export default function CommitPage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <p className="text-neutral-600 mb-4">Settings not found. Please complete setup first.</p>
+          <p className="text-muted-foreground mb-4">Settings not found. Please complete setup first.</p>
           <Button onClick={() => router.push('/setup')}>
             Go to Setup
           </Button>
@@ -154,88 +154,88 @@ export default function CommitPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="px-6 py-4 border-b border-neutral-300">
+      <header className="px-4 sm:px-6 py-4 border-b border-border">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">W</span>
             </div>
-            <h1 className="text-xl font-bold text-neutral-900">WeightWin</h1>
+            <h1 className="text-lg sm:text-xl font-bold text-foreground">WeightWin</h1>
           </div>
         </div>
       </header>
 
-      <main className="px-6 py-12">
+      <main className="px-4 sm:px-6 py-6 sm:py-8">
         <div className="max-w-2xl mx-auto">
           {/* Title */}
-          <div className="text-center mb-12">
-            <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Target className="w-8 h-8 text-primary-600" />
+          <div className="text-center mb-8 sm:mb-12">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <Target className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
             </div>
-            <h1 className="text-4xl font-bold text-neutral-900 mb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">
               Ready to commit?
             </h1>
-            <p className="text-xl text-neutral-600">
+            <p className="text-sm sm:text-base md:text-lg text-muted-foreground">
               You're committing to 7 days of daily scale photos. Consistency is the key to building lasting habits.
             </p>
           </div>
 
           {/* Challenge Details Card */}
-          <Card className="border-neutral-300 mb-8">
-            <CardContent className="p-8">
-              <h2 className="text-2xl font-bold text-neutral-900 mb-6">Your 7-day challenge:</h2>
+          <Card className="border-border mb-6 sm:mb-8">
+            <CardContent className="p-4 sm:p-6 md:p-8">
+              <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-4 sm:mb-6">Your 7-day challenge:</h2>
               
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-primary-600 rounded-full"></div>
-                  <span className="text-neutral-700">Take a scale photo every morning</span>
+                  <div className="w-2 h-2 bg-primary rounded-full"></div>
+                  <span className="text-xs sm:text-sm md:text-base text-muted-foreground">Take a scale photo every morning</span>
                 </div>
                 
                 <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-primary-600 rounded-full"></div>
-                  <span className="text-neutral-700">
+                  <div className="w-2 h-2 bg-primary rounded-full"></div>
+                  <span className="text-xs sm:text-sm md:text-base text-muted-foreground">
                     We'll remind you at {settings.reminderTime}
                   </span>
                 </div>
                 
                 <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-primary-600 rounded-full"></div>
-                  <span className="text-neutral-700">
+                  <div className="w-2 h-2 bg-primary rounded-full"></div>
+                  <span className="text-xs sm:text-sm md:text-base text-muted-foreground">
                     Track weights in {settings.weightUnit === 'kg' ? 'kilograms (kg)' : 'pounds (lb)'}
                   </span>
                 </div>
                 
                 <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-primary-600 rounded-full"></div>
-                  <span className="text-neutral-700">Earn your free nutritionist session</span>
+                  <div className="w-2 h-2 bg-primary rounded-full"></div>
+                  <span className="text-xs sm:text-sm md:text-base text-muted-foreground">Earn your free nutritionist session</span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Settings Summary */}
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
             {/* Reminder Settings */}
-            <Card className="border-neutral-300">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <Clock className="w-5 h-5 text-primary-600" />
-                  <h3 className="text-lg font-semibold text-neutral-900">Daily Reminder</h3>
+            <Card className="border-border">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center gap-3 mb-3 sm:mb-4">
+                  <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Daily Reminder</h3>
                 </div>
-                <p className="text-neutral-600">
+                <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
                   {settings.reminderTime} in {settings.timezone || 'your timezone'}
                 </p>
               </CardContent>
             </Card>
 
             {/* Data Sharing */}
-            <Card className="border-neutral-300">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <Globe className="w-5 h-5 text-primary-600" />
-                  <h3 className="text-lg font-semibold text-neutral-900">Data Sharing</h3>
+            <Card className="border-border">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center gap-3 mb-3 sm:mb-4">
+                  <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Data Sharing</h3>
                 </div>
-                <p className="text-neutral-600">
+                <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
                   {consents.shareWithNutritionist 
                     ? 'Share data with nutritionist after completion' 
                     : 'Keep data private'
@@ -246,21 +246,20 @@ export default function CommitPage() {
           </div>
 
           {/* Action Buttons */}
-          <div className="text-center space-y-4">
+          <div className="text-center space-y-3 sm:space-y-4">
             <Button
               onClick={handleStartChallenge}
-              loading={isSubmitting}
-              size="lg"
-              className="text-lg font-semibold px-8 mx-auto min-w-fit"
+              disabled={isSubmitting}
+              className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white px-6 sm:px-8 py-3 rounded-lg text-sm sm:text-base md:text-lg font-medium disabled:opacity-50"
             >
-              I'm in - Start My Challenge
-              <ArrowRight className="w-5 h-5" />
+              {isSubmitting ? "Starting..." : "I'm in - Start My Challenge"}
+              <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
             
             <div className="flex items-center justify-center gap-4">
               <button
                 onClick={handleBackToSettings}
-                className="text-neutral-600 hover:text-neutral-800 text-sm font-medium"
+                className="text-xs sm:text-sm text-muted-foreground hover:text-foreground font-medium"
               >
                 Back to settings
               </button>
@@ -268,8 +267,8 @@ export default function CommitPage() {
           </div>
 
           {/* Motivational Footer */}
-          <div className="mt-12 text-center">
-            <p className="text-neutral-500 italic">
+          <div className="mt-8 sm:mt-12 text-center">
+            <p className="text-xs sm:text-sm text-muted-foreground italic">
               Remember: You showed up. That's what matters most.
             </p>
           </div>

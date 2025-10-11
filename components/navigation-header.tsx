@@ -4,6 +4,9 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ProfileDropdown } from "@/components/profile-dropdown"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { Menu, X } from "lucide-react"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
 export function NavigationHeader() {
   const [user, setUser] = useState<{ initials: string; isAdmin: boolean } | null>(null)
@@ -54,43 +57,107 @@ export function NavigationHeader() {
   }
 
   return (
-    <header className="px-6 py-4">
+    <header className="px-4 sm:px-6 py-4 bg-background border-b border-border">
       <div className="max-w-6xl mx-auto flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">W</span>
           </div>
-          <h1 className="text-xl font-bold text-neutral-900">WeightWin</h1>
+          <h1 className="text-lg sm:text-xl font-bold text-foreground">WeightWin</h1>
         </div>
         
+        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-8">
           <button 
             onClick={() => scrollToSection('how-it-works')}
-            className="text-neutral-700 hover:text-neutral-900 font-medium transition-colors"
+            className="text-muted-foreground hover:text-foreground font-medium transition-colors"
           >
             How it works
           </button>
           <button 
             onClick={() => scrollToSection('for-nutritionists')}
-            className="text-neutral-700 hover:text-neutral-900 font-medium transition-colors"
+            className="text-muted-foreground hover:text-foreground font-medium transition-colors"
           >
             For Nutritionists
           </button>
         </nav>
         
-        {/* Show profile dropdown if user is logged in, otherwise show CTA button */}
-        {!isLoading && user ? (
-          <ProfileDropdown 
-            userInitials={user.initials}
-            isAdmin={user.isAdmin}
-          />
-        ) : (
-          <Link href="/auth/login">
-            <Button className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg font-medium">
-              Start the 7-Day Challenge
-            </Button>
-          </Link>
-        )}
+        {/* Right side - Desktop */}
+        <div className="hidden md:flex items-center gap-4">
+          {!isLoading && user && (
+            <ThemeToggle />
+          )}
+          {!isLoading && user ? (
+            <ProfileDropdown 
+              userInitials={user.initials}
+              isAdmin={user.isAdmin}
+            />
+          ) : (
+            <Link href="/auth/login">
+              <Button className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg font-medium">
+                Start the 7-Day Challenge
+              </Button>
+            </Link>
+          )}
+        </div>
+
+        {/* Mobile Menu */}
+        <div className="md:hidden flex items-center gap-2">
+          {!isLoading && user && (
+            <ThemeToggle />
+          )}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="sm" className="p-2">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-80">
+              <div className="flex flex-col gap-6 mt-6">
+                {/* Mobile Navigation Links */}
+                <div className="space-y-4">
+                  <button 
+                    onClick={() => scrollToSection('how-it-works')}
+                    className="block w-full text-left text-muted-foreground hover:text-foreground font-medium transition-colors py-2"
+                  >
+                    How it works
+                  </button>
+                  <button 
+                    onClick={() => scrollToSection('for-nutritionists')}
+                    className="block w-full text-left text-muted-foreground hover:text-foreground font-medium transition-colors py-2"
+                  >
+                    For Nutritionists
+                  </button>
+                </div>
+
+                {/* Mobile User Actions */}
+                <div className="border-t border-border pt-6">
+                  {!isLoading && user ? (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">{user.initials}</span>
+                        </div>
+                        <span className="text-sm text-muted-foreground">Signed in</span>
+                      </div>
+                      <ProfileDropdown 
+                        userInitials={user.initials}
+                        isAdmin={user.isAdmin}
+                      />
+                    </div>
+                  ) : (
+                    <Link href="/auth/login" className="block">
+                      <Button className="w-full bg-primary hover:bg-primary/90 text-white py-3 rounded-lg font-medium">
+                        Start the 7-Day Challenge
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </header>
   )

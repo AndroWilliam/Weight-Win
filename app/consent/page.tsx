@@ -74,35 +74,35 @@ export default function ConsentPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="px-6 py-4 border-b border-neutral-300">
+      <header className="px-4 sm:px-6 py-4 border-b border-border">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">W</span>
             </div>
-            <h1 className="text-xl font-bold text-neutral-900">WeightWin</h1>
+            <h1 className="text-lg sm:text-xl font-bold text-foreground">WeightWin</h1>
           </div>
         </div>
       </header>
 
-      <main className="px-6 py-12">
-        <div className="max-w-3xl mx-auto space-y-10">
-          <section className="text-center space-y-4">
-            <h1 className="text-4xl font-bold text-neutral-900">Privacy &amp; Data Consent</h1>
-            <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
+      <main className="px-4 sm:px-6 py-6 sm:py-8">
+        <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8 md:space-y-10">
+          <section className="text-center space-y-3 sm:space-y-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">Privacy & Data Consent</h1>
+            <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
               We believe in transparency. Here's exactly how we handle your information at every step of your WeightWin journey.
             </p>
           </section>
 
-          <section className="space-y-6">
+          <section className="space-y-4 sm:space-y-6">
             {dataHighlights.map(({ icon, title, bullets }) => (
-              <Card key={title} className="border-neutral-300">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="text-3xl" aria-hidden>{icon}</div>
-                    <div className="space-y-3">
-                      <h2 className="text-xl font-semibold text-neutral-900">{title}</h2>
-                      <ul className="space-y-2 text-neutral-700 list-disc list-inside">
+              <Card key={title} className="border-border">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+                    <div className="text-2xl sm:text-3xl" aria-hidden>{icon}</div>
+                    <div className="space-y-2 sm:space-y-3">
+                      <h2 className="text-base sm:text-lg md:text-xl font-semibold text-foreground">{title}</h2>
+                      <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm md:text-base text-muted-foreground list-disc list-inside">
                         {bullets.map(bullet => (
                           <li key={bullet}>{bullet}</li>
                         ))}
@@ -114,10 +114,10 @@ export default function ConsentPage() {
             ))}
           </section>
 
-          <Card className="border-neutral-300">
-            <CardContent className="p-6 space-y-3">
-              <h2 className="text-xl font-semibold text-neutral-900">⚡ Your Rights</h2>
-              <ul className="space-y-2 text-neutral-700 list-disc list-inside">
+          <Card className="border-border">
+            <CardContent className="p-4 sm:p-6 space-y-2 sm:space-y-3">
+              <h2 className="text-base sm:text-lg md:text-xl font-semibold text-foreground">⚡ Your Rights</h2>
+              <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm md:text-base text-muted-foreground list-disc list-inside">
                 {rights.map(item => (
                   <li key={item}>✨ {item}</li>
                 ))}
@@ -125,10 +125,10 @@ export default function ConsentPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-neutral-300">
-            <CardContent className="p-6 space-y-3">
-              <h2 className="text-xl font-semibold text-neutral-900">🔒 Our Commitments</h2>
-              <ul className="space-y-2 text-neutral-700 list-disc list-inside">
+          <Card className="border-border">
+            <CardContent className="p-4 sm:p-6 space-y-2 sm:space-y-3">
+              <h2 className="text-base sm:text-lg md:text-xl font-semibold text-foreground">🔒 Our Commitments</h2>
+              <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm md:text-base text-muted-foreground list-disc list-inside">
                 {commitments.map(item => (
                   <li key={item}>💙 {item}</li>
                 ))}
@@ -136,13 +136,13 @@ export default function ConsentPage() {
             </CardContent>
           </Card>
 
-          <div className="text-center pt-4">
+          <div className="text-center pt-3 sm:pt-4">
             <Button
               onClick={handleContinue}
-              loading={loading}
-              className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 text-lg font-semibold rounded-lg"
+              disabled={loading}
+              className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base md:text-lg font-medium rounded-lg disabled:opacity-50"
             >
-              Continue to Setup
+              {loading ? "Loading..." : "Continue to Setup"}
             </Button>
           </div>
         </div>

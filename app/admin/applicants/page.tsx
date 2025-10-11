@@ -15,9 +15,9 @@ export default async function ApplicantsPage() {
   if (error) {
     console.error('[Applicants Page] Error fetching applications:', error)
     return (
-      <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
+      <div className="bg-card rounded-xl border border-border p-6 sm:p-8 text-center">
         <p className="text-red-600 font-medium">Failed to load applications</p>
-        <p className="text-sm text-slate-600 mt-2">{error.message}</p>
+        <p className="text-xs sm:text-sm text-muted-foreground mt-2">{error.message}</p>
       </div>
     )
   }
@@ -47,7 +47,7 @@ export default async function ApplicantsPage() {
   const applications = rows ?? []
 
   return (
-    <>
+    <div className="space-y-4 sm:space-y-6">
       <ApplicantsKPICards
         newApplicants={kpiData?.new_applicants || 0}
         rejectedApplicants={kpiData?.rejected_applicants || 0}
@@ -56,7 +56,7 @@ export default async function ApplicantsPage() {
       />
       
       <ApplicantsTable rows={applications} />
-    </>
+    </div>
   )
 }
 

@@ -86,39 +86,39 @@
 }
 
 .dark {
-  /* Dark mode variants for WeightWin colors */
-  --background: var(--neutral-900);
-  --foreground: var(--white);
-  --card: #1e293b;
-  --card-foreground: var(--white);
-  --popover: #1e293b;
-  --popover-foreground: var(--white);
-  --primary: var(--primary-600);
-  --primary-foreground: var(--white);
-  --secondary: #334155;
-  --secondary-foreground: var(--white);
-  --muted: #334155;
-  --muted-foreground: #94a3b8;
-  --accent: var(--primary-600);
-  --accent-foreground: var(--white);
-  --destructive: var(--danger-600);
-  --destructive-foreground: var(--white);
-  --border: #334155;
-  --input: #334155;
-  --ring: var(--primary-600);
-  --chart-1: var(--primary-600);
-  --chart-2: var(--success-600);
-  --chart-3: var(--warning-600);
-  --chart-4: #94a3b8;
-  --chart-5: var(--white);
-  --sidebar: #1e293b;
-  --sidebar-foreground: var(--white);
-  --sidebar-primary: var(--primary-600);
-  --sidebar-primary-foreground: var(--white);
-  --sidebar-accent: #334155;
-  --sidebar-accent-foreground: var(--white);
-  --sidebar-border: #334155;
-  --sidebar-ring: var(--primary-600);
+  /* Figma Dark Mode Colors - Extracted from design */
+  --background: #0a0a0a;           /* Almost black background */
+  --foreground: #ffffff;           /* Pure white text */
+  --card: #1a1a1a;                 /* Slightly lighter card background */
+  --card-foreground: #ffffff;      /* White text on cards */
+  --popover: #1a1a1a;              /* Popover background */
+  --popover-foreground: #ffffff;   /* White text in popovers */
+  --primary: #4F46E5;              /* Indigo brand color */
+  --primary-foreground: #ffffff;   /* White text on primary */
+  --secondary: #2a2a2a;            /* Secondary background */
+  --secondary-foreground: #e5e5e5; /* Light gray text */
+  --muted: #2a2a2a;                /* Muted background */
+  --muted-foreground: #a3a3a3;     /* Muted text color */
+  --accent: #4F46E5;               /* Accent color */
+  --accent-foreground: #ffffff;    /* White text on accent */
+  --destructive: #ef4444;          /* Red for destructive actions */
+  --destructive-foreground: #ffffff; /* White text on destructive */
+  --border: #404040;                /* Border color */
+  --input: #2a2a2a;                /* Input background */
+  --ring: #4F46E5;                 /* Focus ring color */
+  --chart-1: #4F46E5;              /* Chart color 1 */
+  --chart-2: #10b981;              /* Chart color 2 (success) */
+  --chart-3: #f59e0b;              /* Chart color 3 (warning) */
+  --chart-4: #a3a3a3;              /* Chart color 4 */
+  --chart-5: #ffffff;              /* Chart color 5 */
+  --sidebar: #1a1a1a;              /* Sidebar background */
+  --sidebar-foreground: #ffffff;   /* Sidebar text */
+  --sidebar-primary: #4F46E5;      /* Sidebar primary */
+  --sidebar-primary-foreground: #ffffff; /* Sidebar primary text */
+  --sidebar-accent: #2a2a2a;       /* Sidebar accent */
+  --sidebar-accent-foreground: #e5e5e5; /* Sidebar accent text */
+  --sidebar-border: #404040;       /* Sidebar border */
+  --sidebar-ring: #4F46E5;         /* Sidebar ring */
 }
 
 @theme inline {

@@ -114,34 +114,34 @@ export default function ApplyNutritionistPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-200">
-        <div className="max-w-4xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="text-slate-600 hover:text-slate-900">
-              <ArrowLeft className="w-5 h-5" />
+      <div className="bg-card border-b border-border">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <Link href="/" className="text-muted-foreground hover:text-foreground">
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">Apply as a Nutritionist</h1>
-              <p className="text-slate-600">Join our network of certified nutritionists</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground">Apply as a Nutritionist</h1>
+              <p className="text-sm sm:text-base text-muted-foreground">Join our network of certified nutritionists</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <FormProvider {...methods}>
-          <form onSubmit={handleSubmit(onSubmit, onInvalid)} noValidate className="space-y-8">
+          <form onSubmit={handleSubmit(onSubmit, onInvalid)} noValidate className="space-y-6 sm:space-y-8">
             {/* Personal Information */}
-            <Card>
+            <Card className="border-border">
               <CardHeader>
-                <CardTitle className="text-xl font-semibold">Personal Information</CardTitle>
+                <CardTitle className="text-lg sm:text-xl font-semibold text-foreground">Personal Information</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
+              <CardContent className="space-y-4 sm:space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
+                    <Label htmlFor="firstName" className="text-sm sm:text-base text-foreground">First Name</Label>
                     <Controller
                       name="firstName"
                       control={control}
@@ -151,17 +151,17 @@ export default function ApplyNutritionistPage() {
                           value={field.value ?? ''}
                           onChange={(e) => field.onChange(e.target.value)}
                           onBlur={field.onBlur}
-                          className={showError('firstName') ? 'border-red-500' : ''}
+                          className={`border-border focus:border-primary focus:ring-primary ${showError('firstName') ? 'border-red-500' : ''}`}
                         />
                       )}
                     />
                     {showError('firstName') && (
-                      <p className="text-sm text-red-600">{errors.firstName.message}</p>
+                      <p className="text-xs sm:text-sm text-red-600">{errors.firstName.message}</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="familyName">Family Name</Label>
+                    <Label htmlFor="familyName" className="text-sm sm:text-base text-foreground">Family Name</Label>
                     <Controller
                       name="familyName"
                       control={control}
@@ -171,28 +171,28 @@ export default function ApplyNutritionistPage() {
                           value={field.value ?? ''}
                           onChange={(e) => field.onChange(e.target.value)}
                           onBlur={field.onBlur}
-                          className={showError('familyName') ? 'border-red-500' : ''}
+                          className={`border-border focus:border-primary focus:ring-primary ${showError('familyName') ? 'border-red-500' : ''}`}
                         />
                       )}
                     />
                     {showError('familyName') && (
-                      <p className="text-sm text-red-600">{errors.familyName.message}</p>
+                      <p className="text-xs sm:text-sm text-red-600">{errors.familyName.message}</p>
                     )}
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Mobile Number</Label>
+                  <Label htmlFor="phone" className="text-sm sm:text-base text-foreground">Mobile Number</Label>
                   <Controller
                     control={control}
                     name="phone"
                     render={({ field }) => (
                       <div className="flex items-center">
-                        <span className="px-3 py-2 rounded-l-md bg-slate-100 border border-r-0 border-slate-300 text-slate-700">
+                        <span className="px-3 py-2 rounded-l-md bg-muted border border-r-0 border-border text-muted-foreground text-sm sm:text-base">
                           +20
                         </span>
                         <Input
-                          className={`flex-1 rounded-l-none ${showError('phone') ? 'border-red-500' : ''}`}
+                          className={`flex-1 rounded-l-none border-border focus:border-primary focus:ring-primary ${showError('phone') ? 'border-red-500' : ''}`}
                           value={(field.value || '').replace(/^\+20/, '')}
                           onChange={(e) => {
                             const cleanValue = e.target.value.replace(/\D/g, '').slice(0, 10)
@@ -206,12 +206,12 @@ export default function ApplyNutritionistPage() {
                     )}
                   />
                   {showError('phone') && (
-                    <p className="text-sm text-red-600">{errors.phone.message}</p>
+                    <p className="text-xs sm:text-sm text-red-600">{errors.phone.message}</p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
+                  <Label htmlFor="email" className="text-sm sm:text-base text-foreground">Email Address</Label>
                   <Controller
                     name="email"
                     control={control}
@@ -222,25 +222,25 @@ export default function ApplyNutritionistPage() {
                         value={field.value ?? ''}
                         onChange={(e) => field.onChange(e.target.value)}
                         onBlur={field.onBlur}
-                        className={showError('email') ? 'border-red-500' : ''}
+                        className={`border-border focus:border-primary focus:ring-primary ${showError('email') ? 'border-red-500' : ''}`}
                       />
                     )}
                   />
                   {showError('email') && (
-                    <p className="text-sm text-red-600">{errors.email.message}</p>
+                    <p className="text-xs sm:text-sm text-red-600">{errors.email.message}</p>
                   )}
                 </div>
               </CardContent>
             </Card>
 
             {/* Identification */}
-            <Card>
+            <Card className="border-border">
               <CardHeader>
-                <CardTitle className="text-xl font-semibold">Identification</CardTitle>
+                <CardTitle className="text-lg sm:text-xl font-semibold text-foreground">Identification</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4 sm:space-y-6">
                 <div className="space-y-3">
-                  <Label>ID Type</Label>
+                  <Label className="text-sm sm:text-base text-foreground">ID Type</Label>
                   <Controller
                     control={control}
                     name="idType"
@@ -248,15 +248,15 @@ export default function ApplyNutritionistPage() {
                       <RadioGroup
                         value={field.value}
                         onValueChange={field.onChange}
-                        className="flex gap-6"
+                        className="flex flex-col sm:flex-row gap-4 sm:gap-6"
                       >
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="national_id" id="national_id" />
-                          <Label htmlFor="national_id">National ID</Label>
+                          <Label htmlFor="national_id" className="text-sm sm:text-base text-foreground">National ID</Label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="passport" id="passport" />
-                          <Label htmlFor="passport">Passport</Label>
+                          <Label htmlFor="passport" className="text-sm sm:text-base text-foreground">Passport</Label>
                         </div>
                       </RadioGroup>
                     )}
@@ -264,7 +264,7 @@ export default function ApplyNutritionistPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="idNumber">
+                  <Label htmlFor="idNumber" className="text-sm sm:text-base text-foreground">
                     {idType === 'national_id' ? 'National ID Number' : 'Passport Number'}
                   </Label>
                   <Controller
@@ -277,25 +277,25 @@ export default function ApplyNutritionistPage() {
                         value={field.value ?? ''}
                         onChange={(e) => field.onChange(e.target.value)}
                         onBlur={field.onBlur}
-                        className={showError('idNumber') ? 'border-red-500' : ''}
+                        className={`border-border focus:border-primary focus:ring-primary ${showError('idNumber') ? 'border-red-500' : ''}`}
                         placeholder={idType === 'national_id' ? '14 digits' : '9 characters'}
                       />
                     )}
                   />
                   {showError('idNumber') && (
-                    <p className="text-sm text-red-600">{errors.idNumber.message}</p>
+                    <p className="text-xs sm:text-sm text-red-600">{errors.idNumber.message}</p>
                   )}
                 </div>
               </CardContent>
             </Card>
 
             {/* Documents */}
-            <Card>
+            <Card className="border-border">
               <CardHeader>
-                <CardTitle className="text-xl font-semibold">Documents</CardTitle>
+                <CardTitle className="text-lg sm:text-xl font-semibold text-foreground">Documents</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
+              <CardContent className="space-y-4 sm:space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-2">
                     <UploadCard
                       formFieldName="cvPath"
@@ -304,7 +304,7 @@ export default function ApplyNutritionistPage() {
                       prefix="cv"
                     />
                     {showError('cvPath') && (
-                      <p className="text-sm text-red-600">{errors.cvPath.message}</p>
+                      <p className="text-xs sm:text-sm text-red-600">{errors.cvPath.message}</p>
                     )}
                   </div>
 
@@ -316,7 +316,7 @@ export default function ApplyNutritionistPage() {
                       prefix="id"
                     />
                     {showError('idPath') && (
-                      <p className="text-sm text-red-600">{errors.idPath.message}</p>
+                      <p className="text-xs sm:text-sm text-red-600">{errors.idPath.message}</p>
                     )}
                   </div>
                 </div>
@@ -324,8 +324,8 @@ export default function ApplyNutritionistPage() {
             </Card>
 
             {/* Consent */}
-            <Card>
-              <CardContent className="pt-6">
+            <Card className="border-border">
+              <CardContent className="pt-4 sm:pt-6">
                 <div className="flex items-start space-x-3">
                   <Controller
                     control={control}
@@ -340,13 +340,13 @@ export default function ApplyNutritionistPage() {
                     )}
                   />
                   <div className="space-y-1">
-                    <Label htmlFor="consent" className="text-sm leading-relaxed">
+                    <Label htmlFor="consent" className="text-xs sm:text-sm leading-relaxed text-foreground">
                       I consent to WeightWin using OCR to extract relevant information from my documents for verification.{' '}
-                      <a href="#" className="text-blue-600 hover:underline">Privacy</a> and{' '}
-                      <a href="#" className="text-blue-600 hover:underline">Terms</a>.
+                      <a href="#" className="text-primary hover:underline">Privacy</a> and{' '}
+                      <a href="#" className="text-primary hover:underline">Terms</a>.
                     </Label>
                     {showError('consent') && (
-                      <p className="text-sm text-red-600">{errors.consent.message}</p>
+                      <p className="text-xs sm:text-sm text-red-600">{errors.consent.message}</p>
                     )}
                   </div>
                 </div>
@@ -354,14 +354,14 @@ export default function ApplyNutritionistPage() {
             </Card>
 
             {/* Submit Button */}
-            <div className="flex justify-end gap-4">
-              <Button type="button" variant="outline" asChild>
+            <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
+              <Button type="button" variant="outline" asChild className="w-full sm:w-auto">
                 <Link href="/">Cancel</Link>
               </Button>
               <Button
                 type="submit"
                 loading={isSubmitting}
-                className="bg-primary-600 hover:bg-primary-700"
+                className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white"
               >
                 Submit details
               </Button>
@@ -372,26 +372,26 @@ export default function ApplyNutritionistPage() {
 
       {/* Success Modal */}
       <AlertDialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-        <AlertDialogContent>
+        <AlertDialogContent className="border-border">
           <AlertDialogHeader>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-emerald-600" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-100 dark:bg-emerald-900/20 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" />
               </div>
               <div>
-                <AlertDialogTitle className="text-xl">Application Submitted Successfully!</AlertDialogTitle>
-                <AlertDialogDescription className="text-base mt-2">
+                <AlertDialogTitle className="text-lg sm:text-xl text-foreground">Application Submitted Successfully!</AlertDialogTitle>
+                <AlertDialogDescription className="text-sm sm:text-base mt-2 text-muted-foreground">
                   Thank you for your interest in joining WeightWin. We'll review your application and get back to you within 3-5 business days.
                 </AlertDialogDescription>
               </div>
             </div>
           </AlertDialogHeader>
-          <div className="mt-6">
-            <p className="text-sm text-slate-600 mb-4">
-              Application ID: <span className="font-mono text-slate-900">{applicationId}</span>
+          <div className="mt-4 sm:mt-6">
+            <p className="text-xs sm:text-sm text-muted-foreground mb-4">
+              Application ID: <span className="font-mono text-foreground">{applicationId}</span>
             </p>
             <div className="flex justify-end">
-              <Button onClick={() => setShowSuccessModal(false)} asChild>
+              <Button onClick={() => setShowSuccessModal(false)} asChild className="bg-primary hover:bg-primary/90 text-white">
                 <Link href="/">Return to Home</Link>
               </Button>
             </div>
