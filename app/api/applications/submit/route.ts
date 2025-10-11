@@ -121,9 +121,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, applicationId })
   } catch (e) {
     console.error('[applications/submit] Error:', e)
+    console.error('[applications/submit] Error details:', {
+      message: e instanceof Error ? e.message : 'Unknown error',
+      stack: e instanceof Error ? e.stack : undefined,
+      name: e instanceof Error ? e.constructor.name : typeof e
+    })
+    
     return NextResponse.json({ 
       ok: false, 
-      error: e instanceof Error ? e.message : 'Unknown error'
+      error: e instanceof Error ? e.message : 'Unknown error',
+      errorType: e instanceof Error ? e.constructor.name : typeof e,
+      details: process.env.NODE_ENV === 'development' ? e : undefined
     }, { status: 500 })
   }
 }
