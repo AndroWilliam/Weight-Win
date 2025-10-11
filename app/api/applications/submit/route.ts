@@ -31,60 +31,13 @@ export async function POST(req: Request) {
     const supabase = await createClient()
     console.log('[applications/submit] Supabase client created successfully')
 
-    // Test basic connection first
-    console.log('[applications/submit] Testing database connection...')
-    const { data: testData, error: testError } = await supabase
-      .from('nutritionist_applications')
-      .select('id')
-      .limit(1)
-    
-    console.log('[applications/submit] Test query result:', { testData, testError })
-    
-    if (testError) {
-      console.error('[applications/submit] Database connection failed:', testError)
-      return NextResponse.json({ 
-        ok: false, 
-        error: 'Database table not found',
-        details: testError.message,
-        code: testError.code,
-        hint: 'The nutritionist_applications table may not exist. Please run the SQL migration script.'
-      }, { status: 500 })
-    }
-
-    console.log('[applications/submit] Database connection successful, proceeding with application submission...')
-
-    const { data: appRow, error } = await supabase
-      .from('nutritionist_applications')
-      .insert({
-        // applicant_user_id is optional for anonymous applicants
-        first_name: payload.firstName,
-        family_name: payload.familyName,
-        phone_e164: payload.phone,
-        email: payload.email.toLowerCase(),
-        id_type: payload.idType,
-        id_number: payload.idNumber,
-        status: 'new',
-        cv_file_path: payload.cvPath,
-        id_file_path: payload.idPath,
-      })
-      .select('id')
-      .single()
-    if (error) throw error
-
-    const applicationId = appRow.id as number
-
-    // Also insert into application_documents for consistency
-    const { error: docErr } = await supabase
-      .from('application_documents')
-      .insert([
-        { application_id: applicationId, kind: 'cv', file_path: payload.cvPath },
-        { application_id: applicationId, kind: 'id', file_path: payload.idPath },
-      ])
-    if (docErr) throw docErr
-
-    await supabase.from('application_events').insert({ application_id: applicationId, event_type: 'submitted' })
-
-    return NextResponse.json({ ok: true, applicationId })
+    // For now, just return success without database operations to test basic functionality
+    console.log('[applications/submit] Returning test success response')
+    return NextResponse.json({ 
+      ok: true, 
+      message: 'Test successful - API route is working',
+      receivedData: payload
+    })
   } catch (e) {
     console.error('[applications/submit] Error:', e)
     console.error('[applications/submit] Error details:', {
