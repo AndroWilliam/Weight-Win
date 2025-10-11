@@ -15,7 +15,7 @@ const schema = z.object({
   idPath: z.string(),
 })
 
-export const POST = async (req: Request) => {
+export async function POST(req: Request) {
   console.log('[applications/submit] Starting request processing')
   
   try {
@@ -44,9 +44,10 @@ export const POST = async (req: Request) => {
       console.error('[applications/submit] Database connection failed:', testError)
       return NextResponse.json({ 
         ok: false, 
-        error: 'Database connection failed',
+        error: 'Database table not found',
         details: testError.message,
-        code: testError.code
+        code: testError.code,
+        hint: 'The nutritionist_applications table may not exist. Please run the SQL migration script.'
       }, { status: 500 })
     }
 
