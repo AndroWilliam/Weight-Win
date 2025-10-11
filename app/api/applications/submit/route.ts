@@ -108,11 +108,19 @@ export async function POST(req: Request) {
       stack: e instanceof Error ? e.stack : undefined,
       payload: body
     })
-    return NextResponse.json({ 
-      ok: false, 
+    
+    // Return detailed error information for debugging
+    const errorResponse = {
+      ok: false,
       error: e instanceof Error ? e.message : 'Unknown error',
-      details: process.env.NODE_ENV === 'development' ? e : undefined
-    }, { status: 500 })
+      errorType: e instanceof Error ? e.constructor.name : typeof e,
+      stack: e instanceof Error ? e.stack : undefined,
+      payload: body,
+      timestamp: new Date().toISOString()
+    }
+    
+    console.error('[applications/submit] Returning error response:', errorResponse)
+    return NextResponse.json(errorResponse, { status: 500 })
   }
 }
 
