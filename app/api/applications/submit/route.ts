@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
-import { createClient } from "@/lib/supabase/server"
+import { createClient } from "@supabase/supabase-js"
 
 export const runtime = 'nodejs'
 
@@ -20,7 +20,10 @@ export async function POST(req: Request) {
     const body = await req.json()
     const payload = schema.parse(body)
     
-    const supabase = await createClient()
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
 
     // Check for existing applications
     const { data: existing, error: existErr } = await supabase
