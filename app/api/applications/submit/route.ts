@@ -18,9 +18,11 @@ const schema = z.object({
 export async function POST(req: Request) {
   console.log('[applications/submit] Starting request processing')
   
+  let body: any = null
+  
   try {
     console.log('[applications/submit] Parsing request body...')
-    const body = await req.json()
+    body = await req.json()
     console.log('[applications/submit] Request body received:', body)
     
     console.log('[applications/submit] Validating schema...')
