@@ -16,36 +16,41 @@ const schema = z.object({
 })
 
 export async function POST(req: Request) {
+  console.log('[applications/submit] Starting request processing')
+  
   try {
-    console.log('[applications/submit] Starting request processing')
-    
+    console.log('[applications/submit] Parsing request body...')
     const body = await req.json()
     console.log('[applications/submit] Request body received:', body)
     
+    console.log('[applications/submit] Validating schema...')
     const payload = schema.parse(body)
     console.log('[applications/submit] Schema validation passed:', payload)
     
+    console.log('[applications/submit] Creating Supabase client...')
     const supabase = await createClient()
-    console.log('[applications/submit] Supabase client created')
+    console.log('[applications/submit] Supabase client created successfully')
 
-    // Conflict check: existing application by email or phone
-    console.log('[applications/submit] Checking for existing applications...')
-    const { data: existing, error: existErr } = await supabase
+    // Test basic connection first
+    console.log('[applications/submit] Testing database connection...')
+    const { data: testData, error: testError } = await supabase
       .from('nutritionist_applications')
       .select('id')
-      .or(`email.eq.${payload.email.toLowerCase()},phone_e164.eq.${payload.phone}`)
       .limit(1)
     
-    console.log('[applications/submit] Existing check result:', { existing, existErr })
+    console.log('[applications/submit] Test query result:', { testData, testError })
     
-    if (existErr) {
-      console.error('[applications/submit] Error checking existing applications:', existErr)
-      throw existErr
+    if (testError) {
+      console.error('[applications/submit] Database connection failed:', testError)
+      return NextResponse.json({ 
+        ok: false, 
+        error: 'Database connection failed',
+        details: testError.message,
+        code: testError.code
+      }, { status: 500 })
     }
-    if (existing && existing.length > 0) {
-      console.log('[applications/submit] Application already exists')
-      return NextResponse.json({ ok: false, message: 'Application already exists' }, { status: 409 })
-    }
+
+    console.log('[applications/submit] Database connection successful, proceeding with application submission...')
 
     const { data: appRow, error } = await supabase
       .from('nutritionist_applications')
