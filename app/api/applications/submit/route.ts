@@ -43,6 +43,8 @@ export async function POST(req: Request) {
         id_type: payload.idType,
         id_number: payload.idNumber,
         status: 'new',
+        cv_file_path: payload.cvPath,
+        id_file_path: payload.idPath,
       })
       .select('id')
       .single()
@@ -50,6 +52,7 @@ export async function POST(req: Request) {
 
     const applicationId = appRow.id as number
 
+    // Also insert into application_documents for consistency
     const { error: docErr } = await supabase
       .from('application_documents')
       .insert([
@@ -62,8 +65,17 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, applicationId })
   } catch (e) {
-    console.error('[applications/submit]', e)
-    return NextResponse.json({ ok: false }, { status: 500 })
+    console.error('[applications/submit] Error:', e)
+    console.error('[applications/submit] Error details:', {
+      message: e instanceof Error ? e.message : 'Unknown error',
+      stack: e instanceof Error ? e.stack : undefined,
+      payload: body
+    })
+    return NextResponse.json({ 
+      ok: false, 
+      error: e instanceof Error ? e.message : 'Unknown error',
+      details: process.env.NODE_ENV === 'development' ? e : undefined
+    }, { status: 500 })
   }
 }
 
