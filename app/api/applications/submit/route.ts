@@ -17,18 +17,33 @@ const schema = z.object({
 
 export async function POST(req: Request) {
   try {
+    console.log('[applications/submit] Starting request processing')
+    
     const body = await req.json()
+    console.log('[applications/submit] Request body received:', body)
+    
     const payload = schema.parse(body)
+    console.log('[applications/submit] Schema validation passed:', payload)
+    
     const supabase = await createClient()
+    console.log('[applications/submit] Supabase client created')
 
     // Conflict check: existing application by email or phone
+    console.log('[applications/submit] Checking for existing applications...')
     const { data: existing, error: existErr } = await supabase
       .from('nutritionist_applications')
       .select('id')
       .or(`email.eq.${payload.email.toLowerCase()},phone_e164.eq.${payload.phone}`)
       .limit(1)
-    if (existErr) throw existErr
+    
+    console.log('[applications/submit] Existing check result:', { existing, existErr })
+    
+    if (existErr) {
+      console.error('[applications/submit] Error checking existing applications:', existErr)
+      throw existErr
+    }
     if (existing && existing.length > 0) {
+      console.log('[applications/submit] Application already exists')
       return NextResponse.json({ ok: false, message: 'Application already exists' }, { status: 409 })
     }
 
