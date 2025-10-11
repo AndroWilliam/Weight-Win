@@ -16,7 +16,23 @@ const schema = z.object({
 })
 
 export async function POST(req: Request) {
-  return NextResponse.json({ ok: true, message: "Minimal test - API route is working" })
+  try {
+    console.log('[applications/submit] Starting request processing')
+    const body = await req.json()
+    console.log('[applications/submit] Request body received:', body)
+    
+    return NextResponse.json({ 
+      ok: true, 
+      message: "Request parsing successful",
+      receivedData: body
+    })
+  } catch (e) {
+    console.error('[applications/submit] Error:', e)
+    return NextResponse.json({ 
+      ok: false, 
+      error: e instanceof Error ? e.message : 'Unknown error'
+    }, { status: 500 })
+  }
 }
 
 
