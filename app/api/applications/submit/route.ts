@@ -74,9 +74,31 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, applicationId })
   } catch (e) {
     console.error('[applications/submit] Error:', e)
+    
+    // Handle different types of errors
+    let errorMessage = 'Unknown error'
+    let errorDetails = undefined
+    
+    if (e instanceof Error) {
+      errorMessage = e.message
+      errorDetails = e.stack
+    } else if (e && typeof e === 'object') {
+      // Handle Supabase errors
+      if ('message' in e) {
+        errorMessage = String(e.message)
+      }
+      if ('code' in e) {
+        errorDetails = `Code: ${e.code}`
+      }
+      if ('details' in e) {
+        errorDetails = `${errorDetails || ''} Details: ${e.details}`
+      }
+    }
+    
     return NextResponse.json({ 
       ok: false, 
-      error: e instanceof Error ? e.message : 'Unknown error'
+      error: errorMessage,
+      details: errorDetails
     }, { status: 500 })
   }
 }
