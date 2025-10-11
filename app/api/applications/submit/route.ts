@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
-import { createClient } from "@/lib/supabase/server"
+// import { createClient } from "@/lib/supabase/server"
 
 export const runtime = 'nodejs'
 
@@ -29,15 +29,11 @@ export async function POST(req: Request) {
     const payload = schema.parse(body)
     console.log('[applications/submit] Schema validation passed:', payload)
     
-    console.log('[applications/submit] Creating Supabase client...')
-    const supabase = await createClient()
-    console.log('[applications/submit] Supabase client created successfully')
-
     // For now, just return success without database operations to test basic functionality
     console.log('[applications/submit] Returning test success response')
     return NextResponse.json({ 
       ok: true, 
-      message: 'Test successful - API route is working',
+      message: 'Test successful - API route is working (no Supabase)',
       receivedData: payload
     })
   } catch (e) {
