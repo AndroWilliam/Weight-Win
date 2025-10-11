@@ -15,7 +15,7 @@ const schema = z.object({
   idPath: z.string(),
 })
 
-export async function POST(req: Request) {
+export const POST = async (req: Request) => {
   console.log('[applications/submit] Starting request processing')
   
   try {

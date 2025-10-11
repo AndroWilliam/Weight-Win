@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 
-export async function POST(req: Request) {
+export const POST = async (req: Request) => {
   console.log('[test] Starting minimal test')
   
   try {
