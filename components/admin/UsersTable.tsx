@@ -96,7 +96,7 @@ export function UsersTable({ rows }: UsersTableProps) {
       {/* Toolbar */}
       <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold text-foreground">Users</h2>
+          <h2 className="text-lg font-semibold text-foreground pl-2">Users</h2>
           
           <div className="flex items-center gap-3">
             {/* Search */}

@@ -10,7 +10,7 @@ interface KPICardProps {
 function KPICard({ label, value, icon, iconBg }: KPICardProps) {
   return (
     <div className="bg-card rounded-xl border border-border p-4 sm:p-6 flex items-center justify-between">
-      <div>
+      <div className="pl-2">
         <p className="text-xs sm:text-sm text-muted-foreground mb-1">{label}</p>
         <p className="text-2xl sm:text-3xl font-bold text-foreground">{value}</p>
       </div>

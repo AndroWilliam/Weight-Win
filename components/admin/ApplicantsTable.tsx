@@ -75,7 +75,7 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
         {/* Toolbar */}
         <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between gap-4">
-            <h2 className="text-lg font-semibold text-foreground">Applicants</h2>
+            <h2 className="text-lg font-semibold text-foreground pl-2">Applicants</h2>
             
             <div className="flex items-center gap-3">
               {/* Search */}
