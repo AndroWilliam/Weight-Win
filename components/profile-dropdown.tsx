@@ -102,35 +102,35 @@ export function ProfileDropdown({ userInitials, isAdmin: initialIsAdmin = false 
       {/* Profile Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white border-2 border-primary-600 hover:bg-primary-50 transition-all duration-200 group"
+        className="flex items-center gap-2 px-2 py-1.5 rounded-lg border-2 border-transparent hover:bg-muted transition-all duration-200 group"
         aria-label="Open profile menu"
         aria-expanded={isOpen}
       >
-        <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white font-semibold text-sm group-hover:scale-110 transition-transform duration-200">
+        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-semibold text-sm group-hover:scale-110 transition-transform duration-200">
           {userInitials || 'U'}
         </div>
         <ChevronDown 
-          className={`w-4 h-4 text-primary-600 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-neutral-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute right-0 mt-2 w-56 bg-card rounded-xl shadow-2xl border border-border py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           {menuItems.filter(item => item.show).map((item, index) => {
             const Icon = item.icon
             return (
               <button
                 key={index}
                 onClick={() => handleMenuItemClick(item.href, item.comingSoon)}
-                className="w-full flex items-center gap-3 px-4 py-3 text-left text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 group relative overflow-hidden"
+                className="w-full flex items-center gap-3 px-4 py-3 text-left text-foreground hover:bg-muted hover:text-primary transition-all duration-200 group relative overflow-hidden"
                 style={{
                   transform: isOpen ? 'translateZ(0)' : 'translateZ(-10px)',
                   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
               >
                 {/* 3D hover effect background */}
-                <div className="absolute inset-0 bg-gradient-to-r from-primary-100 to-primary-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
                 
                 {/* Icon with scale animation */}
                 <div className="relative">
@@ -144,7 +144,7 @@ export function ProfileDropdown({ userInitials, isAdmin: initialIsAdmin = false 
                 
                 {/* Coming soon badge */}
                 {item.comingSoon && (
-                  <span className="ml-auto text-xs bg-neutral-100 text-neutral-600 px-2 py-1 rounded-full">
+                  <span className="ml-auto text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
                     Soon
                   </span>
                 )}

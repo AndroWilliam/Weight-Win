@@ -38,13 +38,13 @@ export function UsersTable({ rows }: UsersTableProps) {
       const isComplete = i < totalWeighIns
       const isPartial = i === totalWeighIns && totalWeighIns < maxDays
       
-      let bgColor = 'bg-slate-200'
+      let bgColor = 'bg-slate-200 dark:bg-slate-700'
       if (isComplete) {
-        if (totalWeighIns >= 7) bgColor = 'bg-indigo-500'
-        else if (totalWeighIns >= 5) bgColor = 'bg-indigo-500'
-        else bgColor = 'bg-indigo-500'
+        if (totalWeighIns >= 7) bgColor = 'bg-indigo-500 dark:bg-indigo-400'
+        else if (totalWeighIns >= 5) bgColor = 'bg-indigo-500 dark:bg-indigo-400'
+        else bgColor = 'bg-indigo-500 dark:bg-indigo-400'
       }
-      if (isPartial) bgColor = 'bg-orange-400'
+      if (isPartial) bgColor = 'bg-orange-400 dark:bg-orange-500'
       
       segments.push(
         <div
@@ -66,8 +66,8 @@ export function UsersTable({ rows }: UsersTableProps) {
           key={day}
           className={`inline-flex items-center justify-center w-6 h-6 text-xs font-medium rounded ${
             isComplete 
-              ? 'bg-green-100 text-green-700' 
-              : 'bg-slate-100 text-slate-400'
+              ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' 
+              : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500'
           }`}
         >
           {day}
@@ -85,29 +85,29 @@ export function UsersTable({ rows }: UsersTableProps) {
 
   if (rows.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-        <p className="text-slate-600">No users found</p>
+      <div className="bg-card rounded-xl border border-border p-12 text-center">
+        <p className="text-muted-foreground">No users found</p>
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
       {/* Toolbar */}
-      <div className="p-4 border-b border-slate-200">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold text-slate-900">Users</h2>
+          <h2 className="text-lg font-semibold text-foreground">Users</h2>
           
           <div className="flex items-center gap-3">
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Search by name or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-1.5 w-64 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="pl-10 pr-4 py-1.5 w-64 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
 
@@ -115,7 +115,7 @@ export function UsersTable({ rows }: UsersTableProps) {
             <select
               value={userFilter}
               onChange={(e) => setUserFilter(e.target.value)}
-              className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="px-3 py-1.5 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="all">All Users</option>
               <option value="active">Active</option>
@@ -128,18 +128,18 @@ export function UsersTable({ rows }: UsersTableProps) {
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-slate-50">
+          <thead className="bg-muted/50">
             <tr>
-              <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">User</th>
-              <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">Email</th>
-              <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">Progress</th>
-              <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">Streak</th>
-              <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">Last Weigh-in</th>
-              <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-600">Days to Reward</th>
-              <th className="px-4 py-2.5 text-right text-xs font-medium text-slate-600">Actions</th>
+              <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">User</th>
+              <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Email</th>
+              <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Progress</th>
+              <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Streak</th>
+              <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Last Weigh-in</th>
+              <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Days to Reward</th>
+              <th className="px-4 py-2.5 text-right text-xs font-medium text-muted-foreground">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-border">
             {filteredRows.map((row) => {
               const userName = row.email.split('@')[0].split('.').map(part => 
                 part.charAt(0).toUpperCase() + part.slice(1)
@@ -148,12 +148,12 @@ export function UsersTable({ rows }: UsersTableProps) {
               return (
                 <tr 
                   key={row.user_id}
-                  className="hover:bg-slate-50 transition-colors"
+                  className="hover:bg-muted/50 transition-colors"
                 >
-                  <td className="px-4 py-3 text-sm font-medium text-slate-900">
+                  <td className="px-4 py-3 text-sm font-medium text-foreground">
                     {userName}
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-600">
+                  <td className="px-4 py-3 text-sm text-muted-foreground">
                     {row.email}
                   </td>
                   <td className="px-4 py-3">
@@ -161,7 +161,7 @@ export function UsersTable({ rows }: UsersTableProps) {
                       <div className="flex gap-0.5 w-32">
                         {getProgressBarSegments(row.total_weigh_ins)}
                       </div>
-                      <span className="text-xs font-medium text-slate-700">
+                      <span className="text-xs font-medium text-muted-foreground">
                         {row.progress_percent}%
                       </span>
                     </div>
@@ -171,16 +171,16 @@ export function UsersTable({ rows }: UsersTableProps) {
                       {getStreakChips(row.total_weigh_ins)}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-600">
+                  <td className="px-4 py-3 text-sm text-muted-foreground">
                     {formatDate(row.last_weigh_in_at)}
                   </td>
                   <td className="px-4 py-3">
                     {row.days_to_reward === 0 || row.total_weigh_ins >= 7 ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400 rounded-full text-xs font-medium">
                         Completed ✓
                       </span>
                     ) : (
-                      <span className="text-sm font-medium text-slate-900">
+                      <span className="text-sm font-medium text-foreground">
                         {row.days_to_reward} {row.days_to_reward === 1 ? 'day' : 'days'}
                       </span>
                     )}
@@ -189,13 +189,13 @@ export function UsersTable({ rows }: UsersTableProps) {
                     <div className="flex items-center justify-end gap-1">
                       <button
                         disabled
-                        className="inline-flex items-center gap-1 px-2 py-1 text-sm font-medium text-slate-400 cursor-not-allowed"
+                        className="inline-flex items-center gap-1 px-2 py-1 text-sm font-medium text-muted-foreground cursor-not-allowed"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
                       <button
                         disabled
-                        className="inline-flex items-center gap-1 px-2 py-1 text-sm font-medium text-slate-400 cursor-not-allowed"
+                        className="inline-flex items-center gap-1 px-2 py-1 text-sm font-medium text-muted-foreground cursor-not-allowed"
                       >
                         <Bell className="w-4 h-4" />
                         Nudge
@@ -210,20 +210,20 @@ export function UsersTable({ rows }: UsersTableProps) {
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between">
-        <p className="text-sm text-slate-600">
+      <div className="px-4 py-3 border-t border-border flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
           Showing {filteredRows.length} of {rows.length} users
         </p>
         <div className="flex items-center gap-2">
           <button 
             disabled
-            className="px-3 py-1 text-sm text-slate-400 cursor-not-allowed"
+            className="px-3 py-1 text-sm text-muted-foreground cursor-not-allowed"
           >
             Previous
           </button>
           <button 
             disabled
-            className="px-3 py-1 text-sm bg-slate-900 text-white rounded cursor-not-allowed"
+            className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded cursor-not-allowed"
           >
             Next
           </button>
@@ -232,7 +232,7 @@ export function UsersTable({ rows }: UsersTableProps) {
 
       {/* Empty State */}
       {filteredRows.length === 0 && searchTerm && (
-        <div className="p-8 text-center text-slate-600">
+        <div className="p-8 text-center text-muted-foreground">
           No results found for "{searchTerm}"
         </div>
       )}

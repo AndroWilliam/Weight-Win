@@ -56,11 +56,11 @@ export function RewardCountdown({ currentDay, className, daysRemaining: propsDay
 
   if (isCompleted) {
     return (
-      <section className={`rounded-2xl border border-slate-200 shadow-sm p-8 flex flex-col justify-center ${className}`} aria-labelledby="reward-heading">
+      <section className={`rounded-2xl border border-border shadow-sm p-8 flex flex-col justify-center ${className}`} aria-labelledby="reward-heading">
         <div className="text-center space-y-4">
           <span className="text-4xl">🎁</span>
-          <h3 id="reward-heading" className="text-2xl font-semibold text-slate-900">Reward Unlocked!</h3>
-          <p className="text-slate-700">
+          <h3 id="reward-heading" className="text-2xl font-semibold text-foreground">Reward Unlocked!</h3>
+          <p className="text-muted-foreground">
             Congratulations! You've completed the 7-day challenge and earned your free nutritionist session.
           </p>
         </div>
@@ -69,11 +69,11 @@ export function RewardCountdown({ currentDay, className, daysRemaining: propsDay
   }
 
   return (
-    <section className={`rounded-2xl border border-slate-200 shadow-sm p-8 flex flex-col justify-center ${className}`} aria-labelledby="reward-heading">
+    <section className={`rounded-2xl border border-border shadow-sm p-8 flex flex-col justify-center ${className}`} aria-labelledby="reward-heading">
       <div className="text-center space-y-4">
         <span className="text-4xl">🎁</span>
-        <h3 id="reward-heading" className="text-2xl font-semibold text-slate-900">Your Reward</h3>
-                <p className="text-slate-700">
+        <h3 id="reward-heading" className="text-2xl font-semibold text-foreground">Your Reward</h3>
+                <p className="text-muted-foreground">
                   {actualDaysRemaining > 0 
                     ? `Only ${actualDaysRemaining} more day${actualDaysRemaining !== 1 ? 's' : ''} to go for your reward 🔥`
                     : "Complete your final check-in to unlock your reward!"
