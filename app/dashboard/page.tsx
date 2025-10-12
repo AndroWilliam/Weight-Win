@@ -8,12 +8,20 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import { Camera, Home } from "lucide-react"
+import { toast } from "sonner"
 
 interface ChallengeData {
   currentDay: number
   startDate: string
   completed: boolean
   settings: any
+  currentMilestone?: number
+  totalDaysCompleted?: number
+  nextMilestone?: number
+  completedDaysArray?: number[]
+  checkedInToday?: boolean
+  daysRemaining?: number
+  currentStreak?: number
 }
 
 export default function DashboardPage() {
@@ -21,6 +29,23 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isNavigating, setIsNavigating] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    // Check for new badge notification from weight check
+    const newBadgeData = localStorage.getItem('newBadgeEarned')
+    if (newBadgeData) {
+      try {
+        const badgeInfo = JSON.parse(newBadgeData)
+        toast.success('🎉 New Badge Unlocked!', {
+          description: `You earned the ${badgeInfo.name} badge! ${badgeInfo.icon}`,
+          duration: 5000,
+        })
+        localStorage.removeItem('newBadgeEarned')
+      } catch (e) {
+        console.error('Error parsing badge data:', e)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     async function loadChallengeProgress() {
@@ -81,6 +106,10 @@ export default function DashboardPage() {
           completedDays: progress.completed_days || [],
           daysRemaining: progress.days_remaining || 7,
           currentStreak: progress.current_streak || 0,
+          currentMilestone: progress.current_milestone || 7,
+          totalDaysCompleted: progress.total_days_completed || 0,
+          nextMilestone: progress.next_milestone || 7,
+          completedDaysArray: progress.completed_days || [],
           settings: settingsData.settings || {}
         }
         
@@ -109,11 +138,15 @@ export default function DashboardPage() {
   }, [router])
 
   const currentDay = challengeData?.currentDay || 1
-  const isCompleted = challengeData?.completed || currentDay > 7
+  const currentMilestone = challengeData?.currentMilestone || 7
+  const nextMilestone = challengeData?.nextMilestone || 7
+  const totalDaysCompleted = challengeData?.totalDaysCompleted || 0
+  const completedDaysArray = challengeData?.completedDaysArray || []
+  const isCompleted = challengeData?.completed || currentDay >= 30
   const checkedInToday = challengeData?.checkedInToday || false
-  const canTrackToday = currentDay <= 7 && !isCompleted
-  const daysCompleted = challengeData?.completedDays?.length || 0
-  const progressPercent = Math.min(100, Math.round((daysCompleted / 7) * 100))
+  const canTrackToday = currentDay <= 30 && !isCompleted
+  const daysCompleted = completedDaysArray.length || 0
+  const progressPercent = Math.min(100, Math.round((currentDay / currentMilestone) * 100))
 
   const handleTakePhoto = () => {
     setIsNavigating(true)
@@ -174,13 +207,20 @@ export default function DashboardPage() {
           </button>
 
           <div className="text-center space-y-2 mb-6 sm:mb-8">
-            <h2 className="text-2xl sm:text-3xl font-semibold text-foreground">Day {Math.min(currentDay, 7)} of 7</h2>
+            <h2 className="text-2xl sm:text-3xl font-semibold text-foreground">
+              Day {currentDay} of {currentMilestone}
+            </h2>
             <p className="text-sm sm:text-base text-muted-foreground">
               {checkedInToday 
                 ? "Come back tomorrow for your weigh-in 🔥🎉" 
                 : "Ready for today's weigh-in?"
               }
             </p>
+            {nextMilestone > currentMilestone && (
+              <p className="text-xs text-primary font-medium">
+                {nextMilestone - currentDay} days until next milestone! 🎯
+              </p>
+            )}
           </div>
 
           {/* Take Photo Card - Full Width at Top */}
@@ -217,7 +257,11 @@ export default function DashboardPage() {
             </div>
             <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
               <div className="flex justify-center">
-                <StreakPills currentDay={currentDay} />
+                <StreakPills 
+                  currentDay={currentDay} 
+                  currentMilestone={currentMilestone}
+                  completedDaysArray={completedDaysArray}
+                />
               </div>
               <div className="space-y-3">
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -234,6 +278,22 @@ export default function DashboardPage() {
                     aria-valuenow={progressPercent}
                   />
                 </div>
+                
+                {/* Milestone Indicators */}
+                <div className="flex items-center justify-between pt-2 text-xs">
+                  <div className={`flex items-center gap-1 ${currentDay >= 7 ? 'text-green-600' : 'text-muted-foreground'}`}>
+                    {currentDay >= 7 ? '✓' : '○'} 7 days
+                  </div>
+                  <div className={`flex items-center gap-1 ${currentDay >= 14 ? 'text-green-600' : 'text-muted-foreground'}`}>
+                    {currentDay >= 14 ? '✓' : '○'} 14 days
+                  </div>
+                  <div className={`flex items-center gap-1 ${currentDay >= 21 ? 'text-green-600' : 'text-muted-foreground'}`}>
+                    {currentDay >= 21 ? '✓' : '○'} 21 days
+                  </div>
+                  <div className={`flex items-center gap-1 ${currentDay >= 30 ? 'text-green-600' : 'text-muted-foreground'}`}>
+                    {currentDay >= 30 ? '✓' : '○'} 30 days
+                  </div>
+                </div>
               </div>
             </div>
           </section>
@@ -243,7 +303,9 @@ export default function DashboardPage() {
             {/* Reward Card */}
             <RewardCountdown 
               currentDay={currentDay} 
-              daysRemaining={challengeData?.daysRemaining || 7} 
+              daysRemaining={challengeData?.daysRemaining || 7}
+              currentMilestone={currentMilestone}
+              nextMilestone={nextMilestone}
               className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20" 
             />
 

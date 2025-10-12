@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
+import { Toaster as Sonner } from 'sonner'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { ThemeProvider } from '@/components/theme-provider'
 
@@ -42,6 +43,7 @@ export default function RootLayout({
           <ErrorBoundary>
             {children}
             <Toaster />
+            <Sonner />
             <Analytics />
             <SpeedInsights />
           </ErrorBoundary>

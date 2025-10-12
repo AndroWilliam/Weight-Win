@@ -92,6 +92,12 @@ export const POST = withHandler(async (req, ctx, requestId) => {
     isNewDay: checkInResult.is_new_day,
     currentStreak: checkInResult.current_streak,
     daysRemaining: checkInResult.days_remaining,
+    currentMilestone: checkInResult.current_milestone,
+    totalDaysCompleted: checkInResult.total_days_completed,
+    nextMilestone: checkInResult.next_milestone,
+    newBadgeEarned: checkInResult.new_badge_earned,
+    badgeName: checkInResult.badge_name,
+    badgeIcon: checkInResult.badge_icon,
     progress: progressData,
     message: checkInResult.is_new_day 
       ? `Day ${checkInResult.day_number} completed! 🎉` 

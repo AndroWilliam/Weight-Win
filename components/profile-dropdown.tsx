@@ -62,7 +62,7 @@ export function ProfileDropdown({ userInitials, isAdmin: initialIsAdmin = false 
       label: 'Rewards',
       href: '/rewards',
       show: true,
-      comingSoon: true
+      comingSoon: false
     },
     {
       icon: Settings,

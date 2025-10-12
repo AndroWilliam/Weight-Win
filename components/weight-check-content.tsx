@@ -307,9 +307,17 @@ export function WeightCheckContent() {
         setCurrentStep('success')
         setIsProcessing(false)
         
-        // Redirect to progress page after showing success
+        // Check if a new badge was earned and store for notification
+        if (result.data.newBadgeEarned && result.data.badgeName) {
+          localStorage.setItem('newBadgeEarned', JSON.stringify({
+            name: result.data.badgeName,
+            icon: result.data.badgeIcon || '🏆'
+          }))
+        }
+        
+        // Redirect to dashboard after showing success (changed from progress page)
         setTimeout(() => {
-          router.push('/progress')
+          router.push('/dashboard')
         }, 2000)
         
       } catch (error: any) {

@@ -1,247 +1,259 @@
-<!-- 9d485153-87b3-426c-a029-e1b9d248e08a d2947819-b4cb-4790-b392-f907e8c62997 -->
-# Mobile Responsiveness & Dark Mode Implementation
+<!-- 9d485153-87b3-426c-a029-e1b9d248e08a 50989253-40f5-42dc-8c4f-d66578ac7a6b -->
+# Milestone-Based Streak System Implementation
 
-## Phase 1: Theme Infrastructure Setup
+## Overview
 
-### 1.1 Extract Figma Dark Mode Colors
+Transform the fixed 7-day challenge into a progressive milestone system (7→14→21→30 days) with dynamic progress visualization, badge collection, and enhanced theme toggle animations.
 
-- Access Figma design via MCP to extract exact dark mode color values
-- Document all color tokens (backgrounds, text colors, borders, accents)
-- Update CSS variables in `app/globals.css` with Figma dark mode colors
+## Phase 1: Database Schema & Functions
 
-### 1.2 Configure Theme Provider
+### Create Milestone & Badge Tables
 
-- Update `app/layout.tsx` to wrap app with `ThemeProvider` from `next-themes`
-- Set `attribute="class"` for Tailwind CSS dark mode
-- Enable `enableSystem={true}` for system preference detection
-- Set `defaultTheme="system"` to follow device settings
+**File**: `scripts/16_milestone_system.sql`
 
-### 1.3 Create Theme Toggle Component
+Create new tables:
 
-- Create `components/theme-toggle.tsx` with sun/moon icon switch
-- Add smooth transition animation between light/dark states
-- Style according to Figma toggle design (shown in screenshots)
-- Make component reusable for footer and header placement
+- `user_milestones`: Track user progress through milestones (7, 14, 21, 30 days)
+  - `user_id`, `current_milestone` (7/14/21/30), `current_streak`, `total_days_completed`
+  - `milestone_7_completed_at`, `milestone_14_completed_at`, `milestone_21_completed_at`, `milestone_30_completed_at`
 
-## Phase 2: Landing Page Mobile & Dark Mode
+- `milestone_badges`: Define available badges
+  - `id`, `milestone_day` (7/14/21/30), `badge_name`, `badge_description`, `badge_icon_url`
+  - Seed with: "Week Warrior" (7), "Fortnight Champion" (14), "Triple Week Legend" (21), "Monthly Master" (30)
 
-### 2.1 Landing Page (`app/page.tsx`)
+- `user_badges`: Track awarded badges per user
+  - `user_id`, `badge_id`, `earned_at`, `milestone_completed`
 
-**Mobile Responsiveness:**
+### Update `record_daily_weight_checkin` Function
 
-- Fix hero section: adjust text sizes from `text-5xl md:text-6xl` to `text-3xl sm:text-4xl md:text-6xl`
-- Stack CTA buttons vertically on mobile (`flex-col sm:flex-row`)
-- Adjust padding/spacing: reduce `py-16` to `py-8 sm:py-12 md:py-16`
-- Optimize scale image section for mobile viewport
-- Make feature cards stack on mobile (already has `grid md:grid-cols-3`)
-- Adjust "How it works" section spacing and numbered steps for mobile
+**File**: `scripts/16_milestone_system.sql`
 
-**Dark Mode:**
+Modify the existing RPC function to:
 
-- Add dark mode classes to all sections:
-- Hero: `dark:bg-neutral-900 dark:text-white`
-- Cards: `dark:bg-card dark:text-card-foreground`
-- Buttons: ensure proper contrast in dark mode
-- Update footer background: `bg-neutral-900` works for both themes
+1. Calculate `current_milestone` based on `total_days_completed` (1-7→7, 8-14→14, 15-21→21, 22-30→30)
+2. Update `user_milestones` table instead of just tracking 7-day completion
+3. Award badges automatically when milestones are reached (7, 14, 21, 30)
+4. Return extended progress data: `current_day`, `current_milestone`, `days_in_milestone`, `completed_days_array`, `next_milestone`, `badges_earned`
 
-### 2.2 Navigation Header (`components/navigation-header.tsx`)
+### Create Helper Functions
 
-**Mobile Responsiveness:**
+**File**: `scripts/16_milestone_system.sql`
 
-- Add hamburger menu for mobile navigation (currently `hidden md:flex`)
-- Create mobile menu drawer/sheet component
-- Stack navigation items vertically in mobile menu
-- Ensure profile dropdown works on mobile
+- `get_user_milestone_progress(p_user_id UUID)`: Returns current milestone status
+- `get_user_badges(p_user_id UUID)`: Returns all badges earned by user
+- `calculate_current_milestone(p_total_days INTEGER)`: Returns appropriate milestone (7/14/21/30)
 
-**Dark Mode:**
+## Phase 2: Frontend - Dashboard Updates
 
-- Add dark mode classes to header
-- Theme toggle button in header for authenticated users
-- Ensure logo and navigation items have proper dark mode colors
+### Update Dashboard Title Logic
 
-### 2.3 Footer Theme Toggle
+**File**: `app/dashboard/page.tsx` (lines 176-184)
 
-- Add `ThemeToggle` component to footer (line 233 in `app/page.tsx`)
-- Position with proper spacing and alignment
-- Add animation on theme change (fade/slide transition)
+Change from hardcoded "Day X of 7" to dynamic:
 
-## Phase 3: Dashboard & User Pages Mobile & Dark Mode
+```typescript
+const currentMilestone = challengeData?.currentMilestone || 7
+const currentDayInMilestone = challengeData?.currentDay || 1
+<h2>Day {currentDayInMilestone} of {currentMilestone}</h2>
+```
 
-### 3.1 Dashboard (`app/dashboard/page.tsx`)
+Fetch milestone data from new RPC function `get_user_milestone_progress`.
 
-**Mobile Responsiveness:**
+### Dynamic Progress Pills Component
 
-- Optimize breadcrumb navigation for mobile
-- Adjust "Day X of 7" heading size for mobile screens
-- Stack "Take Photo" card and "Your Progress" card vertically on mobile
-- Make progress pills (1-7) scrollable horizontally on small screens
-- Adjust "Your Reward" card layout for mobile
+**File**: `components/streak-pills.tsx`
 
-**Dark Mode:**
+Transform from fixed 7 pills to dynamic milestone-based rendering:
 
-- Update all card backgrounds with `dark:bg-card`
-- Ensure proper contrast for progress indicators
-- Update text colors: `dark:text-foreground`
-- Style buttons for dark mode compatibility
+- Accept props: `currentDay`, `currentMilestone`, `completedDaysArray`
+- Render `currentMilestone` number of pills (7, 14, 21, or 30)
+- Use grid layout with wrapping for larger milestone counts
+- Styling: 
+  - Completed days: green with checkmark
+  - Current day: blue with pulse animation
+  - Pending days: gray outline
+- Add responsive design for mobile (2-3 rows if needed for 30 days)
 
-### 3.2 Setup Flow Pages
+### Enhanced Progress Bar
 
-- `app/setup/page.tsx`: Stack form elements, adjust input sizes
-- `app/consent/page.tsx`: Optimize text blocks for mobile reading
-- `app/commit/page.tsx`: Ensure checkbox and consent text readable on mobile
-- Add dark mode classes to all form elements
+**File**: `app/dashboard/page.tsx` (lines 227-236)
 
-### 3.3 Weight Check & Tracking Pages
+Update progress calculation:
 
-- `app/weight-check/page.tsx`: Optimize camera interface for mobile
-- `app/track/page.tsx`: Adjust photo upload UI for mobile screens
-- `app/progress/page.tsx`: Make charts/graphs responsive
-- Add dark mode styling to all interactive elements
+```typescript
+const progressPercent = Math.min(100, Math.round((currentDayInMilestone / currentMilestone) * 100))
+```
 
-## Phase 4: Admin Dashboard Mobile & Dark Mode
+Add milestone indicator below progress bar showing completed milestones with icons (7✓, 14✓, 21, 30).
 
-### 4.1 Admin Layout (`app/admin/layout.tsx`)
+### Reward Countdown Updates
 
-**Mobile Responsiveness:**
+**File**: `components/reward-countdown.tsx`
 
-- Make admin header responsive with hamburger menu
-- Optimize search bar for mobile
-- Adjust profile dropdown positioning
+Update to show next milestone reward:
 
-**Dark Mode:**
+- "Only X days until Week Warrior badge!" (for milestone 7)
+- "Only X days until Fortnight Champion badge!" (for milestone 14)
+- Dynamic messaging based on `currentMilestone` and `daysRemaining`
 
-- Apply dark mode to admin header
-- Update search input styling for dark mode
+## Phase 3: Rewards/Badges Page
 
-### 4.2 Applicants Page (`app/admin/applicants/page.tsx`)
+### Create Rewards Page
 
-**Mobile Responsiveness:**
+**File**: `app/rewards/page.tsx` (new file)
 
-- Convert KPI cards from grid to vertical stack on mobile
-- Transform applicants table to card-based layout on mobile:
-- Each row becomes a card with key info visible
-- Use collapsible sections for additional details
-- Add "View Details" button to open review drawer
-- Make tabs scrollable horizontally if needed
-- Optimize filters and search for mobile
+Build a dedicated page to display:
 
-**Dark Mode:**
+- **Header**: "Your Achievements" with total badges count
+- **Badge Gallery**: Grid of milestone badges (4 cards)
+  - Each card shows: badge icon, name, description, earned date (or "locked" state)
+  - Locked badges appear grayed out with lock icon
+  - Earned badges have celebration animation on page load
+- **Progress Timeline**: Visual timeline showing 7→14→21→30 with checkmarks for completed milestones
+- **Stats Section**: 
+  - Total days tracked
+  - Current streak
+  - Longest streak
+  - Next milestone countdown
 
-- Apply dark mode to KPI cards
-- Update table/card styling for dark mode
-- Ensure status pills have proper dark mode colors
-- Style drawer/modal components for dark mode
+Fetch data via new RPC: `get_user_badges`.
 
-### 4.3 Users Page (`app/admin/users/page.tsx`)
+### Add Rewards Route to Navigation
 
-**Mobile Responsiveness:**
+**File**: `components/profile-dropdown.tsx` (line ~30)
 
-- Same card-based approach as Applicants page
-- Optimize progress bars for mobile display
-- Make streak indicators touch-friendly
-- Stack user info vertically in cards
+Update `menuItems` array to make "Rewards" functional:
 
-**Dark Mode:**
+- Change `comingSoon: true` to `comingSoon: false`
+- Set `href: '/rewards'`
 
-- Apply consistent dark mode styling
-- Ensure progress bars visible in dark mode
-- Update action buttons for dark mode
+## Phase 4: Enhanced Theme Toggle Animation
 
-### 4.4 Admin Components
+### Improve Theme Toggle Component
 
-- `components/admin/ApplicantsTable.tsx`: Create mobile card view
-- `components/admin/UsersTable.tsx`: Create mobile card view
-- `components/admin/ReviewDrawer.tsx`: Optimize drawer for mobile
-- `components/admin/KPICards.tsx`: Stack vertically on mobile
+**File**: `components/theme-toggle.tsx`
 
-## Phase 5: Authentication Pages Mobile & Dark Mode
+Current implementation already has smooth animations (lines 26-42), but enhance:
 
-### 5.1 Login Page (`app/auth/login/page.tsx`)
+1. Add spring animation using Framer Motion for the sliding thumb
+2. Add scale pulse effect on click
+3. Add glow effect around active icon
+4. Slow down transition from 300ms to 500ms for more visible movement
 
-**Mobile Responsiveness:**
+Update dependencies:
 
-- Center content with proper padding
-- Adjust button sizes for mobile (min 44px touch target)
-- Optimize Google sign-in button for mobile
+```typescript
+import { motion } from 'framer-motion'
+```
 
-**Dark Mode:**
+Replace button with motion.button and add spring transition:
 
-- Update form background for dark mode
-- Ensure sufficient contrast for input fields
-- Style authentication providers for dark mode
+```typescript
+<motion.button
+  whileTap={{ scale: 0.95 }}
+  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+>
+  <motion.span
+    animate={{ x: isDark ? 28 : 2 }}
+    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+  >
+```
 
-### 5.2 Callback & Error Pages
+Note: `framer-motion` is already installed (package.json line 58).
 
-- `app/auth/callback/route.ts`: No UI changes needed
-- `app/auth/auth-code-error/page.tsx`: Apply mobile/dark mode styling
+## Phase 5: Library Assessment & Optimization
 
-## Phase 6: Nutritionist Application Mobile & Dark Mode
+### Current Libraries Analysis
 
-### 6.1 Application Form (`app/apply/nutritionist/page.tsx`)
+The project already has excellent animation support:
 
-**Mobile Responsiveness:**
+- **framer-motion** (v12.23.18): For advanced animations ✓
+- **tailwindcss-animate** (v1.0.7): For Tailwind-based animations ✓
+- **lucide-react**: For consistent icons ✓
+- **next-themes**: For theme management ✓
 
-- Stack form fields vertically on mobile
-- Optimize file upload components for mobile
-- Adjust document preview for mobile screens
-- Make form inputs touch-friendly (min height 44px)
+### Recommended Additions
 
-**Dark Mode:**
+**File**: `package.json`
 
-- Apply dark mode to form containers
-- Update input field styling for dark mode
-- Ensure file upload dropzone visible in dark mode
-- Style preview modal for dark mode
+Consider adding (optional, based on future needs):
 
-## Phase 7: Global Components & Polish
+1. **react-confetti**: For celebration effects when badges are earned
+2. **react-spring**: Alternative animation library (if more complex physics needed)
 
-### 7.1 Shared Components
+Current stack is sufficient for this implementation - no critical additions needed.
 
-- `components/profile-dropdown.tsx`: Ensure mobile-friendly positioning
-- `components/photo-capture.tsx`: Optimize camera UI for mobile
-- All UI components in `components/ui/`: Add dark mode variants
+## Phase 6: API Routes
 
-### 7.2 Testing & Refinement
+### Create Milestone Progress API
 
-- Test all pages on mobile viewports (375px, 390px, 414px)
-- Verify theme switching works across all pages
-- Check system preference detection
-- Ensure smooth animations
-- Verify color contrast meets WCAG AA standards
+**File**: `app/api/milestone/progress/route.ts` (new)
 
-## Key Files to Modify
+GET endpoint that calls `get_user_milestone_progress` RPC and returns formatted data.
 
-**Core Infrastructure:**
+### Create Badges API
 
-- `app/layout.tsx` - Add ThemeProvider wrapper
-- `app/globals.css` - Update dark mode CSS variables with Figma colors
-- `components/theme-toggle.tsx` - NEW: Create theme toggle component
+**File**: `app/api/badges/route.ts` (new)
 
-**Pages (Mobile + Dark Mode):**
+GET endpoint that calls `get_user_badges` RPC and returns user's badge collection.
 
-- `app/page.tsx` - Landing page
-- `app/dashboard/page.tsx` - User dashboard
-- `app/admin/applicants/page.tsx` - Admin applicants
-- `app/admin/users/page.tsx` - Admin users
-- `app/apply/nutritionist/page.tsx` - Nutritionist application
-- All setup/flow pages (`setup`, `consent`, `commit`, `weight-check`, `track`)
+## Phase 7: Testing & Polish
 
-**Components (Mobile Variants):**
+### Update Weight Check Flow
 
-- `components/navigation-header.tsx` - Add mobile menu
-- `components/admin/ApplicantsTable.tsx` - Add card view
-- `components/admin/UsersTable.tsx` - Add card view
-- All other admin components
+**File**: `app/api/weight/process/route.ts` (line ~80)
 
-**Styling Utilities:**
+Ensure the weight processing API uses the updated `record_daily_weight_checkin` function and handles new milestone response data.
 
-- May need to add mobile-specific utility classes in `app/globals.css`
+### Handle Badge Award Notifications
+
+**File**: `app/dashboard/page.tsx`
+
+Add toast notification using existing `sonner` library when user earns a new badge:
+
+```typescript
+import { toast } from 'sonner'
+
+if (newBadgeEarned) {
+  toast.success('🎉 New Badge Unlocked!', {
+    description: `You earned the ${badgeName} badge!`
+  })
+}
+```
+
+### Mobile Responsiveness
+
+Ensure all new components (especially 30-day pill grid and rewards page) are fully responsive with proper breakpoints.
+
+## Implementation Order
+
+1. Database schema & functions (Phase 1)
+2. Dashboard title & progress logic updates (Phase 2.1-2.3)
+3. Dynamic streak pills component (Phase 2.2)
+4. Rewards page & navigation (Phase 3)
+5. Theme toggle enhancements (Phase 4)
+6. API routes (Phase 6)
+7. Testing & polish (Phase 7)
+
+## Critical Notes
+
+- **Backward Compatibility**: Existing users with 7-day data will automatically migrate to milestone system (days 1-7 count toward first milestone)
+- **Data Preservation**: All existing `weight_entries` and streak data remain intact
+- **Gradual Rollout**: Current dashboard continues working during implementation; new features activate progressively
+- **No Logic Destruction**: Existing `get_challenge_progress`, `record_daily_weight_checkin` functions are enhanced, not replaced
 
 ### To-dos
 
-- [ ] Set up theme infrastructure (Figma color extraction, ThemeProvider configuration, ThemeToggle component)
-- [ ] Implement mobile responsiveness and dark mode for landing page and navigation
-- [ ] Implement mobile responsiveness and dark mode for dashboard and user flow pages
-- [ ] Implement mobile responsiveness (card-based layout) and dark mode for admin dashboard
-- [ ] Implement mobile responsiveness and dark mode for authentication and nutritionist application pages
-- [ ] Test all pages on multiple mobile viewports, verify theme switching, and polish animations
+- [ ] Create database schema for milestones, badges, and user badges tables with RLS policies
+- [ ] Modify record_daily_weight_checkin function to handle milestone progression and badge awards
+- [ ] Create helper functions for milestone progress, badge retrieval, and milestone calculation
+- [ ] Update dashboard page title to show dynamic 'Day X of Y' based on current milestone
+- [ ] Transform StreakPills component to render dynamic number of pills (7/14/21/30) with responsive grid
+- [ ] Update progress bar calculation and add milestone indicators below the bar
+- [ ] Update RewardCountdown component to show next milestone badge information
+- [ ] Create new rewards page with badge gallery, timeline, and stats section
+- [ ] Update profile dropdown to make Rewards menu item functional
+- [ ] Add Framer Motion spring animations to theme toggle for smoother visual transitions
+- [ ] Create API routes for milestone progress and badges data
+- [ ] Add toast notifications when users earn new badges
+- [ ] Test and polish mobile responsiveness for 30-day pill grid and rewards page
