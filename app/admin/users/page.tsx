@@ -31,7 +31,7 @@ export default async function UsersPage() {
     console.error('[Users Page] Error fetching KPIs:', kpiError)
     // Fallback to 0 values if KPI function fails
     return (
-      <>
+      <div className="space-y-4 sm:space-y-6">
         <UsersKPICards
           newUsersThisWeek={0}
           usersInProgress={0}
@@ -40,14 +40,14 @@ export default async function UsersPage() {
         />
         
         <UsersTable rows={rows ?? []} />
-      </>
+      </div>
     )
   }
 
   const users = rows ?? []
 
   return (
-    <>
+    <div className="space-y-4 sm:space-y-6">
       <UsersKPICards
         newUsersThisWeek={kpiData?.new_users_this_week || 0}
         usersInProgress={kpiData?.users_in_progress || 0}
@@ -56,7 +56,7 @@ export default async function UsersPage() {
       />
       
       <UsersTable rows={users} />
-    </>
+    </div>
   )
 }
 
