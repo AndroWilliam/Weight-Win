@@ -367,8 +367,8 @@ export function WeightCheckContent() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-neutral-600">Checking authentication...</p>
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Checking authentication...</p>
         </div>
       </div>
     )
@@ -377,12 +377,12 @@ export function WeightCheckContent() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="px-6 py-4 border-b border-neutral-300">
+      <header className="px-4 sm:px-6 py-4 border-b border-border">
         <div className="max-w-6xl mx-auto flex items-center gap-4">
           <Button
             variant="ghost"
             onClick={handleBack}
-            className="flex items-center gap-2 text-neutral-700 hover:text-neutral-900"
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back</span>
@@ -393,30 +393,32 @@ export function WeightCheckContent() {
                 <div
                   key={index}
                   className={`w-2 h-2 rounded-full ${
-                    parseInt(day) > index ? 'bg-primary-600' : 'bg-neutral-300'
+                    parseInt(day) > index ? 'bg-primary' : 'bg-border'
                   }`}
                 ></div>
               ))}
             </div>
           </div>
+          {/* Spacer to balance the back button */}
+          <div style={{ width: '80px' }} />
         </div>
       </header>
 
-      <main className="px-6 py-8">
+      <main className="px-4 sm:px-6 py-6 sm:py-8">
         <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-neutral-900 mb-2">Day {day} Weight Check</h1>
-            <p className="text-neutral-600">Take or upload a clear photo of your scale</p>
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Day {day} Weight Check</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Take or upload a clear photo of your scale</p>
           </div>
 
           {/* Photo Tips Card */}
-          <Card className="border-neutral-300 mb-6">
-            <CardContent className="p-6">
+          <Card className="border-border mb-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center gap-3 mb-4">
-                <Camera className="w-5 h-5 text-primary-600" />
-                <h3 className="text-lg font-semibold text-neutral-900">Photo Tips</h3>
+                <Camera className="w-5 h-5 text-primary" />
+                <h3 className="text-base sm:text-lg font-semibold text-foreground">Photo Tips</h3>
               </div>
-              <ul className="space-y-2 text-sm text-neutral-700">
+              <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground">
                 <li>• Point camera directly down at the scale</li>
                 <li>• Ensure good lighting so digits are clear</li>
                 <li>• Make sure your weight is fully displayed</li>
@@ -427,15 +429,15 @@ export function WeightCheckContent() {
 
           {/* Camera View */}
           {currentStep === 'camera' && (
-            <Card className="border-neutral-300 mb-6">
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-neutral-900 mb-4">Camera Preview</h3>
-                <div className="relative bg-neutral-100 rounded-lg overflow-hidden">
+            <Card className="border-border mb-6">
+              <CardContent className="p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold text-foreground mb-4">Camera Preview</h3>
+                <div className="relative bg-muted rounded-lg overflow-hidden">
                   {isCameraLoading ? (
                     <div className="w-full h-80 flex items-center justify-center">
                       <div className="text-center">
-                        <div className="w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                        <p className="text-neutral-600">Initializing camera...</p>
+                        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                        <p className="text-muted-foreground">Initializing camera...</p>
                       </div>
                     </div>
                   ) : (
@@ -475,7 +477,7 @@ export function WeightCheckContent() {
                       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
                         <Button
                           onClick={capturePhoto}
-                          className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 text-lg font-semibold rounded-lg shadow-lg"
+                          className="bg-primary hover:bg-primary/90 text-white px-8 py-3 text-lg font-semibold rounded-lg shadow-lg"
                         >
                           <Camera className="w-5 h-5 mr-2" />
                           Capture Photo
@@ -504,7 +506,7 @@ export function WeightCheckContent() {
                       setCurrentStep('upload')
                     }}
                     variant="outline"
-                    className="border-neutral-300"
+                    className="border-border"
                   >
                     Cancel
                   </Button>
@@ -515,17 +517,17 @@ export function WeightCheckContent() {
 
           {/* Upload Area */}
           {currentStep === 'upload' && (
-            <Card className="border-neutral-300 mb-6">
-              <CardContent className="p-8">
-                <div className="border-2 border-dashed border-neutral-300 rounded-lg p-8 text-center">
-                  <Upload className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-neutral-900 mb-2">Take or upload your scale photo</h3>
-                  <p className="text-neutral-600 mb-6">Make sure the weight digits are clearly visible</p>
-                  <div className="flex gap-4 justify-center">
+            <Card className="border-border mb-6">
+              <CardContent className="p-6 sm:p-8">
+                <div className="border-2 border-dashed border-border rounded-lg p-6 sm:p-8 text-center">
+                  <Upload className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2">Take or upload your scale photo</h3>
+                  <p className="text-sm sm:text-base text-muted-foreground mb-6">Make sure the weight digits are clearly visible</p>
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                     <Button
                       onClick={handleTakePhoto}
                       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleTakePhoto()}
-                      className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3"
+                      className="bg-primary hover:bg-primary/90 text-white px-6 py-3"
                       aria-label="Take weight scale photo with camera"
                     >
                       <Camera className="w-4 h-4 mr-2" />
@@ -535,15 +537,15 @@ export function WeightCheckContent() {
                       onClick={handleUploadPhoto}
                       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleUploadPhoto()}
                       variant="outline"
-                      className="border-neutral-300 px-6 py-3"
+                      className="border-border px-6 py-3"
                       aria-label="Upload weight scale photo from device"
                     >
                       <Upload className="w-4 h-4 mr-2" />
                       Upload Photo
                     </Button>
                   </div>
-                  <p className="text-sm text-neutral-500 mt-4">Drag and drop your photo here, or click to browse</p>
-                  <p className="text-xs text-neutral-400 mt-2">JPG, PNG up to 10MB</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-4">Drag and drop your photo here, or click to browse</p>
+                  <p className="text-xs text-muted-foreground/80 mt-2">JPG, PNG up to 10MB</p>
                 </div>
                 <input
                   type="file"
@@ -558,17 +560,17 @@ export function WeightCheckContent() {
 
           {/* Photo Preview */}
           {currentStep === 'preview' && capturedImage && (
-            <Card className="border-neutral-300 mb-6">
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-neutral-900 mb-4">Review Photo</h3>
-                <div className="relative bg-neutral-100 rounded-lg overflow-hidden mb-4">
+            <Card className="border-border mb-6">
+              <CardContent className="p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold text-foreground mb-4">Review Photo</h3>
+                <div className="relative bg-muted rounded-lg overflow-hidden mb-4">
                   <img src={capturedImage} alt="Captured Weight" className="w-full h-auto object-cover rounded-lg" />
                 </div>
-                <div className="flex gap-4 justify-center">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                   <Button
                     onClick={handleUsePhoto}
                     disabled={isProcessing}
-                    className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3"
+                    className="bg-primary hover:bg-primary/90 text-white px-6 py-3"
                   >
                     {isProcessing ? 'Processing...' : <><Check className="w-4 h-4 mr-2" />Use This Photo</>}
                   </Button>
@@ -576,7 +578,7 @@ export function WeightCheckContent() {
                     onClick={handleRetake}
                     variant="outline"
                     disabled={isProcessing}
-                    className="border-neutral-300 px-6 py-3"
+                    className="border-border px-6 py-3"
                   >
                     <RotateCcw className="w-4 h-4 mr-2" />
                     Retake
@@ -589,22 +591,22 @@ export function WeightCheckContent() {
           {/* Processing State */}
           {currentStep === 'processing' && (
             <div className="text-center py-12">
-              <div className="w-16 h-16 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-neutral-600 text-lg">Analyzing your weight...</p>
+              <div className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-muted-foreground text-base sm:text-lg">Analyzing your weight...</p>
             </div>
           )}
           
           {/* Success State */}
           {currentStep === 'success' && (
-            <Card className="border-green-300 bg-green-50 mb-6">
+            <Card className="border-green-300 bg-green-50 dark:bg-green-900/20 mb-6">
               <CardContent className="p-6">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-green-100 dark:bg-green-800/30 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Check className="w-8 h-8 text-green-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-green-900 mb-2">Weight Recorded Successfully!</h3>
-                  <p className="text-green-700 text-2xl font-bold mb-2">{weight} kg</p>
-                  <p className="text-green-600">Redirecting to your progress...</p>
+                  <h3 className="text-lg font-semibold text-green-900 dark:text-green-300 mb-2">Weight Recorded Successfully!</h3>
+                  <p className="text-green-700 dark:text-green-400 text-2xl font-bold mb-2">{weight} kg</p>
+                  <p className="text-green-600 dark:text-green-500">Redirecting to your progress...</p>
                 </div>
               </CardContent>
             </Card>
@@ -612,14 +614,14 @@ export function WeightCheckContent() {
           
           {/* Error State */}
           {currentStep === 'error' && (
-            <Card className="border-red-300 bg-red-50 mb-6">
+            <Card className="border-red-300 bg-red-50 dark:bg-red-900/20 mb-6">
               <CardContent className="p-6">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-red-100 dark:bg-red-800/30 rounded-full flex items-center justify-center mx-auto mb-4">
                     <AlertCircle className="w-8 h-8 text-red-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-red-900 mb-2">Unable to Read Weight</h3>
-                  <p className="text-red-700 whitespace-pre-line">{errorMessage}</p>
+                  <h3 className="text-lg font-semibold text-red-900 dark:text-red-300 mb-2">Unable to Read Weight</h3>
+                  <p className="text-red-700 dark:text-red-400 whitespace-pre-line">{errorMessage}</p>
                 </div>
               </CardContent>
             </Card>

@@ -18,6 +18,7 @@ import {
   Legend,
   ChartOptions
 } from 'chart.js'
+import { useTheme } from 'next-themes'
 
 // Register ChartJS components
 ChartJS.register(
@@ -58,6 +59,7 @@ export default function ProgressPage() {
   const [motivationalQuote, setMotivationalQuote] = useState<string>("")
   const router = useRouter()
   const supabase = createClient()
+  const { theme } = useTheme()
 
   useEffect(() => {
     loadWeightData()
@@ -132,18 +134,23 @@ export default function ProgressPage() {
   }
 
   const getChartData = () => {
+    const isDark = theme === 'dark'
+    const primaryColor = isDark ? 'rgb(129, 140, 248)' : 'rgb(99, 102, 241)' // indigo-400 for dark, indigo-500 for light
+    const backgroundColor = isDark ? 'rgba(129, 140, 248, 0.1)' : 'rgba(99, 102, 241, 0.1)'
+    const pointBorderColor = isDark ? '#1a1a1a' : '#fff' // Card color for dark, white for light
+
     return {
       labels: weightEntries.map(entry => formatDate(entry.recorded_at)),
       datasets: [{
         label: 'Weight (kg)',
         data: weightEntries.map(entry => entry.weight_kg),
-        borderColor: 'rgb(99, 102, 241)',
-        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+        borderColor: primaryColor,
+        backgroundColor: backgroundColor,
         tension: 0.3,
         pointRadius: 6,
         pointHoverRadius: 8,
-        pointBackgroundColor: 'rgb(99, 102, 241)',
-        pointBorderColor: '#fff',
+        pointBackgroundColor: primaryColor,
+        pointBorderColor: pointBorderColor,
         pointBorderWidth: 2
       }]
     }
@@ -157,7 +164,9 @@ export default function ProgressPage() {
         display: false
       },
       tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        backgroundColor: theme === 'dark' ? 'rgba(30, 30, 30, 0.9)' : 'rgba(0, 0, 0, 0.8)',
+        titleColor: '#fff',
+        bodyColor: '#fff',
         padding: 12,
         cornerRadius: 8,
         titleFont: {
@@ -181,10 +190,11 @@ export default function ProgressPage() {
           callback: (value) => `${value} kg`,
           font: {
             size: 12
-          }
+          },
+          color: theme === 'dark' ? '#a3a3a3' : '#6b7280' // Muted-foreground colors
         },
         grid: {
-          color: 'rgba(0, 0, 0, 0.05)'
+          color: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'
         }
       },
       x: {
@@ -194,7 +204,8 @@ export default function ProgressPage() {
         ticks: {
           font: {
             size: 12
-          }
+          },
+          color: theme === 'dark' ? '#a3a3a3' : '#6b7280'
         }
       }
     }
@@ -204,8 +215,8 @@ export default function ProgressPage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-neutral-600">Loading your progress...</p>
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading your progress...</p>
         </div>
       </div>
     )
@@ -214,48 +225,48 @@ export default function ProgressPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="px-6 py-4 border-b border-neutral-300">
+      <header className="px-4 sm:px-6 py-4 border-b border-border">
         <div className="max-w-6xl mx-auto flex items-center gap-4">
           <button 
             onClick={() => router.push('/dashboard')}
-            className="flex items-center gap-2 text-neutral-700 hover:text-neutral-900"
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Back</span>
+            <span className="hidden sm:inline">Back</span>
           </button>
           <div className="flex-1 flex justify-center">
-            <h1 className="text-xl font-bold text-neutral-900">Progress</h1>
+            <h1 className="text-lg sm:text-xl font-bold text-foreground">Progress</h1>
           </div>
-          <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
+          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
             <span className="text-white font-bold text-sm">A</span>
           </div>
         </div>
       </header>
 
-      <main className="px-6 py-8">
+      <main className="px-4 sm:px-6 py-6 sm:py-8">
         <div className="max-w-4xl mx-auto">
           {/* Stats Overview */}
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
             {/* Weight Change Card */}
-            <Card className="border-neutral-300">
-              <CardContent className="p-6 text-center">
-                <div className="w-12 h-12 bg-primary-50 rounded-lg flex items-center justify-center mx-auto mb-4">
+            <Card className="border-border">
+              <CardContent className="p-4 sm:p-6 text-center">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                   {weightSummary?.trend === 'down' ? (
-                    <TrendingDown className="w-6 h-6 text-green-600" />
+                    <TrendingDown className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
                   ) : weightSummary?.trend === 'up' ? (
-                    <TrendingUp className="w-6 h-6 text-red-600" />
+                    <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
                   ) : (
-                    <TrendingUp className="w-6 h-6 text-primary-600" />
+                    <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   )}
                 </div>
-                <h3 className="text-lg font-semibold text-neutral-900 mb-2">Weight Change</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2">Weight Change</h3>
                 <div className="flex items-center justify-center gap-2">
-                  <p className={`text-2xl font-bold ${
+                  <p className={`text-xl sm:text-2xl font-bold ${
                     weightSummary?.change_from_previous && weightSummary.change_from_previous < 0 
                       ? 'text-green-600' 
                       : weightSummary?.change_from_previous && weightSummary.change_from_previous > 0 
                       ? 'text-red-600' 
-                      : 'text-neutral-900'
+                      : 'text-foreground'
                   }`}>
                     {weightSummary?.change_from_previous 
                       ? `${weightSummary.change_from_previous > 0 ? '+' : ''}${weightSummary.change_from_previous.toFixed(1)} kg`
@@ -263,12 +274,12 @@ export default function ProgressPage() {
                     }
                   </p>
                   {weightSummary?.trend === 'down' ? (
-                    <Smile className="w-6 h-6 text-green-600" />
+                    <Smile className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
                   ) : weightSummary?.trend === 'up' ? (
-                    <Frown className="w-6 h-6 text-red-600" />
+                    <Frown className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
                   ) : null}
                 </div>
-                <p className="text-sm text-neutral-600 mt-1">Since last weigh-in</p>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">Since last weigh-in</p>
                 {weightSummary?.trend === 'down' && motivationalQuote && (
                   <p className="text-xs text-green-600 mt-2 italic">"{motivationalQuote}"</p>
                 )}
@@ -279,57 +290,57 @@ export default function ProgressPage() {
             </Card>
 
             {/* Current Weight Card */}
-            <Card className="border-neutral-300">
-              <CardContent className="p-6 text-center">
-                <div className="w-12 h-12 bg-primary-50 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Scale className="w-6 h-6 text-primary-600" />
+            <Card className="border-border">
+              <CardContent className="p-4 sm:p-6 text-center">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Scale className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-neutral-900 mb-2">Current Weight</h3>
-                <p className="text-2xl font-bold text-neutral-900">
+                <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2">Current Weight</h3>
+                <p className="text-xl sm:text-2xl font-bold text-foreground">
                   {weightSummary?.current_weight 
                     ? `${weightSummary.current_weight.toFixed(1)} kg`
                     : '-- kg'
                   }
                 </p>
-                <p className="text-sm text-neutral-600 mt-1">Latest reading</p>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">Latest reading</p>
               </CardContent>
             </Card>
 
             {/* Streak Card */}
-            <Card className="border-neutral-300">
-              <CardContent className="p-6 text-center">
-                <div className="w-12 h-12 bg-primary-50 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Calendar className="w-6 h-6 text-primary-600" />
+            <Card className="border-border">
+              <CardContent className="p-4 sm:p-6 text-center">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-neutral-900 mb-2">Streak</h3>
-                <p className="text-2xl font-bold text-neutral-900">
+                <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2">Streak</h3>
+                <p className="text-xl sm:text-2xl font-bold text-foreground">
                   {streakInfo?.streak || 0} days
                 </p>
-                <p className="text-sm text-neutral-600 mt-1">Consecutive tracking</p>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">Consecutive tracking</p>
                 {streakInfo?.message && (
-                  <p className="text-xs text-primary-600 mt-2">{streakInfo.message}</p>
+                  <p className="text-xs text-primary mt-2">{streakInfo.message}</p>
                 )}
               </CardContent>
             </Card>
           </div>
 
           {/* Weight Chart */}
-          <Card className="border-neutral-300 mb-8">
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold text-neutral-900 mb-6">Weight Progress</h3>
+          <Card className="border-border mb-6 sm:mb-8">
+            <CardContent className="p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-semibold text-foreground mb-4 sm:mb-6">Weight Progress</h3>
               
               {weightEntries.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <TrendingUp className="w-8 h-8 text-neutral-400" />
+                <div className="text-center py-8 sm:py-12">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                    <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground" />
                   </div>
-                  <h4 className="text-lg font-medium text-neutral-900 mb-2">No data yet</h4>
-                  <p className="text-neutral-600 mb-4">
+                  <h4 className="text-base sm:text-lg font-medium text-foreground mb-2">No data yet</h4>
+                  <p className="text-sm sm:text-base text-muted-foreground mb-4">
                     Start tracking your weight to see your progress here
                   </p>
                   <Button
                     onClick={() => router.push('/dashboard')}
-                    className="bg-primary-600 hover:bg-primary-700"
+                    className="bg-primary hover:bg-primary/90"
                   >
                     Take Your First Photo
                   </Button>
@@ -344,19 +355,19 @@ export default function ProgressPage() {
 
           {/* Total Progress Summary */}
           {weightSummary && weightSummary.total_change !== 0 && (
-            <Card className="border-neutral-300">
-              <CardContent className="p-6 text-center">
-                <h3 className="text-lg font-semibold text-neutral-900 mb-2">
+            <Card className="border-border">
+              <CardContent className="p-4 sm:p-6 text-center">
+                <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2">
                   Total Progress {weightSummary.total_change < 0 ? '🎉' : '💪'}
                 </h3>
-                <p className="text-neutral-600">
+                <p className="text-sm sm:text-base text-muted-foreground">
                   You've {weightSummary.total_change < 0 ? 'lost' : 'gained'} a total of{' '}
                   <span className={`font-bold ${weightSummary.total_change < 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {Math.abs(weightSummary.total_change).toFixed(1)} kg
                   </span>{' '}
                   since you started tracking.
                 </p>
-                <p className="text-sm text-neutral-500 mt-2">
+                <p className="text-xs sm:text-sm text-muted-foreground/80 mt-2">
                   Remember: {weightSummary.message}
                 </p>
               </CardContent>
