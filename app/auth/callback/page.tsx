@@ -38,8 +38,8 @@ export default function AuthCallbackPage() {
       try {
         setStatus("exchanging")
         const supabase = createClient()
-        // Use object signature to be compatible with latest supabase-js
-        const { data, error } = await supabase.auth.exchangeCodeForSession({ code })
+        // Call with string signature (PKCE: code_verifier is managed by supabase-js in storage)
+        const { data, error } = await supabase.auth.exchangeCodeForSession(code as string)
 
         if (error || !data?.session) {
           setStatus("error")
