@@ -8,7 +8,8 @@ import {
   Settings, 
   Send, 
   Shield,
-  ChevronDown
+  ChevronDown,
+  LogOut
 } from 'lucide-react'
 
 interface ProfileDropdownProps {
@@ -97,6 +98,22 @@ export function ProfileDropdown({ userInitials, isAdmin: initialIsAdmin = false 
     setIsOpen(false)
   }
 
+  const handleSignOut = async () => {
+    try {
+      // Sign out using Supabase
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      await supabase.auth.signOut()
+      
+      // Redirect to login page
+      router.push('/auth/login')
+      setIsOpen(false)
+    } catch (error) {
+      console.error('Error signing out:', error)
+      alert('Failed to sign out. Please try again.')
+    }
+  }
+
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Profile Button */}
@@ -117,6 +134,7 @@ export function ProfileDropdown({ userInitials, isAdmin: initialIsAdmin = false 
       {/* Dropdown Menu */}
       {isOpen && (
         <div className="absolute right-0 mt-2 w-56 bg-card rounded-xl shadow-2xl border border-border py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+          {/* Menu Items */}
           {menuItems.filter(item => item.show).map((item, index) => {
             const Icon = item.icon
             return (
@@ -151,6 +169,32 @@ export function ProfileDropdown({ userInitials, isAdmin: initialIsAdmin = false 
               </button>
             )
           })}
+
+          {/* Divider */}
+          <div className="my-2 mx-4 border-t border-border" />
+
+          {/* Sign Out Button */}
+          <button
+            onClick={handleSignOut}
+            className="w-full flex items-center gap-3 px-4 py-3 text-left text-foreground hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200 group relative overflow-hidden"
+            style={{
+              transform: isOpen ? 'translateZ(0)' : 'translateZ(-10px)',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+            }}
+          >
+            {/* 3D hover effect background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
+            
+            {/* Icon with scale animation */}
+            <div className="relative">
+              <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
+            </div>
+            
+            {/* Label */}
+            <span className="font-medium group-hover:translate-x-1 transition-transform duration-200">
+              Sign Out
+            </span>
+          </button>
         </div>
       )}
     </div>
