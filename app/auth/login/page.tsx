@@ -180,6 +180,11 @@ export default function LoginPage() {
       // Persist intended next so callback page can use it if provider strips query params
       try { localStorage.setItem('postAuthNext', '/consent') } catch {}
 
+      // Debug: Check storage before OAuth
+      const storageKey = `sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0]}-auth-token-code-verifier`
+      console.log('[Auth Debug] Storage key that will be used:', storageKey)
+      console.log('[Auth Debug] LocalStorage available:', !!window.localStorage)
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
@@ -191,6 +196,12 @@ export default function LoginPage() {
       })
 
       console.log("[v0] OAuth response:", { data, error })
+      
+      // Debug: Check if code_verifier was stored after OAuth call
+      setTimeout(() => {
+        const verifier = localStorage.getItem(storageKey)
+        console.log('[Auth Debug] code_verifier stored after OAuth initiation:', !!verifier)
+      }, 100)
 
       if (error) {
         console.error("[v0] OAuth error:", error)

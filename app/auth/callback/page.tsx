@@ -38,11 +38,21 @@ export default function AuthCallbackPage() {
       try {
         setStatus("exchanging")
         const supabase = createClient()
-        // Call with string signature (PKCE: code_verifier is managed by supabase-js in storage)
+        
+        // Debug: Check if code_verifier exists in storage
+        if (typeof window !== 'undefined') {
+          const storageKey = `sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0]}-auth-token-code-verifier`
+          const verifier = localStorage.getItem(storageKey)
+          console.log('[Auth Debug] code_verifier in storage:', !!verifier)
+          console.log('[Auth Debug] storage key:', storageKey)
+        }
+        
+        // Exchange code for session with explicit error handling
         const { data, error } = await supabase.auth.exchangeCodeForSession(code as string)
 
         if (error || !data?.session) {
           setStatus("error")
+          console.error('[Auth Debug] Exchange failed:', error)
           setMessage(error?.message || "Failed to create session.")
           return
         }

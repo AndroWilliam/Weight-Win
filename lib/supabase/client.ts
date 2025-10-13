@@ -1,5 +1,17 @@
 import { createBrowserClient } from "@supabase/ssr"
 
 export function createClient() {
-  return createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!, 
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: {
+        flowType: 'pkce',
+        detectSessionInUrl: true,
+        persistSession: true,
+        storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+        storageKey: `sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0]}-auth-token`,
+      }
+    }
+  )
 }
