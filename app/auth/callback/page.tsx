@@ -39,19 +39,11 @@ export default function AuthCallbackPage() {
         setStatus("exchanging")
         const supabase = createClient()
         
-        // Debug: Check all localStorage keys related to Supabase auth
-        if (typeof window !== 'undefined') {
-          console.log('[Auth Debug] All localStorage keys:', Object.keys(localStorage))
-          const allSupabaseKeys = Object.keys(localStorage).filter(k => k.includes('supabase') || k.includes('sb-'))
-          console.log('[Auth Debug] Supabase-related keys:', allSupabaseKeys)
-          allSupabaseKeys.forEach(key => {
-            const value = localStorage.getItem(key)
-            console.log(`[Auth Debug] ${key}:`, value ? value.substring(0, 50) + '...' : 'null')
-          })
-        }
+        console.log('[Auth Debug] Processing OAuth callback with implicit flow')
+        console.log('[Auth Debug] Code format:', code?.substring(0, 20) + '... (UUID = implicit flow)')
         
-        // Exchange code for session with explicit error handling
-        console.log('[Auth Debug] Calling exchangeCodeForSession with code:', code?.substring(0, 20) + '...')
+        // For implicit flow, exchangeCodeForSession handles the code exchange
+        // No code_verifier is needed since Google OAuth provider uses implicit flow
         const { data, error } = await supabase.auth.exchangeCodeForSession(code as string)
 
         if (error || !data?.session) {
@@ -62,7 +54,7 @@ export default function AuthCallbackPage() {
           return
         }
         
-        console.log('[Auth Debug] Exchange successful! Session created.')
+        console.log('[Auth Debug] ✓ Exchange successful! Session created for implicit flow.')
 
         setStatus("success")
         // Determine post-auth destination: URL param > localStorage > /consent
