@@ -53,16 +53,16 @@ export function DailyTips({ className }: DailyTipsProps) {
 
   if (isLoading) {
     return (
-      <section className={`rounded-2xl border border-border shadow-sm p-8 flex flex-col ${className}`} aria-labelledby="tips-heading">
+      <section className={`rounded-2xl border border-border shadow-sm p-5 sm:p-8 flex flex-col ${className}`} aria-labelledby="tips-heading">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-            <span className="text-2xl">📖</span>
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+            <span className="text-xl sm:text-2xl">📖</span>
           </div>
-          <h3 id="tips-heading" className="text-2xl font-semibold text-foreground">Daily Tips</h3>
+          <h3 id="tips-heading" className="text-lg sm:text-2xl font-semibold text-foreground">Daily Tips</h3>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center text-center gap-3">
           <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-muted-foreground">Loading today's tips...</p>
+          <p className="text-sm sm:text-base text-muted-foreground">Loading today's tips...</p>
         </div>
       </section>
     )
@@ -70,14 +70,14 @@ export function DailyTips({ className }: DailyTipsProps) {
 
   if (!dailyTips || dailyTips.tips.length === 0) {
     return (
-      <section className={`rounded-2xl border border-border shadow-sm p-8 flex flex-col ${className}`} aria-labelledby="tips-heading">
+      <section className={`rounded-2xl border border-border shadow-sm p-5 sm:p-8 flex flex-col ${className}`} aria-labelledby="tips-heading">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-            <span className="text-2xl">📖</span>
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+            <span className="text-xl sm:text-2xl">📖</span>
           </div>
-          <h3 id="tips-heading" className="text-2xl font-semibold text-foreground">Daily Tips</h3>
+          <h3 id="tips-heading" className="text-lg sm:text-2xl font-semibold text-foreground">Daily Tips</h3>
         </div>
-        <p className="text-muted-foreground">No tips available today.</p>
+        <p className="text-sm sm:text-base text-muted-foreground">No tips available today.</p>
       </section>
     )
   }
@@ -85,13 +85,13 @@ export function DailyTips({ className }: DailyTipsProps) {
   const currentTip = dailyTips.tips[currentTipIndex]
 
   return (
-    <section className={`rounded-2xl border border-border shadow-sm p-8 flex flex-col ${className}`} aria-labelledby="tips-heading">
-      <div className="flex items-center justify-between mb-6">
+    <section className={`rounded-2xl border border-border shadow-sm p-5 sm:p-8 flex flex-col ${className}`} aria-labelledby="tips-heading">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-            <span className="text-2xl">📖</span>
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+            <span className="text-xl sm:text-2xl">📖</span>
           </div>
-          <h3 id="tips-heading" className="text-2xl font-semibold text-foreground">Daily Tips</h3>
+          <h3 id="tips-heading" className="text-lg sm:text-2xl font-semibold text-foreground">Daily Tips</h3>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -122,10 +122,10 @@ export function DailyTips({ className }: DailyTipsProps) {
         >
           {dailyTips.tips.map((tip) => (
             <div key={tip.id} className="w-full flex-shrink-0 flex flex-col space-y-4">
-              <h4 className="font-semibold text-foreground text-lg">{tip.title}</h4>
-              <p className="text-muted-foreground leading-relaxed">{tip.content}</p>
+              <h4 className="font-semibold text-foreground text-base sm:text-lg">{tip.title}</h4>
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{tip.content}</p>
               <div className="flex items-center gap-3 mt-auto pt-4">
-                <span className="text-xs text-muted-foreground">{currentTip.readTime}</span>
+                <span className="text-[11px] sm:text-xs text-muted-foreground">{currentTip.readTime}</span>
                 <div className="flex gap-1.5">
                   {dailyTips.tips.map((_, index) => (
                     <button

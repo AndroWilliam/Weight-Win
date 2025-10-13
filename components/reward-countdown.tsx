@@ -97,17 +97,17 @@ export function RewardCountdown({
   const BadgeIcon = badgeInfo.icon
 
   return (
-    <section className={`rounded-2xl border border-border shadow-sm p-6 sm:p-8 flex flex-col justify-center ${className}`} aria-labelledby="reward-heading">
+    <section className={`rounded-2xl border border-border shadow-sm p-5 sm:p-8 flex flex-col justify-center ${className}`} aria-labelledby="reward-heading">
       <div className="text-center space-y-4">
         <div className="flex justify-center">
           <div className="relative">
-            <span className="text-4xl sm:text-5xl">{badgeInfo.emoji}</span>
+            <span className="text-3xl sm:text-5xl">{badgeInfo.emoji}</span>
             {actualDaysRemaining <= 3 && actualDaysRemaining > 0 && (
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
             )}
           </div>
         </div>
-        <h3 id="reward-heading" className="text-xl sm:text-2xl font-semibold text-foreground">
+        <h3 id="reward-heading" className="text-lg sm:text-2xl font-semibold text-foreground">
           Next Milestone
         </h3>
         <div className="space-y-2">
@@ -115,7 +115,7 @@ export function RewardCountdown({
             <BadgeIcon className="w-5 h-5 text-primary" />
             <span className="text-sm font-semibold text-primary">{badgeInfo.name}</span>
           </div>
-          <p className="text-muted-foreground text-sm sm:text-base">
+          <p className="text-muted-foreground text-[13px] sm:text-base">
             {actualDaysRemaining > 0 
               ? `Only ${actualDaysRemaining} more day${actualDaysRemaining !== 1 ? 's' : ''} until you earn this badge! 🔥`
               : "Complete your check-in today to unlock this milestone!"
