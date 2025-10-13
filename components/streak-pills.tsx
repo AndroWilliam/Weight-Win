@@ -21,7 +21,7 @@ export function StreakPills({
   
   return (
     <div className={cn(
-      "grid gap-2 justify-center",
+      "grid gap-1.5 sm:gap-2 justify-center",
       className,
       {
         "grid-cols-7": totalPills === 7,
@@ -47,7 +47,7 @@ export function StreakPills({
               damping: 20
             }}
             className={cn(
-              "w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold transition-all duration-300 relative",
+              "w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-[11px] sm:text-sm font-semibold transition-all duration-300 relative",
               {
                 "bg-green-500 text-white shadow-lg": isCompleted && !isCurrent,
                 "bg-primary text-white shadow-lg ring-4 ring-primary/30 animate-pulse": isCurrent,
