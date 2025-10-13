@@ -98,7 +98,7 @@ export default function ConsentPage() {
             {dataHighlights.map(({ icon, title, bullets }) => (
               <Card key={title} className="border-border">
                 <CardContent className="p-4 sm:p-6">
-                  <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+                  <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 pl-2">
                     <div className="text-2xl sm:text-3xl" aria-hidden>{icon}</div>
                     <div className="space-y-2 sm:space-y-3">
                       <h2 className="text-base sm:text-lg md:text-xl font-semibold text-foreground">{title}</h2>
@@ -116,8 +116,8 @@ export default function ConsentPage() {
 
           <Card className="border-border">
             <CardContent className="p-4 sm:p-6 space-y-2 sm:space-y-3">
-              <h2 className="text-base sm:text-lg md:text-xl font-semibold text-foreground">⚡ Your Rights</h2>
-              <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm md:text-base text-muted-foreground list-disc list-inside">
+              <h2 className="text-base sm:text-lg md:text-xl font-semibold text-foreground pl-2">⚡ Your Rights</h2>
+              <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm md:text-base text-muted-foreground list-disc list-inside pl-2">
                 {rights.map(item => (
                   <li key={item}>✨ {item}</li>
                 ))}
@@ -127,8 +127,8 @@ export default function ConsentPage() {
 
           <Card className="border-border">
             <CardContent className="p-4 sm:p-6 space-y-2 sm:space-y-3">
-              <h2 className="text-base sm:text-lg md:text-xl font-semibold text-foreground">🔒 Our Commitments</h2>
-              <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm md:text-base text-muted-foreground list-disc list-inside">
+              <h2 className="text-base sm:text-lg md:text-xl font-semibold text-foreground pl-2">🔒 Our Commitments</h2>
+              <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm md:text-base text-muted-foreground list-disc list-inside pl-2">
                 {commitments.map(item => (
                   <li key={item}>💙 {item}</li>
                 ))}

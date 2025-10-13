@@ -183,9 +183,9 @@ export default function CommitPage() {
           {/* Challenge Details Card */}
           <Card className="border-border mb-6 sm:mb-8">
             <CardContent className="p-4 sm:p-6 md:p-8">
-              <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-4 sm:mb-6">Your 7-day challenge:</h2>
+              <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-4 sm:mb-6 pl-2">Your 7-day challenge:</h2>
               
-              <div className="space-y-3 sm:space-y-4">
+              <div className="space-y-3 sm:space-y-4 pl-2">
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 bg-primary rounded-full"></div>
                   <span className="text-xs sm:text-sm md:text-base text-muted-foreground">Take a scale photo every morning</span>
@@ -218,11 +218,11 @@ export default function CommitPage() {
             {/* Reminder Settings */}
             <Card className="border-border">
               <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center gap-3 mb-3 sm:mb-4">
+                <div className="flex items-center gap-3 mb-3 sm:mb-4 pl-2">
                   <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                   <h3 className="text-base sm:text-lg font-semibold text-foreground">Daily Reminder</h3>
                 </div>
-                <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
+                <p className="text-xs sm:text-sm md:text-base text-muted-foreground pl-2">
                   {settings.reminderTime} in {settings.timezone || 'your timezone'}
                 </p>
               </CardContent>
@@ -231,11 +231,11 @@ export default function CommitPage() {
             {/* Data Sharing */}
             <Card className="border-border">
               <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center gap-3 mb-3 sm:mb-4">
+                <div className="flex items-center gap-3 mb-3 sm:mb-4 pl-2">
                   <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                   <h3 className="text-base sm:text-lg font-semibold text-foreground">Data Sharing</h3>
                 </div>
-                <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
+                <p className="text-xs sm:text-sm md:text-base text-muted-foreground pl-2">
                   {consents.shareWithNutritionist 
                     ? 'Share data with nutritionist after completion' 
                     : 'Keep data private'
