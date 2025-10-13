@@ -118,7 +118,7 @@ export default function SetupPage() {
       locationPermission
     }
     localStorage.setItem('userSettings', JSON.stringify(settings))
-    router.push('/consent')
+    router.push('/commit')
   }
 
   return (
