@@ -9,20 +9,69 @@ export default function AuthCallbackPage() {
   const [status, setStatus] = useState<"init" | "exchanging" | "success" | "error">("init")
   const [message, setMessage] = useState<string>("")
 
-  const { code, next, err, errCode, errDesc } = useMemo(() => {
-    if (typeof window === "undefined") return { code: null as string | null, next: "/setup" }
+  const { code, next, err, errCode, errDesc, hasHashToken } = useMemo(() => {
+    if (typeof window === "undefined") return { 
+      code: null as string | null, 
+      next: "/setup",
+      hasHashToken: false 
+    }
     const url = new URL(window.location.href)
+    
+    // Check if we have implicit flow tokens in hash (access_token, refresh_token)
+    const hashParams = new URLSearchParams(window.location.hash.substring(1))
+    const hasHashToken = hashParams.has('access_token')
+    
     return {
       code: url.searchParams.get("code"),
       next: url.searchParams.get("next") || "/setup",
       err: url.searchParams.get("error"),
       errCode: url.searchParams.get("error_code"),
       errDesc: url.searchParams.get("error_description"),
+      hasHashToken
     }
   }, [])
 
   useEffect(() => {
     async function run() {
+      // Handle implicit flow (tokens in URL hash)
+      if (hasHashToken) {
+        console.log('[Auth Debug] Implicit flow detected - tokens in URL hash')
+        setStatus("exchanging")
+        const supabase = createClient()
+        
+        try {
+          // Supabase client automatically detects and processes hash tokens
+          // when detectSessionInUrl is true
+          const { data: { session }, error } = await supabase.auth.getSession()
+          
+          if (error || !session) {
+            console.error('[Auth Debug] Failed to get session from hash:', error)
+            setStatus("error")
+            setMessage(error?.message || "Failed to create session from tokens.")
+            return
+          }
+          
+          console.log('[Auth Debug] ✓ Session created from implicit flow hash tokens')
+          setStatus("success")
+          
+          // Determine destination
+          let dest = next || "/consent"
+          try {
+            const stored = localStorage.getItem("postAuthNext")
+            if (!next && stored) dest = stored
+            localStorage.removeItem("postAuthNext")
+          } catch {}
+          
+          setTimeout(() => router.replace(dest), 200)
+          return
+        } catch (err: any) {
+          setStatus("error")
+          setMessage(err?.message || "Unexpected error processing tokens.")
+          return
+        }
+      }
+      
+      // Handle code exchange flow (if code exists in query params)
       if (!code) {
         // If provider returned an error, show it
         if (err || errCode) {
@@ -39,11 +88,9 @@ export default function AuthCallbackPage() {
         setStatus("exchanging")
         const supabase = createClient()
         
-        console.log('[Auth Debug] Processing OAuth callback with implicit flow')
-        console.log('[Auth Debug] Code format:', code?.substring(0, 20) + '... (UUID = implicit flow)')
+        console.log('[Auth Debug] Code exchange flow')
+        console.log('[Auth Debug] Code format:', code?.substring(0, 20) + '...')
         
-        // For implicit flow, exchangeCodeForSession handles the code exchange
-        // No code_verifier is needed since Google OAuth provider uses implicit flow
         const { data, error } = await supabase.auth.exchangeCodeForSession(code as string)
 
         if (error || !data?.session) {
@@ -54,7 +101,7 @@ export default function AuthCallbackPage() {
           return
         }
         
-        console.log('[Auth Debug] ✓ Exchange successful! Session created for implicit flow.')
+        console.log('[Auth Debug] ✓ Session created from code exchange')
 
         setStatus("success")
         // Determine post-auth destination: URL param > localStorage > /consent
@@ -74,7 +121,7 @@ export default function AuthCallbackPage() {
 
     run()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [code])
+  }, [code, hasHashToken])
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
