@@ -6,6 +6,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { AnimatedTimePicker } from "@/components/animated-time-picker"
 import { useState, useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { Clock, Globe, ArrowRight } from "lucide-react"
@@ -174,11 +175,9 @@ export default function SetupPage() {
                 </div>
                 <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4 pl-2">When should we remind you to weigh in?</p>
                 <div className="max-w-xs pl-2">
-                  <Input
-                    type="time"
+                  <AnimatedTimePicker
                     value={reminderTime}
-                    onChange={(e) => setReminderTime(e.target.value)}
-                    className="border-border focus:border-primary focus:ring-primary"
+                    onChange={setReminderTime}
                   />
                 </div>
                 <p className="text-xs sm:text-sm text-muted-foreground mt-2 pl-2">
