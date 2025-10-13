@@ -9,18 +9,27 @@ export default function AuthCallbackPage() {
   const [status, setStatus] = useState<"init" | "exchanging" | "success" | "error">("init")
   const [message, setMessage] = useState<string>("")
 
-  const { code, next } = useMemo(() => {
+  const { code, next, err, errCode, errDesc } = useMemo(() => {
     if (typeof window === "undefined") return { code: null as string | null, next: "/setup" }
     const url = new URL(window.location.href)
     return {
       code: url.searchParams.get("code"),
       next: url.searchParams.get("next") || "/setup",
+      err: url.searchParams.get("error"),
+      errCode: url.searchParams.get("error_code"),
+      errDesc: url.searchParams.get("error_description"),
     }
   }, [])
 
   useEffect(() => {
     async function run() {
       if (!code) {
+        // If provider returned an error, show it
+        if (err || errCode) {
+          setStatus("error")
+          setMessage(errDesc || "Authentication was cancelled or failed.")
+          return
+        }
         setStatus("error")
         setMessage("Missing authorization code in callback URL.")
         return
@@ -38,8 +47,15 @@ export default function AuthCallbackPage() {
         }
 
         setStatus("success")
+        // Determine post-auth destination: URL param > localStorage > /setup
+        let dest = next || "/setup"
+        try {
+          const stored = localStorage.getItem("postAuthNext")
+          if (!next && stored) dest = stored
+          localStorage.removeItem("postAuthNext")
+        } catch {}
         // Small timeout for visual feedback on mobile
-        setTimeout(() => router.replace(next!), 200)
+        setTimeout(() => router.replace(dest), 200)
       } catch (err: any) {
         setStatus("error")
         setMessage(err?.message || "Unexpected error.")

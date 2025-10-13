@@ -177,6 +177,9 @@ export default function LoginPage() {
       console.log("[v0] Redirect URL:", redirectUrl)
       console.log("[v0] Environment:", { isProduction, isVercel, hostname: window.location.hostname })
 
+      // Persist intended next so callback page can use it if provider strips query params
+      try { localStorage.setItem('postAuthNext', '/consent') } catch {}
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
