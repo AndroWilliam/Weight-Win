@@ -66,7 +66,7 @@ export default function ConsentPage() {
       }
       localStorage.setItem('userConsents', JSON.stringify(consents))
       await new Promise(r => setTimeout(r, 250))
-      router.push('/commit')
+      router.push('/setup')
     } finally {
       setLoading(false)
     }
