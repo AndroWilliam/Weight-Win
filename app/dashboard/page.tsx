@@ -176,15 +176,15 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="px-4 sm:px-6 py-4 border-b border-border">
+      <header className="px-3 sm:px-6 py-3 sm:py-4 border-b border-border">
         <div className="max-w-5xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">W</span>
             </div>
-            <h1 className="text-lg sm:text-xl font-bold text-foreground">WeightWin</h1>
+            <h1 className="text-base sm:text-xl font-bold text-foreground">WeightWin</h1>
           </div>
-          <div className="flex items-center gap-2 sm:gap-4 text-sm font-medium text-muted-foreground">
+          <div className="hidden md:flex items-center gap-2 sm:gap-4 text-sm font-medium text-muted-foreground">
             <ThemeToggle />
             <button onClick={() => router.push('/dashboard')} className="hover:text-foreground">Dashboard</button>
             <button onClick={() => router.push('/progress')} className="hover:text-foreground">Progress</button>
@@ -194,8 +194,8 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <main className="px-4 sm:px-6 py-6 sm:py-8">
-        <div className="mx-auto max-w-5xl space-y-4 sm:space-y-6">
+      <main className="px-3 sm:px-6 py-5 sm:py-8">
+        <div className="mx-auto max-w-5xl space-y-3 sm:space-y-6">
           {/* Home breadcrumb */}
           <button 
             onClick={() => router.push('/')}
@@ -206,34 +206,34 @@ export default function DashboardPage() {
             <span className="group-hover:underline">Home</span>
           </button>
 
-          <div className="text-center space-y-2 mb-6 sm:mb-8">
-            <h2 className="text-2xl sm:text-3xl font-semibold text-foreground">
+          <div className="text-center space-y-1.5 mb-5 sm:mb-8">
+            <h2 className="text-xl sm:text-3xl font-semibold text-foreground">
               Day {currentDay} of {currentMilestone}
             </h2>
-            <p className="text-sm sm:text-base text-muted-foreground">
+            <p className="text-[13px] sm:text-base text-muted-foreground">
               {checkedInToday 
                 ? "Come back tomorrow for your weigh-in 🔥🎉" 
                 : "Ready for today's weigh-in?"
               }
             </p>
             {nextMilestone > currentMilestone && (
-              <p className="text-xs text-primary font-medium">
+              <p className="text-[12px] text-primary font-medium">
                 {nextMilestone - currentDay} days until next milestone! 🎯
               </p>
             )}
           </div>
 
           {/* Take Photo Card - Full Width at Top */}
-          <section className="rounded-2xl border border-border bg-gradient-to-br from-primary/5 to-primary/10 p-6 sm:p-8 shadow-sm" aria-labelledby="take-photo-heading">
-            <div className="max-w-xl mx-auto text-center space-y-4">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-primary/10 mx-auto flex items-center justify-center">
-                <Camera className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
+          <section className="rounded-2xl border border-border bg-gradient-to-br from-primary/5 to-primary/10 p-4 sm:p-8 shadow-sm" aria-labelledby="take-photo-heading">
+            <div className="max-w-xl mx-auto text-center space-y-3 sm:space-y-4">
+              <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-primary/10 mx-auto flex items-center justify-center">
+                <Camera className="w-7 h-7 sm:w-10 sm:h-10 text-primary" />
               </div>
               <div className="space-y-2">
-                <h3 id="take-photo-heading" className="text-xl sm:text-2xl font-semibold text-foreground">
+                <h3 id="take-photo-heading" className="text-lg sm:text-2xl font-semibold text-foreground">
                   {checkedInToday ? "Today's check-in complete!" : "Take today's photo"}
                 </h3>
-                <p className="text-sm sm:text-base text-muted-foreground">
+                <p className="text-[13px] sm:text-base text-muted-foreground">
                   {checkedInToday 
                     ? `You've recorded your weight for day ${currentDay}. Come back tomorrow! 🎉`
                     : `Snap a photo of your scale to track day ${currentDay}`
@@ -243,7 +243,7 @@ export default function DashboardPage() {
               <Button
                 onClick={handleTakePhoto}
                 disabled={!canTrackToday || isCompleted || checkedInToday}
-                className="bg-primary hover:bg-primary/90 text-white px-6 sm:px-8 py-3 rounded-lg text-sm sm:text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-primary hover:bg-primary/90 text-white px-5 sm:px-8 py-3 rounded-lg text-sm sm:text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isCompleted ? 'Challenge complete!' : checkedInToday ? 'Already checked in ✓' : 'Take Photo'}
               </Button>
@@ -251,11 +251,11 @@ export default function DashboardPage() {
           </section>
 
           {/* Progress Card - Full Width */}
-          <section className="rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-sm" aria-labelledby="progress-heading">
-            <div className="text-center mb-6 sm:mb-8">
-              <h3 id="progress-heading" className="text-xl sm:text-2xl font-semibold text-card-foreground">Your Progress</h3>
+          <section className="rounded-2xl border border-border bg-card p-4 sm:p-8 shadow-sm" aria-labelledby="progress-heading">
+            <div className="text-center mb-5 sm:mb-8">
+              <h3 id="progress-heading" className="text-lg sm:text-2xl font-semibold text-card-foreground">Your Progress</h3>
             </div>
-            <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
+            <div className="max-w-2xl mx-auto space-y-3 sm:space-y-6">
               <div className="flex justify-center">
                 <StreakPills 
                   currentDay={currentDay} 
@@ -264,7 +264,7 @@ export default function DashboardPage() {
                 />
               </div>
               <div className="space-y-3">
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <div className="flex items-center justify-between text-[13px] sm:text-sm text-muted-foreground">
                   <span>Progress</span>
                   <span className="text-primary font-semibold">{progressPercent}%</span>
                 </div>
@@ -280,7 +280,7 @@ export default function DashboardPage() {
                 </div>
                 
                 {/* Milestone Indicators */}
-                <div className="flex items-center justify-between pt-2 text-xs">
+                <div className="flex items-center justify-between pt-2 text-[11px] sm:text-xs">
                   <div className={`flex items-center gap-1 ${currentDay >= 7 ? 'text-green-600' : 'text-muted-foreground'}`}>
                     {currentDay >= 7 ? '✓' : '○'} 7 days
                   </div>

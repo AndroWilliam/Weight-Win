@@ -112,7 +112,7 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
           </div>
         </div>
 
-        {/* Table */}
+        {/* Table (enable horizontal scroll on small screens) */}
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-muted/50">
