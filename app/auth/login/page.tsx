@@ -185,10 +185,13 @@ export default function LoginPage() {
       console.log('[Auth Debug] Storage key that will be used:', storageKey)
       console.log('[Auth Debug] LocalStorage available:', !!window.localStorage)
 
+      // Use skipBrowserRedirect to get the URL and manually navigate
+      // This ensures localStorage.setItem completes before redirect
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: redirectUrl,
+          skipBrowserRedirect: true,
           queryParams: {
             prompt: 'select_account',
           }
@@ -197,15 +200,18 @@ export default function LoginPage() {
 
       console.log("[v0] OAuth response:", { data, error })
       
-      // Debug: Check if code_verifier was stored after OAuth call
-      setTimeout(() => {
-        const verifier = localStorage.getItem(storageKey)
-        console.log('[Auth Debug] code_verifier stored after OAuth initiation:', !!verifier)
-      }, 100)
-
       if (error) {
         console.error("[v0] OAuth error:", error)
         throw error
+      }
+
+      // Manually redirect after a tiny delay to ensure storage persists
+      if (data?.url) {
+        console.log('[Auth Debug] Manually redirecting to OAuth URL after storage sync')
+        // Give localStorage a moment to flush
+        await new Promise(resolve => setTimeout(resolve, 50))
+        window.location.href = data.url
+        return
       }
     } catch (error: unknown) {
       console.error("[v0] Login error:", error)
