@@ -1,4 +1,4 @@
-import { createServerClient } from "@supabase/ssr"
+import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 import { NextResponse, type NextRequest } from "next/server"
 
 export async function updateSession(request: NextRequest) {
@@ -25,36 +25,25 @@ export async function updateSession(request: NextRequest) {
   })
 
   try {
-    // With Fluid compute, don't put this client in a global environment
-    // variable. Always create a new one on each request.
-    const supabase = createServerClient(
-      supabaseUrl,
-      supabaseAnonKey,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll()
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-            supabaseResponse = NextResponse.next({
-              request,
-            })
-            cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options))
-          },
-        },
-      },
-    )
-
-    // Do not run code between createServerClient and
-    // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-    // issues with users being randomly logged out.
-
-    // IMPORTANT: If you remove getUser() and you use server-side rendering
-    // with the Supabase client, your users may be randomly logged out.
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    // Create client and check for session in custom cookies
+    const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey)
+    
+    // Get access token from custom cookie (set by browser client after OAuth)
+    const accessToken = request.cookies.get('sb-access-token')?.value
+    const refreshToken = request.cookies.get('sb-refresh-token')?.value
+    
+    let user = null
+    
+    // If we have tokens in cookies, set the session and get user
+    if (accessToken && refreshToken) {
+      await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken
+      })
+      
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      user = authUser
+    }
 
     console.log("[v0] User authenticated:", !!user)
     console.log("[v0] Current path:", request.nextUrl.pathname)

@@ -51,10 +51,26 @@ export default function AuthCallbackPage() {
             return
           }
           
-          console.log('[Auth Debug] ✓ Session created from implicit flow hash tokens')
-          setStatus("success")
+        console.log('[Auth Debug] ✓ Session created from implicit flow hash tokens')
+        setStatus("success")
+        
+        // Check if user is new or existing by checking settings
+        try {
+          const settingsResponse = await fetch('/api/settings/get')
           
-          // Determine destination
+          if (settingsResponse.ok) {
+            const settingsData = await settingsResponse.json()
+            
+            // Existing user with completed setup -> go to dashboard
+            if (settingsData.success && settingsData.setupCompleted) {
+              console.log('[Auth Debug] Existing user detected - redirecting to dashboard')
+              setTimeout(() => router.replace('/dashboard'), 200)
+              return
+            }
+          }
+          
+          // New user or setup not completed -> start onboarding flow
+          console.log('[Auth Debug] New user detected - starting onboarding flow')
           let dest = next || "/consent"
           try {
             const stored = localStorage.getItem("postAuthNext")
@@ -63,7 +79,12 @@ export default function AuthCallbackPage() {
           } catch {}
           
           setTimeout(() => router.replace(dest), 200)
-          return
+        } catch (error) {
+          console.error('[Auth Debug] Error checking user status:', error)
+          // On error, default to consent page (safer for new users)
+          setTimeout(() => router.replace("/consent"), 200)
+        }
+        return
         } catch (err: any) {
           setStatus("error")
           setMessage(err?.message || "Unexpected error processing tokens.")
@@ -104,15 +125,37 @@ export default function AuthCallbackPage() {
         console.log('[Auth Debug] ✓ Session created from code exchange')
 
         setStatus("success")
-        // Determine post-auth destination: URL param > localStorage > /consent
-        let dest = next || "/consent"
+        
+        // Check if user is new or existing by checking settings
         try {
-          const stored = localStorage.getItem("postAuthNext")
-          if (!next && stored) dest = stored
-          localStorage.removeItem("postAuthNext")
-        } catch {}
-        // Small timeout for visual feedback on mobile
-        setTimeout(() => router.replace(dest), 200)
+          const settingsResponse = await fetch('/api/settings/get')
+          
+          if (settingsResponse.ok) {
+            const settingsData = await settingsResponse.json()
+            
+            // Existing user with completed setup -> go to dashboard
+            if (settingsData.success && settingsData.setupCompleted) {
+              console.log('[Auth Debug] Existing user detected - redirecting to dashboard')
+              setTimeout(() => router.replace('/dashboard'), 200)
+              return
+            }
+          }
+          
+          // New user or setup not completed -> start onboarding flow
+          console.log('[Auth Debug] New user detected - starting onboarding flow')
+          let dest = next || "/consent"
+          try {
+            const stored = localStorage.getItem("postAuthNext")
+            if (!next && stored) dest = stored
+            localStorage.removeItem("postAuthNext")
+          } catch {}
+          
+          setTimeout(() => router.replace(dest), 200)
+        } catch (error) {
+          console.error('[Auth Debug] Error checking user status:', error)
+          // On error, default to consent page (safer for new users)
+          setTimeout(() => router.replace("/consent"), 200)
+        }
       } catch (err: any) {
         setStatus("error")
         setMessage(err?.message || "Unexpected error.")
