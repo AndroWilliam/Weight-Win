@@ -38,7 +38,8 @@ export default function AuthCallbackPage() {
       try {
         setStatus("exchanging")
         const supabase = createClient()
-        const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+        // Use object signature to be compatible with latest supabase-js
+        const { data, error } = await supabase.auth.exchangeCodeForSession({ code })
 
         if (error || !data?.session) {
           setStatus("error")
