@@ -39,23 +39,30 @@ export default function AuthCallbackPage() {
         setStatus("exchanging")
         const supabase = createClient()
         
-        // Debug: Check if code_verifier exists in storage
+        // Debug: Check all localStorage keys related to Supabase auth
         if (typeof window !== 'undefined') {
-          const storageKey = `sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0]}-auth-token-code-verifier`
-          const verifier = localStorage.getItem(storageKey)
-          console.log('[Auth Debug] code_verifier in storage:', !!verifier)
-          console.log('[Auth Debug] storage key:', storageKey)
+          console.log('[Auth Debug] All localStorage keys:', Object.keys(localStorage))
+          const allSupabaseKeys = Object.keys(localStorage).filter(k => k.includes('supabase') || k.includes('sb-'))
+          console.log('[Auth Debug] Supabase-related keys:', allSupabaseKeys)
+          allSupabaseKeys.forEach(key => {
+            const value = localStorage.getItem(key)
+            console.log(`[Auth Debug] ${key}:`, value ? value.substring(0, 50) + '...' : 'null')
+          })
         }
         
         // Exchange code for session with explicit error handling
+        console.log('[Auth Debug] Calling exchangeCodeForSession with code:', code?.substring(0, 20) + '...')
         const { data, error } = await supabase.auth.exchangeCodeForSession(code as string)
 
         if (error || !data?.session) {
           setStatus("error")
           console.error('[Auth Debug] Exchange failed:', error)
+          console.error('[Auth Debug] Error details:', JSON.stringify(error, null, 2))
           setMessage(error?.message || "Failed to create session.")
           return
         }
+        
+        console.log('[Auth Debug] Exchange successful! Session created.')
 
         setStatus("success")
         // Determine post-auth destination: URL param > localStorage > /consent

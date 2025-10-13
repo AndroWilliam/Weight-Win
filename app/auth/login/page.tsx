@@ -180,18 +180,13 @@ export default function LoginPage() {
       // Persist intended next so callback page can use it if provider strips query params
       try { localStorage.setItem('postAuthNext', '/consent') } catch {}
 
-      // Debug: Check storage before OAuth
-      const storageKey = `sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0]}-auth-token-code-verifier`
-      console.log('[Auth Debug] Storage key that will be used:', storageKey)
+      console.log('[Auth Debug] Starting OAuth with standard supabase-js (PKCE in localStorage)')
       console.log('[Auth Debug] LocalStorage available:', !!window.localStorage)
 
-      // Use skipBrowserRedirect to get the URL and manually navigate
-      // This ensures localStorage.setItem completes before redirect
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: redirectUrl,
-          skipBrowserRedirect: true,
           queryParams: {
             prompt: 'select_account',
           }
@@ -203,15 +198,6 @@ export default function LoginPage() {
       if (error) {
         console.error("[v0] OAuth error:", error)
         throw error
-      }
-
-      // Manually redirect after a tiny delay to ensure storage persists
-      if (data?.url) {
-        console.log('[Auth Debug] Manually redirecting to OAuth URL after storage sync')
-        // Give localStorage a moment to flush
-        await new Promise(resolve => setTimeout(resolve, 50))
-        window.location.href = data.url
-        return
       }
     } catch (error: unknown) {
       console.error("[v0] Login error:", error)
