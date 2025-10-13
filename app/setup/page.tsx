@@ -151,8 +151,8 @@ export default function SetupPage() {
             {/* Weight Units */}
             <Card className="border-border">
               <CardContent className="p-4 sm:p-6">
-                <h3 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4">Weight Units</h3>
-                <RadioGroup value={weightUnit} onValueChange={setWeightUnit} className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <h3 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4 pl-2">Weight Units</h3>
+                <RadioGroup value={weightUnit} onValueChange={setWeightUnit} className="flex flex-col sm:flex-row gap-3 sm:gap-4 pl-2">
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="kg" id="kg" />
                     <Label htmlFor="kg" className="text-sm sm:text-base text-muted-foreground">Kilograms (kg)</Label>
@@ -168,12 +168,12 @@ export default function SetupPage() {
             {/* Daily Reminder */}
             <Card className="border-border">
               <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center gap-3 mb-3 sm:mb-4">
+                <div className="flex items-center gap-3 mb-3 sm:mb-4 pl-2">
                   <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                   <h3 className="text-base sm:text-lg font-semibold text-foreground">Daily Reminder</h3>
                 </div>
-                <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4">When should we remind you to weigh in?</p>
-                <div className="max-w-xs">
+                <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4 pl-2">When should we remind you to weigh in?</p>
+                <div className="max-w-xs pl-2">
                   <Input
                     type="time"
                     value={reminderTime}
@@ -181,7 +181,7 @@ export default function SetupPage() {
                     className="border-border focus:border-primary focus:ring-primary"
                   />
                 </div>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-2">
+                <p className="text-xs sm:text-sm text-muted-foreground mt-2 pl-2">
                   Morning weigh-ins are most consistent for tracking progress.
                 </p>
               </CardContent>
@@ -190,14 +190,14 @@ export default function SetupPage() {
             {/* Time Zone */}
             <Card className="border-border">
               <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center gap-3 mb-3 sm:mb-4">
+                <div className="flex items-center gap-3 mb-3 sm:mb-4 pl-2">
                   <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                   <h3 className="text-base sm:text-lg font-semibold text-foreground">Time Zone</h3>
                 </div>
-                <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4">Your time zone (auto-detected)</p>
+                <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4 pl-2">Your time zone (auto-detected)</p>
                 
                 {locationPermission === "pending" && (
-                  <div className="mb-3 sm:mb-4">
+                  <div className="mb-3 sm:mb-4 pl-2">
                     <Button
                       onClick={requestLocationPermission}
                       variant="outline"
@@ -212,7 +212,7 @@ export default function SetupPage() {
                 )}
 
                 {locationPermission === "granted" && (
-                  <div className="mb-3 sm:mb-4">
+                  <div className="mb-3 sm:mb-4 pl-2">
                     <div className="flex items-center gap-2 text-green-600 mb-2">
                       <div className="w-2 h-2 bg-green-600 rounded-full"></div>
                       <span className="text-xs sm:text-sm font-medium">Location detected successfully</span>
@@ -221,7 +221,7 @@ export default function SetupPage() {
                 )}
 
                 {locationPermission === "denied" && (
-                  <div className="mb-3 sm:mb-4">
+                  <div className="mb-3 sm:mb-4 pl-2">
                     <div className="flex items-center gap-2 text-yellow-600 mb-2">
                       <div className="w-2 h-2 bg-yellow-600 rounded-full"></div>
                       <span className="text-xs sm:text-sm font-medium">Location access denied - using browser timezone</span>
@@ -229,7 +229,7 @@ export default function SetupPage() {
                   </div>
                 )}
 
-                <div className={`max-w-md transition-opacity duration-300 ${tzLocked ? 'opacity-60' : 'opacity-100'}`}>
+                <div className={`max-w-md transition-opacity duration-300 pl-2 ${tzLocked ? 'opacity-60' : 'opacity-100'}`}>
                   <Select value={timezone} onValueChange={setTimezone} disabled={tzLocked}>
                     <SelectTrigger className="border-border focus:border-primary focus:ring-primary">
                       <SelectValue placeholder="Select your timezone" />
@@ -263,7 +263,7 @@ export default function SetupPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-2">
+                <p className="text-xs sm:text-sm text-muted-foreground mt-2 pl-2">
                   This ensures your daily reminders arrive at the right time.
                 </p>
               </CardContent>
