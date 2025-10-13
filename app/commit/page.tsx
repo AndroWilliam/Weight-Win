@@ -29,12 +29,34 @@ export default function CommitPage() {
   useEffect(() => {
     async function loadSettings() {
       try {
-        // Try to load from database first
+        // Try localStorage first (for new users coming from setup flow)
+        const savedSettings = localStorage.getItem('userSettings')
+        const savedConsents = localStorage.getItem('userConsents')
+        
+        if (savedSettings && savedConsents) {
+          console.log('[Commit] Loading settings from localStorage (setup flow)')
+          setSettings(JSON.parse(savedSettings))
+          setConsents(JSON.parse(savedConsents))
+          setIsLoading(false)
+          return
+        }
+        
+        // Fallback: Try to load from database (for returning users)
+        console.log('[Commit] Attempting to load settings from database')
         const response = await fetch('/api/settings/get')
+        
+        // If unauthorized (401), user needs to complete setup flow first
+        if (response.status === 401) {
+          console.log('[Commit] Unauthorized - redirecting to consent page')
+          router.push('/consent')
+          return
+        }
+        
         const data = await response.json()
         
         if (data.success && data.settings) {
           // Settings found in database
+          console.log('[Commit] Loaded settings from database')
           setSettings({
             weightUnit: data.settings.weightUnit,
             reminderTime: data.settings.reminderTime,
@@ -50,26 +72,19 @@ export default function CommitPage() {
           return
         }
         
-        // Fallback to localStorage (for backward compatibility)
-        const savedSettings = localStorage.getItem('userSettings')
-        const savedConsents = localStorage.getItem('userConsents')
+        // No settings found anywhere - redirect to setup
+        console.log('[Commit] No settings found - redirecting to consent')
+        router.push('/consent')
         
-        if (savedSettings) {
-          setSettings(JSON.parse(savedSettings))
-        }
-        if (savedConsents) {
-          setConsents(JSON.parse(savedConsents))
-        }
-        
-        setIsLoading(false)
       } catch (error) {
         console.error('Error loading settings:', error)
-        setIsLoading(false)
+        // On error, redirect to consent to start fresh
+        router.push('/consent')
       }
     }
     
     loadSettings()
-  }, [])
+  }, [router])
 
   const handleStartChallenge = async () => {
     setIsSubmitting(true)
