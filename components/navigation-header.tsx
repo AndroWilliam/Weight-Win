@@ -106,57 +106,51 @@ export function NavigationHeader() {
           {!isLoading && user && (
             <ThemeToggle />
           )}
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="sm" className="p-2">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Open menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-80">
-              <div className="flex flex-col gap-6 mt-6">
-                {/* Mobile Navigation Links */}
-                <div className="space-y-4">
-                  <button 
-                    onClick={() => scrollToSection('how-it-works')}
-                    className="block w-full text-left text-muted-foreground hover:text-foreground font-medium transition-colors py-2"
-                  >
-                    How it works
-                  </button>
-                  <button 
-                    onClick={() => scrollToSection('for-nutritionists')}
-                    className="block w-full text-left text-muted-foreground hover:text-foreground font-medium transition-colors py-2"
-                  >
-                    For Nutritionists
-                  </button>
-                </div>
+          {!isLoading && user ? (
+            /* Show profile dropdown when logged in on mobile */
+            <ProfileDropdown 
+              userInitials={user.initials}
+              isAdmin={user.isAdmin}
+            />
+          ) : (
+            /* Show hamburger menu when not logged in */
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="sm" className="p-2">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-80">
+                <div className="flex flex-col gap-6 mt-6">
+                  {/* Mobile Navigation Links with left padding spacer */}
+                  <div className="space-y-4">
+                    <button 
+                      onClick={() => scrollToSection('how-it-works')}
+                      className="block w-full text-left text-muted-foreground hover:text-foreground font-medium transition-colors py-2 pl-4"
+                    >
+                      How it works
+                    </button>
+                    <button 
+                      onClick={() => scrollToSection('for-nutritionists')}
+                      className="block w-full text-left text-muted-foreground hover:text-foreground font-medium transition-colors py-2 pl-4"
+                    >
+                      For Nutritionists
+                    </button>
+                  </div>
 
-                {/* Mobile User Actions */}
-                <div className="border-t border-border pt-6">
-                  {!isLoading && user ? (
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                          <span className="text-white font-bold text-sm">{user.initials}</span>
-                        </div>
-                        <span className="text-sm text-muted-foreground">Signed in</span>
-                      </div>
-                      <ProfileDropdown 
-                        userInitials={user.initials}
-                        isAdmin={user.isAdmin}
-                      />
-                    </div>
-                  ) : (
-                    <Link href="/auth/login" className="block">
+                  {/* Mobile CTA Button - Centered with top/bottom spacers */}
+                  <div className="flex-1 flex items-center justify-center px-4 py-8">
+                    <Link href="/auth/login" className="w-full">
                       <Button className="w-full bg-primary hover:bg-primary/90 text-white py-3 rounded-lg font-medium">
                         Start the 7-Day Challenge
                       </Button>
                     </Link>
-                  )}
+                  </div>
                 </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+              </SheetContent>
+            </Sheet>
+          )}
         </div>
       </div>
     </header>
