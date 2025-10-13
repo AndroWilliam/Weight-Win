@@ -106,11 +106,11 @@ export default function LoginPage() {
             
             let redirectUrl: string
             if (isProduction && isVercel) {
-              redirectUrl = `${window.location.origin}/auth/callback?next=/consent`
+              redirectUrl = `${window.location.origin}/auth/callback`
             } else if (isProduction) {
-              redirectUrl = `${window.location.origin}/auth/callback?next=/consent`
+              redirectUrl = `${window.location.origin}/auth/callback`
             } else {
-              redirectUrl = `${window.location.origin}/auth/callback?next=/consent`
+              redirectUrl = `${window.location.origin}/auth/callback`
             }
             
             const { data, error } = await supabase.auth.signUp({
@@ -165,13 +165,13 @@ export default function LoginPage() {
       let redirectUrl: string
       if (isProduction && isVercel) {
         // In production on Vercel, use the current domain
-        redirectUrl = `${window.location.origin}/auth/callback?next=/consent`
+        redirectUrl = `${window.location.origin}/auth/callback`
       } else if (isProduction) {
         // In production but not Vercel, still use current domain
-        redirectUrl = `${window.location.origin}/auth/callback?next=/consent`
+        redirectUrl = `${window.location.origin}/auth/callback`
       } else {
         // In development, use localhost
-        redirectUrl = `${window.location.origin}/auth/callback?next=/consent`
+        redirectUrl = `${window.location.origin}/auth/callback`
       }
       
       console.log("[v0] Redirect URL:", redirectUrl)

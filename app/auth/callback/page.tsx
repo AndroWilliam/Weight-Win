@@ -47,8 +47,8 @@ export default function AuthCallbackPage() {
         }
 
         setStatus("success")
-        // Determine post-auth destination: URL param > localStorage > /setup
-        let dest = next || "/setup"
+        // Determine post-auth destination: URL param > localStorage > /consent
+        let dest = next || "/consent"
         try {
           const stored = localStorage.getItem("postAuthNext")
           if (!next && stored) dest = stored
