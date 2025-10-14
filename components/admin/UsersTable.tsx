@@ -1,7 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, Eye, Bell } from 'lucide-react'
+import { Search, Eye, Bell, MoreVertical } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 interface UserProgress {
   user_id: string
@@ -24,6 +31,7 @@ interface UsersTableProps {
 export function UsersTable({ rows }: UsersTableProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [userFilter, setUserFilter] = useState('all')
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
   // Client-side search filter
   const filteredRows = rows.filter(row => 
@@ -125,8 +133,105 @@ export function UsersTable({ rows }: UsersTableProps) {
         </div>
       </div>
 
-      {/* Table (enable horizontal scroll on small screens) */}
-      <div className="overflow-x-auto">
+      {/* Mobile Card List */}
+      <div className="md:hidden p-4 space-y-3">
+        {filteredRows.map((row) => {
+          const userName = row.email.split('@')[0].split('.').map(part => 
+            part.charAt(0).toUpperCase() + part.slice(1)
+          ).join(' ')
+          const isExpanded = expandedId === row.user_id
+          return (
+            <div key={row.user_id} className="rounded-xl border border-border bg-background/60 p-4">
+              {/* Header line */}
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="text-base font-semibold text-foreground leading-tight">{userName}</p>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      className="p-2 rounded-md hover:bg-muted text-muted-foreground"
+                      aria-label="Open actions"
+                    >
+                      <MoreVertical className="w-4 h-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-44">
+                    <DropdownMenuItem disabled>View profile</DropdownMenuItem>
+                    <DropdownMenuItem disabled>Send nudge</DropdownMenuItem>
+                    <DropdownMenuItem disabled>Edit user</DropdownMenuItem>
+                    <DropdownMenuItem disabled>Delete user</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              {/* Progress visual */}
+              <div className="mt-3 space-y-1">
+                <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-pink-500 transition-[width] duration-500"
+                    style={{ width: `${row.progress_percent}%` }}
+                  />
+                </div>
+                <div className="text-xs text-muted-foreground">{row.progress_percent}% complete</div>
+                <button
+                  onClick={() => setExpandedId(isExpanded ? null : row.user_id)}
+                  className="text-[11px] text-muted-foreground underline underline-offset-2"
+                >
+                  {isExpanded ? 'Hide details' : 'Tap for more details'}
+                </button>
+              </div>
+
+              {/* Expandable details */}
+              <AnimatePresence initial={false}>
+                {isExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden mt-3 border-t border-border pt-3 text-xs space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Email</span>
+                      <span className="text-foreground">{row.email}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Streak</span>
+                      <span className="text-foreground">{row.longest_streak ?? 0} days</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Last weigh‑in</span>
+                      <span className="text-foreground">{formatDate(row.last_weigh_in_at)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Days to reward</span>
+                      <span className="text-foreground">{row.days_to_reward}</span>
+                    </div>
+                    <div className="flex items-center justify-end gap-2 pt-1">
+                      <button
+                        disabled
+                        className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-muted-foreground rounded-md border border-border"
+                      >
+                        <Eye className="w-3.5 h-3.5" /> View
+                      </button>
+                      <button
+                        disabled
+                        className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-muted-foreground rounded-md border border-border"
+                      >
+                        <Bell className="w-3.5 h-3.5" /> Nudge
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Desktop Table (md+) */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full">
           <thead className="bg-muted/50 sticky top-[64px] md:top-[56px] z-10">
             <tr>
