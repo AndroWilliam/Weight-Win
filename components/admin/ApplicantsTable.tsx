@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
-import { Search, Eye, Download } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Search, Eye, Download, Mail, Phone, Check, X, Loader2 } from 'lucide-react'
 import { ReviewDrawer } from './ReviewDrawer'
+import { createClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 
 interface Applicant {
   id: string
@@ -27,9 +29,15 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [selectedApplicant, setSelectedApplicant] = useState<Applicant | null>(null)
+  const [apps, setApps] = useState<Applicant[]>(rows)
+  const [loadingId, setLoadingId] = useState<string | null>(null)
+
+  useEffect(() => {
+    setApps(rows)
+  }, [rows])
 
   // Client-side filters
-  const filteredRows = rows.filter(row => {
+  const filteredRows = apps.filter(row => {
     const matchesSearch = 
       row.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       row.family_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -39,6 +47,41 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
     
     return matchesSearch && matchesStatus
   })
+
+  const updateStatus = async (id: string, nextStatus: 'approved' | 'rejected', showUndo = true, previousStatus?: string) => {
+    try {
+      setLoadingId(id)
+      const supabase = createClient()
+      const { error } = await supabase
+        .from('nutritionist_applications')
+        .update({ status: nextStatus })
+        .eq('id', id)
+
+      if (error) throw error
+
+      setApps(prev => prev.map(a => a.id === id ? { ...a, status: nextStatus } : a))
+
+      const msg = nextStatus === 'approved' ? 'Application approved ✓' : 'Application rejected ✕'
+      if (showUndo && previousStatus) {
+        toast.success(msg, {
+          action: {
+            label: 'Undo',
+            onClick: () => updateStatus(id, previousStatus as 'approved' | 'rejected', false),
+          },
+        })
+      } else {
+        toast.success(msg)
+      }
+    } catch (err: any) {
+      console.error('[ApplicantsTable] Failed to update status', err)
+      toast.error(err?.message || 'Failed to update application status')
+    } finally {
+      setLoadingId(null)
+    }
+  }
+
+  const handleApprove = (app: Applicant) => updateStatus(app.id, 'approved', true, app.status)
+  const handleReject = (app: Applicant) => updateStatus(app.id, 'rejected', true, app.status)
 
 
   const getStatusBadge = (status: string) => {
@@ -112,8 +155,76 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
           </div>
         </div>
 
-        {/* Table (enable horizontal scroll on small screens) */}
-        <div className="overflow-x-auto">
+        {/* Mobile Card List */}
+        <div className="md:hidden p-4 space-y-3">
+          {filteredRows.map((row) => {
+            const fullName = `${row.first_name} ${row.family_name}`
+            const isLoading = loadingId === row.id
+            return (
+              <div key={row.id} className="rounded-xl border border-border bg-background/60 p-4">
+                {/* Header */}
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-base font-semibold text-foreground leading-tight">{fullName}</p>
+                  {getStatusBadge(row.status)}
+                </div>
+
+                {/* Contact */}
+                <div className="mt-3 space-y-1.5">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Mail className="w-3.5 h-3.5" />
+                    <span className="truncate" title={row.email}>{row.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Phone className="w-3.5 h-3.5" />
+                    <span className="truncate" title={row.mobile_e164}>{row.mobile_e164}</span>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="mt-4 grid grid-cols-3 gap-2">
+                  <button
+                    onClick={() => setSelectedApplicant(row)}
+                    className="px-3 py-2 rounded-md text-xs font-medium bg-indigo-600 text-white active:scale-[0.99] transition-transform"
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      <Eye className="w-3.5 h-3.5" />
+                      Review
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => handleApprove(row)}
+                    disabled={isLoading}
+                    className="px-3 py-2 rounded-md text-xs font-medium bg-green-600 text-white active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed transition-transform"
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                      Approve
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => handleReject(row)}
+                    disabled={isLoading}
+                    className="px-3 py-2 rounded-md text-xs font-medium bg-red-600 text-white active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed transition-transform"
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <X className="w-3.5 h-3.5" />}
+                      Reject
+                    </div>
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+
+          {filteredRows.length === 0 && (
+            <div className="p-8 text-center text-muted-foreground text-sm">
+              No results found{searchTerm ? ` for "${searchTerm}"` : ''}
+            </div>
+          )}
+        </div>
+
+        {/* Desktop Table (md+) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
             <thead className="bg-muted/50 sticky top-[64px] md:top-[56px] z-10">
               <tr>
