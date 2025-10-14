@@ -47,7 +47,7 @@ export default async function ApplicantsPage() {
   const applications = rows ?? []
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="px-4 sm:px-6 space-y-4 sm:space-y-6">
       <ApplicantsKPICards
         newApplicants={kpiData?.new_applicants || 0}
         rejectedApplicants={kpiData?.rejected_applicants || 0}

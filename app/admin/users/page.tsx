@@ -47,7 +47,7 @@ export default async function UsersPage() {
   const users = rows ?? []
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="px-4 sm:px-6 space-y-4 sm:space-y-6">
       <UsersKPICards
         newUsersThisWeek={kpiData?.new_users_this_week || 0}
         usersInProgress={kpiData?.users_in_progress || 0}
