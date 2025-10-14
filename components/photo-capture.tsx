@@ -85,8 +85,7 @@ export function PhotoCapture({ onPhotoTaken }: PhotoCaptureProps) {
             ref={videoRef}
             autoPlay
             playsInline
-            className="w-full rounded-lg bg-black"
-            style={{ maxHeight: "400px" }}
+            className="w-full rounded-lg bg-black aspect-square md:aspect-video max-h-[60vh] md:max-h-[400px] object-cover"
           />
           <canvas ref={canvasRef} className="hidden" />
 
