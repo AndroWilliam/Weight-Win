@@ -195,7 +195,7 @@ export default function DashboardPage() {
       </header>
 
       <main className="px-3 sm:px-6 py-5 sm:py-8">
-        <div className="mx-auto max-w-5xl space-y-3 sm:space-y-6">
+        <div className="mx-auto max-w-5xl space-y-5 sm:space-y-6">
           {/* Home breadcrumb */}
           <button 
             onClick={() => router.push('/')}
@@ -224,7 +224,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Take Photo Card - Full Width at Top */}
-          <section className="rounded-2xl border border-border bg-gradient-to-br from-primary/5 to-primary/10 p-4 sm:p-8 shadow-sm" aria-labelledby="take-photo-heading">
+          <section className="rounded-2xl border border-border bg-gradient-to-br from-primary/5 to-primary/10 p-5 sm:p-8 shadow-sm" aria-labelledby="take-photo-heading">
             <div className="max-w-xl mx-auto text-center space-y-3 sm:space-y-4">
               <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-primary/10 mx-auto flex items-center justify-center">
                 <Camera className="w-7 h-7 sm:w-10 sm:h-10 text-primary" />
@@ -251,7 +251,7 @@ export default function DashboardPage() {
           </section>
 
           {/* Progress Card - Full Width */}
-          <section className="rounded-2xl border border-border bg-card p-4 sm:p-8 shadow-sm" aria-labelledby="progress-heading">
+          <section className="rounded-2xl border border-border bg-card p-5 sm:p-8 shadow-sm" aria-labelledby="progress-heading">
             <div className="text-center mb-5 sm:mb-8">
               <h3 id="progress-heading" className="text-lg sm:text-2xl font-semibold text-card-foreground">Your Progress</h3>
             </div>
@@ -300,7 +300,7 @@ export default function DashboardPage() {
           </section>
 
           {/* Bottom Cards - Reward and Daily Tips Side by Side */}
-          <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+          <div className="grid gap-5 sm:gap-6 lg:grid-cols-2">
             {/* Reward Card */}
             <RewardCountdown 
               currentDay={currentDay} 

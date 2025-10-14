@@ -86,6 +86,8 @@ export function DailyTips({ className }: DailyTipsProps) {
 
   return (
     <section className={`rounded-2xl border border-border shadow-sm p-5 sm:p-8 flex flex-col ${className}`} aria-labelledby="tips-heading">
+    <section className={`rounded-2xl border border-border shadow-sm p-5 sm:p-8 flex flex-col ${className}`} aria-labelledby="tips-heading">
+    <section className={`rounded-2xl border border-border shadow-sm p-5 sm:p-8 flex flex-col ${className}`} aria-labelledby="tips-heading">
       <div className="flex items-center justify-between mb-4 sm:mb-6">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
