@@ -243,7 +243,7 @@ export default function DashboardPage() {
               <Button
                 onClick={handleTakePhoto}
                 disabled={!canTrackToday || isCompleted || checkedInToday}
-                className="bg-primary hover:bg-primary/90 text-white px-5 sm:px-8 py-3 rounded-lg text-sm sm:text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-primary hover:bg-primary/90 text-white px-5 sm:px-8 py-3 rounded-lg text-sm sm:text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
               >
                 {isCompleted ? 'Challenge complete!' : checkedInToday ? 'Already checked in ✓' : 'Take Photo'}
               </Button>
@@ -268,7 +268,8 @@ export default function DashboardPage() {
                   <span>Progress</span>
                   <span className="text-primary font-semibold">{progressPercent}%</span>
                 </div>
-                <div className="h-3 w-full rounded-full bg-muted overflow-hidden">
+                {/* Responsive progress bar height */}
+                <div className="h-2 md:h-3 w-full rounded-full bg-muted overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full transition-[width] duration-700"
                     style={{ width: `${progressPercent}%` }}

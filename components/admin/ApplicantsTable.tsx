@@ -73,7 +73,7 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
     <>
       <div className="bg-card rounded-xl border border-border overflow-hidden">
         {/* Toolbar */}
-        <div className="p-4 border-b border-border">
+        <div className="p-4 border-b border-border sticky top-0 bg-card z-10">
           <div className="flex items-center justify-between gap-4">
             <h2 className="text-lg font-semibold text-foreground pl-2">Applicants</h2>
             
@@ -115,15 +115,15 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
         {/* Table (enable horizontal scroll on small screens) */}
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-muted/50">
+            <thead className="bg-muted/50 sticky top-[64px] md:top-[56px] z-10">
               <tr>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Submitted</th>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Full Name</th>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Email</th>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Mobile</th>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">ID Type</th>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Status</th>
-                <th className="px-4 py-2.5 text-right text-xs font-medium text-muted-foreground">Actions</th>
+                <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">Submitted</th>
+                <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">Full Name</th>
+                <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">Email</th>
+                <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">Mobile</th>
+                <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">ID Type</th>
+                <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">Status</th>
+                <th className="px-3 md:px-4 py-2 md:py-2.5 text-right text-[11px] md:text-xs font-medium text-muted-foreground">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -132,28 +132,28 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
                   key={row.id}
                   className="hover:bg-muted/50 transition-colors"
                 >
-                  <td className="px-4 py-3 text-sm text-foreground">
+                  <td className="px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm text-foreground">
                     {new Date(row.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </td>
-                  <td className="px-4 py-3 text-sm font-medium text-foreground">
+                  <td className="px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm font-medium text-foreground">
                     {row.first_name} {row.family_name}
                   </td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">
+                  <td className="px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm text-muted-foreground">
                     {row.email}
                   </td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">
+                  <td className="px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm text-muted-foreground">
                     {row.mobile_e164}
                   </td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">
+                  <td className="px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm text-muted-foreground">
                     {row.id_type.replace('_', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-3 md:px-4 py-2 md:py-3">
                     {getStatusBadge(row.status)}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-3 md:px-4 py-2 md:py-3 text-right">
                     <button
                       onClick={() => setSelectedApplicant(row)}
-                      className="inline-flex items-center gap-1 px-2 py-1 text-sm font-medium text-foreground hover:bg-muted rounded-lg transition-colors"
+                      className="inline-flex items-center gap-1 px-2 py-1 text-xs md:text-sm font-medium text-foreground hover:bg-muted rounded-lg transition-colors"
                     >
                       <Eye className="w-4 h-4" />
                       Review

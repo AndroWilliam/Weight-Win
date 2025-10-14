@@ -94,7 +94,7 @@ export function UsersTable({ rows }: UsersTableProps) {
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden">
       {/* Toolbar */}
-      <div className="p-4 border-b border-border">
+      <div className="p-4 border-b border-border sticky top-0 bg-card z-10">
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-lg font-semibold text-foreground pl-2">Users</h2>
           
@@ -128,15 +128,15 @@ export function UsersTable({ rows }: UsersTableProps) {
       {/* Table (enable horizontal scroll on small screens) */}
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-muted/50">
+          <thead className="bg-muted/50 sticky top-[64px] md:top-[56px] z-10">
             <tr>
-              <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">User</th>
-              <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Email</th>
-              <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Progress</th>
-              <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Streak</th>
-              <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Last Weigh-in</th>
-              <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Days to Reward</th>
-              <th className="px-4 py-2.5 text-right text-xs font-medium text-muted-foreground">Actions</th>
+              <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">User</th>
+              <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">Email</th>
+              <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">Progress</th>
+              <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">Streak</th>
+              <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">Last Weigh-in</th>
+              <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">Days to Reward</th>
+              <th className="px-3 md:px-4 py-2 md:py-2.5 text-right text-[11px] md:text-xs font-medium text-muted-foreground">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -150,52 +150,52 @@ export function UsersTable({ rows }: UsersTableProps) {
                   key={row.user_id}
                   className="hover:bg-muted/50 transition-colors"
                 >
-                  <td className="px-4 py-3 text-sm font-medium text-foreground">
+                  <td className="px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm font-medium text-foreground">
                     {userName}
                   </td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">
+                  <td className="px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm text-muted-foreground">
                     {row.email}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-3 md:px-4 py-2 md:py-3">
                     <div className="flex flex-col gap-1.5">
                       <div className="flex gap-0.5 w-32">
                         {getProgressBarSegments(row.total_weigh_ins)}
                       </div>
-                      <span className="text-xs font-medium text-muted-foreground">
+                      <span className="text-[11px] md:text-xs font-medium text-muted-foreground">
                         {row.progress_percent}%
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-3 md:px-4 py-2 md:py-3">
                     <div className="flex gap-1">
                       {getStreakChips(row.total_weigh_ins)}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">
+                  <td className="px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm text-muted-foreground">
                     {formatDate(row.last_weigh_in_at)}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-3 md:px-4 py-2 md:py-3">
                     {row.days_to_reward === 0 || row.total_weigh_ins >= 7 ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400 rounded-full text-xs font-medium">
                         Completed ✓
                       </span>
                     ) : (
-                      <span className="text-sm font-medium text-foreground">
+                      <span className="text-xs md:text-sm font-medium text-foreground">
                         {row.days_to_reward} {row.days_to_reward === 1 ? 'day' : 'days'}
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-3 md:px-4 py-2 md:py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
                       <button
                         disabled
-                        className="inline-flex items-center gap-1 px-2 py-1 text-sm font-medium text-muted-foreground cursor-not-allowed"
+                        className="inline-flex items-center gap-1 px-2 py-1 text-xs md:text-sm font-medium text-muted-foreground cursor-not-allowed"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
                       <button
                         disabled
-                        className="inline-flex items-center gap-1 px-2 py-1 text-sm font-medium text-muted-foreground cursor-not-allowed"
+                        className="inline-flex items-center gap-1 px-2 py-1 text-xs md:text-sm font-medium text-muted-foreground cursor-not-allowed"
                       >
                         <Bell className="w-4 h-4" />
                         Nudge

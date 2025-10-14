@@ -63,7 +63,7 @@ export function ReviewDrawer({ applicant, onClose }: ReviewDrawerProps) {
       />
       
       {/* Drawer */}
-      <div className="fixed right-0 top-0 bottom-0 w-full max-w-2xl bg-background shadow-2xl z-50 overflow-y-auto animate-in slide-in-from-right duration-300 border-l border-border">
+      <div className="fixed right-0 top-0 bottom-0 w-full md:max-w-2xl bg-background shadow-2xl z-50 overflow-y-auto animate-in slide-in-from-right duration-300 border-l border-border">
         {/* Header */}
         <div className="sticky top-0 bg-background border-b border-border px-6 py-4 flex items-center justify-between">
           <div>
