@@ -48,6 +48,7 @@ export function MobileTopNav({ notificationCount = 0, className }: MobileTopNavP
   }, [])
 
   const handleTabChange = (value: string) => {
+    // Immediate navigation - no delays
     router.push(value)
   }
 

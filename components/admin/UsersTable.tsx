@@ -135,13 +135,17 @@ export function UsersTable({ rows }: UsersTableProps) {
 
       {/* Mobile Card List */}
       <div className="md:hidden p-4 space-y-3">
-        {filteredRows.map((row) => {
-          const userName = row.email.split('@')[0].split('.').map(part => 
+        {filteredRows.map((row, index) => {
+          const userName = row.email.split('@')[0].split('.').map(part =>
             part.charAt(0).toUpperCase() + part.slice(1)
           ).join(' ')
           const isExpanded = expandedId === row.user_id
           return (
-            <div key={row.user_id} className="rounded-xl border border-border bg-background/60 p-4">
+            <div
+              key={row.user_id}
+              className="rounded-xl border border-border bg-background/60 p-4 animate-in fade-in slide-in-from-bottom-4 duration-300"
+              style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'backwards' }}
+            >
               {/* Header line */}
               <div className="flex items-start justify-between gap-2">
                 <div>

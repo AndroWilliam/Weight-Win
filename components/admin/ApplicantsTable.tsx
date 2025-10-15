@@ -157,11 +157,15 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
 
         {/* Mobile Card List */}
         <div className="md:hidden p-4 space-y-3">
-          {filteredRows.map((row) => {
+          {filteredRows.map((row, index) => {
             const fullName = `${row.first_name} ${row.family_name}`
             const isLoading = loadingId === row.id
             return (
-              <div key={row.id} className="rounded-xl border border-border bg-background/60 p-4">
+              <div
+                key={row.id}
+                className="rounded-xl border border-border bg-background/60 p-4 animate-in fade-in slide-in-from-bottom-4 duration-300"
+                style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'backwards' }}
+              >
                 {/* Header */}
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-base font-semibold text-foreground leading-tight">{fullName}</p>

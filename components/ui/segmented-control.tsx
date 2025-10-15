@@ -35,26 +35,30 @@ export function SegmentedControl({
       role="tablist"
       aria-label="Navigation tabs"
     >
-      {/* Animated background indicator */}
+      {/* Animated background indicator - Single source of truth */}
       {activeIndex >= 0 && (
         <motion.div
-          layoutId="segmented-control-indicator"
+          key="tab-indicator"
           className="absolute inset-y-1 rounded-md bg-primary"
           initial={false}
           animate={{
-            x: `calc(${activeIndex * 100}% + ${activeIndex * 4}px)`,
-            width: `calc(${100 / options.length}% - 4px)`,
+            left: `calc(${activeIndex * (100 / options.length)}% + 4px)`,
+            width: `calc(${100 / options.length}% - 8px)`,
           }}
           transition={{
             type: 'spring',
-            stiffness: 300,
+            stiffness: 400,
             damping: 30,
+            duration: 0.3,
+          }}
+          style={{
+            willChange: 'left, width',
           }}
         />
       )}
 
       {/* Tab buttons */}
-      {options.map((option) => {
+      {options.map((option, index) => {
         const isActive = option.value === value
         const sizeClasses = size === 'sm'
           ? 'px-3 py-1.5 text-xs min-w-[60px]'
@@ -65,8 +69,12 @@ export function SegmentedControl({
             key={option.value}
             onClick={() => onChange(option.value)}
             className={cn(
-              'relative z-10 rounded-md font-medium transition-colors duration-200',
+              'relative z-10 rounded-md font-medium overflow-hidden',
+              'transition-colors duration-200',
               'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#1a1a1a]',
+              'after:content-[""] after:absolute after:inset-0 after:rounded-md',
+              'after:bg-white/30 after:scale-0 after:transition-transform after:duration-300',
+              'active:after:scale-100',
               sizeClasses,
               isActive
                 ? 'text-white'
@@ -76,8 +84,11 @@ export function SegmentedControl({
             aria-selected={isActive}
             aria-controls={`panel-${option.value}`}
             tabIndex={isActive ? 0 : -1}
+            style={{
+              flex: `1 1 ${100 / options.length}%`,
+            }}
           >
-            {option.label}
+            <span className="relative z-10">{option.label}</span>
           </button>
         )
       })}
