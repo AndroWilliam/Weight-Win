@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Search, Eye, Bell, MoreVertical } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { SkeletonCard } from './SkeletonCard'
 
 interface UserProgress {
   user_id: string
@@ -32,11 +33,34 @@ export function UsersTable({ rows }: UsersTableProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [userFilter, setUserFilter] = useState('all')
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [isLoadingPage, setIsLoadingPage] = useState(false)
+  const itemsPerPage = 5
 
   // Client-side search filter
-  const filteredRows = rows.filter(row => 
+  const filteredRows = rows.filter(row =>
     row.email.toLowerCase().includes(searchTerm.toLowerCase())
   )
+
+  // Pagination
+  const totalPages = Math.ceil(filteredRows.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedRows = filteredRows.slice(startIndex, endIndex)
+
+  const handlePageChange = async (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages || newPage === currentPage) return
+    setIsLoadingPage(true)
+    // Simulate loading delay for skeleton
+    await new Promise(resolve => setTimeout(resolve, 300))
+    setCurrentPage(newPage)
+    setIsLoadingPage(false)
+  }
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, userFilter])
 
   const getProgressBarSegments = (totalWeighIns: number) => {
     const segments = []
@@ -135,12 +159,19 @@ export function UsersTable({ rows }: UsersTableProps) {
 
       {/* Mobile Card List */}
       <div className="md:hidden p-4 space-y-3">
-        {filteredRows.map((row, index) => {
-          const userName = row.email.split('@')[0].split('.').map(part =>
-            part.charAt(0).toUpperCase() + part.slice(1)
-          ).join(' ')
-          const isExpanded = expandedId === row.user_id
-          return (
+        {isLoadingPage ? (
+          <>
+            {Array.from({ length: itemsPerPage }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </>
+        ) : (
+          paginatedRows.map((row, index) => {
+            const userName = row.email.split('@')[0].split('.').map(part =>
+              part.charAt(0).toUpperCase() + part.slice(1)
+            ).join(' ')
+            const isExpanded = expandedId === row.user_id
+            return (
             <div
               key={row.user_id}
               className="rounded-xl border border-border bg-background/60 p-4 animate-in fade-in slide-in-from-bottom-4 duration-300"
@@ -230,42 +261,60 @@ export function UsersTable({ rows }: UsersTableProps) {
                 )}
               </AnimatePresence>
             </div>
-          )
-        })}
+            )
+          })
+        )}
       </div>
 
       {/* Desktop Table (md+) */}
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-muted/50 sticky top-[64px] md:top-[56px] z-10">
+          <thead className="bg-[#0f0f0f] dark:bg-[#0f0f0f] sticky top-[64px] md:top-[56px] z-10 border-b-2 border-[#333]">
             <tr>
-              <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">User</th>
-              <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">Email</th>
-              <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">Progress</th>
-              <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">Streak</th>
-              <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">Last Weigh-in</th>
-              <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">Days to Reward</th>
-              <th className="px-3 md:px-4 py-2 md:py-2.5 text-right text-[11px] md:text-xs font-medium text-muted-foreground">Actions</th>
+              <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-[#888] uppercase tracking-wider">User</th>
+              <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-[#888] uppercase tracking-wider">Email</th>
+              <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-[#888] uppercase tracking-wider">Progress</th>
+              <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-[#888] uppercase tracking-wider">Streak</th>
+              <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-[#888] uppercase tracking-wider">Last Weigh-in</th>
+              <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-[#888] uppercase tracking-wider">Days to Reward</th>
+              <th className="px-6 pt-4 pb-4 text-right text-xs font-semibold text-[#888] uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border">
-            {filteredRows.map((row) => {
-              const userName = row.email.split('@')[0].split('.').map(part => 
-                part.charAt(0).toUpperCase() + part.slice(1)
-              ).join(' ')
-              
-              return (
-                <tr 
+          <tbody>
+            {isLoadingPage ? (
+              Array.from({ length: itemsPerPage }).map((_, i) => (
+                <tr key={i} className="border-b border-[#2a2a2a] animate-pulse">
+                  <td className="px-6 py-5"><div className="h-4 bg-muted rounded w-28" /></td>
+                  <td className="px-6 py-5"><div className="h-4 bg-muted rounded w-40" /></td>
+                  <td className="px-6 py-5"><div className="h-4 bg-muted rounded w-32" /></td>
+                  <td className="px-6 py-5"><div className="flex gap-1">{Array.from({length: 7}).map((_, j) => <div key={j} className="w-6 h-6 bg-muted rounded" />)}</div></td>
+                  <td className="px-6 py-5"><div className="h-4 bg-muted rounded w-32" /></td>
+                  <td className="px-6 py-5"><div className="h-5 bg-muted rounded-full w-20" /></td>
+                  <td className="px-6 py-5 text-right"><div className="h-8 bg-muted rounded w-16 ml-auto" /></td>
+                </tr>
+              ))
+            ) : (
+              paginatedRows.map((row, index) => {
+                const userName = row.email.split('@')[0].split('.').map(part =>
+                  part.charAt(0).toUpperCase() + part.slice(1)
+                ).join(' ')
+
+                const isEven = index % 2 === 0
+
+                return (
+                <tr
                   key={row.user_id}
-                  className="hover:bg-muted/50 transition-colors"
+                  className={`border-b border-[#2a2a2a] hover:bg-[#202020] transition-colors ${
+                    isEven ? 'bg-[#151515]' : 'bg-[#1a1a1a]'
+                  }`}
                 >
-                  <td className="px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm font-medium text-foreground">
+                  <td className="px-6 py-5 text-sm font-medium text-[#e0e0e0]">
                     {userName}
                   </td>
-                  <td className="px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm text-muted-foreground">
+                  <td className="px-6 py-5 text-sm text-[#e0e0e0]">
                     {row.email}
                   </td>
-                  <td className="px-3 md:px-4 py-2 md:py-3">
+                  <td className="px-6 py-5">
                     <div className="flex flex-col gap-1.5">
                       <div className="flex gap-0.5 w-32">
                         {getProgressBarSegments(row.total_weigh_ins)}
@@ -275,26 +324,26 @@ export function UsersTable({ rows }: UsersTableProps) {
                       </span>
                     </div>
                   </td>
-                  <td className="px-3 md:px-4 py-2 md:py-3">
+                  <td className="px-6 py-5">
                     <div className="flex gap-1">
                       {getStreakChips(row.total_weigh_ins)}
                     </div>
                   </td>
-                  <td className="px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm text-muted-foreground">
+                  <td className="px-6 py-5 text-sm text-[#e0e0e0]">
                     {formatDate(row.last_weigh_in_at)}
                   </td>
-                  <td className="px-3 md:px-4 py-2 md:py-3">
+                  <td className="px-6 py-5">
                     {row.days_to_reward === 0 || row.total_weigh_ins >= 7 ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400 rounded-full text-xs font-medium">
                         Completed ✓
                       </span>
                     ) : (
-                      <span className="text-xs md:text-sm font-medium text-foreground">
+                      <span className="text-sm font-medium text-[#e0e0e0]">
                         {row.days_to_reward} {row.days_to_reward === 1 ? 'day' : 'days'}
                       </span>
                     )}
                   </td>
-                  <td className="px-3 md:px-4 py-2 md:py-3 text-right">
+                  <td className="px-6 py-5 text-right">
                     <div className="flex items-center justify-end gap-1">
                       <button
                         disabled
@@ -312,8 +361,9 @@ export function UsersTable({ rows }: UsersTableProps) {
                     </div>
                   </td>
                 </tr>
-              )
-            })}
+                )
+              })
+            )}
           </tbody>
         </table>
       </div>
@@ -321,18 +371,36 @@ export function UsersTable({ rows }: UsersTableProps) {
       {/* Footer */}
       <div className="px-4 py-3 border-t border-border flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          Showing {filteredRows.length} of {rows.length} users
+          Showing {startIndex + 1}-{Math.min(endIndex, filteredRows.length)} of {filteredRows.length} users
         </p>
         <div className="flex items-center gap-2">
-          <button 
-            disabled
-            className="px-3 py-1 text-sm text-muted-foreground cursor-not-allowed"
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1 || isLoadingPage}
+            className="px-3 py-1 text-sm text-foreground hover:bg-muted rounded disabled:text-muted-foreground disabled:cursor-not-allowed disabled:hover:bg-transparent transition-colors"
           >
             Previous
           </button>
-          <button 
-            disabled
-            className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded cursor-not-allowed"
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              <button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                disabled={isLoadingPage}
+                className={`w-8 h-8 text-sm rounded transition-colors ${
+                  page === currentPage
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-foreground hover:bg-muted disabled:cursor-not-allowed'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages || isLoadingPage}
+            className="px-3 py-1 text-sm text-foreground hover:bg-muted rounded disabled:text-muted-foreground disabled:cursor-not-allowed disabled:hover:bg-transparent transition-colors"
           >
             Next
           </button>

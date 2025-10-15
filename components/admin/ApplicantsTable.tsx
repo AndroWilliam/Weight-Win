@@ -5,6 +5,7 @@ import { Search, Eye, Download, Mail, Phone, Check, X, Loader2 } from 'lucide-re
 import { ReviewDrawer } from './ReviewDrawer'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+import { SkeletonCard } from './SkeletonCard'
 
 interface Applicant {
   id: string
@@ -31,6 +32,9 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
   const [selectedApplicant, setSelectedApplicant] = useState<Applicant | null>(null)
   const [apps, setApps] = useState<Applicant[]>(rows)
   const [loadingId, setLoadingId] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [isLoadingPage, setIsLoadingPage] = useState(false)
+  const itemsPerPage = 5
 
   useEffect(() => {
     setApps(rows)
@@ -38,15 +42,35 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
 
   // Client-side filters
   const filteredRows = apps.filter(row => {
-    const matchesSearch = 
+    const matchesSearch =
       row.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       row.family_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       row.email.toLowerCase().includes(searchTerm.toLowerCase())
-    
+
     const matchesStatus = statusFilter === 'all' || row.status === statusFilter
-    
+
     return matchesSearch && matchesStatus
   })
+
+  // Pagination
+  const totalPages = Math.ceil(filteredRows.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedRows = filteredRows.slice(startIndex, endIndex)
+
+  const handlePageChange = async (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages || newPage === currentPage) return
+    setIsLoadingPage(true)
+    // Simulate loading delay for skeleton
+    await new Promise(resolve => setTimeout(resolve, 300))
+    setCurrentPage(newPage)
+    setIsLoadingPage(false)
+  }
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, statusFilter])
 
   const updateStatus = async (id: string, nextStatus: 'approved' | 'rejected', showUndo = true, previousStatus?: string) => {
     try {
@@ -157,15 +181,22 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
 
         {/* Mobile Card List */}
         <div className="md:hidden p-4 space-y-3">
-          {filteredRows.map((row, index) => {
-            const fullName = `${row.first_name} ${row.family_name}`
-            const isLoading = loadingId === row.id
-            return (
-              <div
-                key={row.id}
-                className="rounded-xl border border-border bg-background/60 p-4 animate-in fade-in slide-in-from-bottom-4 duration-300"
-                style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'backwards' }}
-              >
+          {isLoadingPage ? (
+            <>
+              {Array.from({ length: itemsPerPage }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </>
+          ) : (
+            paginatedRows.map((row, index) => {
+              const fullName = `${row.first_name} ${row.family_name}`
+              const isLoading = loadingId === row.id
+              return (
+                <div
+                  key={row.id}
+                  className="rounded-xl border border-border bg-background/60 p-4 animate-in fade-in slide-in-from-bottom-4 duration-300"
+                  style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'backwards' }}
+                >
                 {/* Header */}
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-base font-semibold text-foreground leading-tight">{fullName}</p>
@@ -217,8 +248,9 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
                   </button>
                 </div>
               </div>
-            )
-          })}
+              )
+            })
+          )}
 
           {filteredRows.length === 0 && (
             <div className="p-8 text-center text-muted-foreground text-sm">
@@ -230,42 +262,59 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
         {/* Desktop Table (md+) */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-muted/50 sticky top-[64px] md:top-[56px] z-10">
+            <thead className="bg-[#0f0f0f] dark:bg-[#0f0f0f] sticky top-[64px] md:top-[56px] z-10 border-b-2 border-[#333]">
               <tr>
-                <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">Submitted</th>
-                <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">Full Name</th>
-                <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">Email</th>
-                <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">Mobile</th>
-                <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">ID Type</th>
-                <th className="px-3 md:px-4 py-2 md:py-2.5 text-left text-[11px] md:text-xs font-medium text-muted-foreground">Status</th>
-                <th className="px-3 md:px-4 py-2 md:py-2.5 text-right text-[11px] md:text-xs font-medium text-muted-foreground">Actions</th>
+                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-[#888] uppercase tracking-wider">Submitted</th>
+                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-[#888] uppercase tracking-wider">Full Name</th>
+                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-[#888] uppercase tracking-wider">Email</th>
+                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-[#888] uppercase tracking-wider">Mobile</th>
+                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-[#888] uppercase tracking-wider">ID Type</th>
+                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-[#888] uppercase tracking-wider">Status</th>
+                <th className="px-6 pt-4 pb-4 text-right text-xs font-semibold text-[#888] uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
-              {filteredRows.map((row) => (
-                <tr 
-                  key={row.id}
-                  className="hover:bg-muted/50 transition-colors"
-                >
-                  <td className="px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm text-foreground">
-                    {new Date(row.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  </td>
-                  <td className="px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm font-medium text-foreground">
-                    {row.first_name} {row.family_name}
-                  </td>
-                  <td className="px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm text-muted-foreground">
-                    {row.email}
-                  </td>
-                  <td className="px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm text-muted-foreground">
-                    {row.mobile_e164}
-                  </td>
-                  <td className="px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm text-muted-foreground">
-                    {row.id_type.replace('_', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
-                  </td>
-                  <td className="px-3 md:px-4 py-2 md:py-3">
-                    {getStatusBadge(row.status)}
-                  </td>
-                  <td className="px-3 md:px-4 py-2 md:py-3 text-right">
+            <tbody>
+              {isLoadingPage ? (
+                Array.from({ length: itemsPerPage }).map((_, i) => (
+                  <tr key={i} className="border-b border-[#2a2a2a] animate-pulse">
+                    <td className="px-6 py-5"><div className="h-4 bg-muted rounded w-24" /></td>
+                    <td className="px-6 py-5"><div className="h-4 bg-muted rounded w-32" /></td>
+                    <td className="px-6 py-5"><div className="h-4 bg-muted rounded w-40" /></td>
+                    <td className="px-6 py-5"><div className="h-4 bg-muted rounded w-28" /></td>
+                    <td className="px-6 py-5"><div className="h-4 bg-muted rounded w-20" /></td>
+                    <td className="px-6 py-5"><div className="h-5 bg-muted rounded-full w-20" /></td>
+                    <td className="px-6 py-5 text-right"><div className="h-8 bg-muted rounded w-20 ml-auto" /></td>
+                  </tr>
+                ))
+              ) : (
+                paginatedRows.map((row, index) => {
+                  const isEven = index % 2 === 0
+                  return (
+                  <tr
+                    key={row.id}
+                    className={`border-b border-[#2a2a2a] hover:bg-[#202020] transition-colors ${
+                      isEven ? 'bg-[#151515]' : 'bg-[#1a1a1a]'
+                    }`}
+                  >
+                    <td className="px-6 py-5 text-sm text-[#e0e0e0]">
+                      {new Date(row.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </td>
+                    <td className="px-6 py-5 text-sm font-medium text-[#e0e0e0]">
+                      {row.first_name} {row.family_name}
+                    </td>
+                    <td className="px-6 py-5 text-sm text-[#e0e0e0]">
+                      {row.email}
+                    </td>
+                    <td className="px-6 py-5 text-sm text-[#e0e0e0]">
+                      {row.mobile_e164}
+                    </td>
+                    <td className="px-6 py-5 text-sm text-[#e0e0e0]">
+                      {row.id_type.replace('_', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                    </td>
+                    <td className="px-6 py-5">
+                      {getStatusBadge(row.status)}
+                    </td>
+                    <td className="px-6 py-5 text-right">
                     <button
                       onClick={() => setSelectedApplicant(row)}
                       className="inline-flex items-center gap-1 px-2 py-1 text-xs md:text-sm font-medium text-foreground hover:bg-muted rounded-lg transition-colors"
@@ -274,8 +323,10 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
                       Review
                     </button>
                   </td>
-                </tr>
-              ))}
+                  </tr>
+                  )
+                })
+              )}
             </tbody>
           </table>
         </div>
@@ -283,18 +334,36 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
         {/* Footer */}
         <div className="px-4 py-3 border-t border-border flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Showing {filteredRows.length} of {rows.length} applicants
+            Showing {startIndex + 1}-{Math.min(endIndex, filteredRows.length)} of {filteredRows.length} applicants
           </p>
           <div className="flex items-center gap-2">
-            <button 
-              disabled
-              className="px-3 py-1 text-sm text-muted-foreground cursor-not-allowed"
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1 || isLoadingPage}
+              className="px-3 py-1 text-sm text-foreground hover:bg-muted rounded disabled:text-muted-foreground disabled:cursor-not-allowed disabled:hover:bg-transparent transition-colors"
             >
               Previous
             </button>
-            <button 
-              disabled
-              className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded cursor-not-allowed"
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  disabled={isLoadingPage}
+                  className={`w-8 h-8 text-sm rounded transition-colors ${
+                    page === currentPage
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-foreground hover:bg-muted disabled:cursor-not-allowed'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages || isLoadingPage}
+              className="px-3 py-1 text-sm text-foreground hover:bg-muted rounded disabled:text-muted-foreground disabled:cursor-not-allowed disabled:hover:bg-transparent transition-colors"
             >
               Next
             </button>
