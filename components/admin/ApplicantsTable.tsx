@@ -140,7 +140,7 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
     <>
       <div className="bg-card rounded-xl border border-border overflow-hidden">
         {/* Toolbar */}
-        <div className="p-4 border-b border-border sticky top-0 bg-card z-10">
+        <div className="p-4 border-b border-border bg-card">
           <div className="flex items-center justify-between gap-4">
             <h2 className="text-lg font-semibold text-foreground pl-2">Applicants</h2>
             
@@ -262,15 +262,15 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
         {/* Desktop Table (md+) */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-muted/50 sticky top-[64px] md:top-[56px] z-10 border-b-2 border-border">
+            <thead className="bg-muted/50 border-b-2 border-border">
               <tr>
-                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Submitted</th>
-                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Full Name</th>
-                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Email</th>
-                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Mobile</th>
-                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">ID Type</th>
-                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
-                <th className="px-6 pt-4 pb-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Submitted</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Full Name</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Email</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Mobile</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">ID Type</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody>
