@@ -262,21 +262,21 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
         {/* Desktop Table (md+) */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-[#0f0f0f] dark:bg-[#0f0f0f] sticky top-[64px] md:top-[56px] z-10 border-b-2 border-[#333]">
+            <thead className="bg-muted/50 sticky top-[64px] md:top-[56px] z-10 border-b-2 border-border">
               <tr>
-                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-[#888] uppercase tracking-wider">Submitted</th>
-                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-[#888] uppercase tracking-wider">Full Name</th>
-                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-[#888] uppercase tracking-wider">Email</th>
-                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-[#888] uppercase tracking-wider">Mobile</th>
-                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-[#888] uppercase tracking-wider">ID Type</th>
-                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-[#888] uppercase tracking-wider">Status</th>
-                <th className="px-6 pt-4 pb-4 text-right text-xs font-semibold text-[#888] uppercase tracking-wider">Actions</th>
+                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Submitted</th>
+                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Full Name</th>
+                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Email</th>
+                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Mobile</th>
+                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">ID Type</th>
+                <th className="px-6 pt-4 pb-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                <th className="px-6 pt-4 pb-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody>
               {isLoadingPage ? (
                 Array.from({ length: itemsPerPage }).map((_, i) => (
-                  <tr key={i} className="border-b border-[#2a2a2a] animate-pulse">
+                  <tr key={i} className="border-b border-border animate-pulse">
                     <td className="px-6 py-5"><div className="h-4 bg-muted rounded w-24" /></td>
                     <td className="px-6 py-5"><div className="h-4 bg-muted rounded w-32" /></td>
                     <td className="px-6 py-5"><div className="h-4 bg-muted rounded w-40" /></td>
@@ -292,23 +292,23 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
                   return (
                   <tr
                     key={row.id}
-                    className={`border-b border-[#2a2a2a] hover:bg-[#202020] transition-colors ${
-                      isEven ? 'bg-[#151515]' : 'bg-[#1a1a1a]'
+                    className={`border-b border-border hover:bg-muted/50 transition-colors ${
+                      isEven ? 'bg-background' : 'bg-muted/20'
                     }`}
                   >
-                    <td className="px-6 py-5 text-sm text-[#e0e0e0]">
+                    <td className="px-6 py-5 text-sm text-foreground">
                       {new Date(row.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </td>
-                    <td className="px-6 py-5 text-sm font-medium text-[#e0e0e0]">
+                    <td className="px-6 py-5 text-sm font-medium text-foreground">
                       {row.first_name} {row.family_name}
                     </td>
-                    <td className="px-6 py-5 text-sm text-[#e0e0e0]">
+                    <td className="px-6 py-5 text-sm text-foreground">
                       {row.email}
                     </td>
-                    <td className="px-6 py-5 text-sm text-[#e0e0e0]">
+                    <td className="px-6 py-5 text-sm text-foreground">
                       {row.mobile_e164}
                     </td>
-                    <td className="px-6 py-5 text-sm text-[#e0e0e0]">
+                    <td className="px-6 py-5 text-sm text-foreground">
                       {row.id_type.replace('_', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
                     </td>
                     <td className="px-6 py-5">
