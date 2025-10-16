@@ -268,29 +268,29 @@ export function UsersTable({ rows }: UsersTableProps) {
 
       {/* Desktop Table (md+) */}
       <div className="hidden md:block overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full min-w-[1400px]">
           <thead className="bg-muted/50 border-b-2 border-border">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">User</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Email</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Progress</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Streak</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Last Weigh-in</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Days to Reward</th>
-              <th className="px-6 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-32">User</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-56">Email</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-36">Progress</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-48">Streak</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-44">Last Weigh-in</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-32">Days to Reward</th>
+              <th className="px-4 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider w-24">Actions</th>
             </tr>
           </thead>
           <tbody>
             {isLoadingPage ? (
               Array.from({ length: itemsPerPage }).map((_, i) => (
                 <tr key={i} className="border-b border-border animate-pulse">
-                  <td className="px-6 py-5"><div className="h-4 bg-muted rounded w-28" /></td>
-                  <td className="px-6 py-5"><div className="h-4 bg-muted rounded w-40" /></td>
-                  <td className="px-6 py-5"><div className="h-4 bg-muted rounded w-32" /></td>
-                  <td className="px-6 py-5"><div className="flex gap-1">{Array.from({length: 7}).map((_, j) => <div key={j} className="w-6 h-6 bg-muted rounded" />)}</div></td>
-                  <td className="px-6 py-5"><div className="h-4 bg-muted rounded w-32" /></td>
-                  <td className="px-6 py-5"><div className="h-5 bg-muted rounded-full w-20" /></td>
-                  <td className="px-6 py-5 text-right"><div className="h-8 bg-muted rounded w-16 ml-auto" /></td>
+                  <td className="px-4 py-4"><div className="h-4 bg-muted rounded w-24" /></td>
+                  <td className="px-4 py-4"><div className="h-4 bg-muted rounded w-40" /></td>
+                  <td className="px-4 py-4"><div className="h-4 bg-muted rounded w-28" /></td>
+                  <td className="px-4 py-4"><div className="flex gap-1">{Array.from({length: 7}).map((_, j) => <div key={j} className="w-6 h-6 bg-muted rounded" />)}</div></td>
+                  <td className="px-4 py-4"><div className="h-4 bg-muted rounded w-32" /></td>
+                  <td className="px-4 py-4"><div className="h-5 bg-muted rounded-full w-20" /></td>
+                  <td className="px-4 py-4 text-right"><div className="h-8 bg-muted rounded w-16 ml-auto" /></td>
                 </tr>
               ))
             ) : (
@@ -308,55 +308,56 @@ export function UsersTable({ rows }: UsersTableProps) {
                     isEven ? 'bg-background' : 'bg-muted/20'
                   }`}
                 >
-                  <td className="px-6 py-5 text-sm font-medium text-foreground">
+                  <td className="px-4 py-4 text-sm font-medium text-foreground">
                     {userName}
                   </td>
-                  <td className="px-6 py-5 text-sm text-foreground">
+                  <td className="px-4 py-4 text-sm text-foreground">
                     {row.email}
                   </td>
-                  <td className="px-6 py-5">
-                    <div className="flex flex-col gap-1.5">
+                  <td className="px-4 py-4">
+                    <div className="flex flex-col gap-1">
                       <div className="flex gap-0.5 w-32">
                         {getProgressBarSegments(row.total_weigh_ins)}
                       </div>
-                      <span className="text-[11px] md:text-xs font-medium text-muted-foreground">
+                      <span className="text-[10px] font-medium text-muted-foreground">
                         {row.progress_percent}%
                       </span>
                     </div>
                   </td>
-                  <td className="px-6 py-5">
-                    <div className="flex gap-1">
+                  <td className="px-4 py-4">
+                    <div className="flex gap-0.5">
                       {getStreakChips(row.total_weigh_ins)}
                     </div>
                   </td>
-                  <td className="px-6 py-5 text-sm text-foreground">
+                  <td className="px-4 py-4 text-xs text-foreground whitespace-nowrap">
                     {formatDate(row.last_weigh_in_at)}
                   </td>
-                  <td className="px-6 py-5">
+                  <td className="px-4 py-4">
                     {row.days_to_reward === 0 || row.total_weigh_ins >= 7 ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400 rounded-full text-xs font-medium">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400 rounded-full text-xs font-medium whitespace-nowrap">
                         Completed ✓
                       </span>
                     ) : (
-                      <span className="text-sm font-medium text-foreground">
+                      <span className="text-sm font-medium text-foreground whitespace-nowrap">
                         {row.days_to_reward} {row.days_to_reward === 1 ? 'day' : 'days'}
                       </span>
                     )}
                   </td>
-                  <td className="px-6 py-5 text-right">
-                    <div className="flex items-center justify-end gap-1">
+                  <td className="px-4 py-4 text-right">
+                    <div className="flex items-center justify-end gap-0.5">
                       <button
                         disabled
-                        className="inline-flex items-center gap-1 px-2 py-1 text-xs md:text-sm font-medium text-muted-foreground cursor-not-allowed"
+                        className="inline-flex items-center gap-1 p-2 text-xs font-medium text-muted-foreground cursor-not-allowed hover:bg-muted rounded"
+                        title="View"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
                       <button
                         disabled
-                        className="inline-flex items-center gap-1 px-2 py-1 text-xs md:text-sm font-medium text-muted-foreground cursor-not-allowed"
+                        className="inline-flex items-center gap-1 p-2 text-xs font-medium text-muted-foreground cursor-not-allowed hover:bg-muted rounded"
+                        title="Nudge"
                       >
                         <Bell className="w-4 h-4" />
-                        Nudge
                       </button>
                     </div>
                   </td>
