@@ -1,45 +1,42 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { userIsAdmin } from '@/lib/admin/guard'
 import { createServiceSupabaseClient } from '@/lib/supabase/service'
+import { withHandler } from '@/lib/api/with-handler'
+import { ok, fail } from '@/lib/api/responses'
+import { logger } from '@/lib/logger'
 
-export async function GET(
-  _request: Request,
-  { params }: { params: { userId: string } }
-) {
-  try {
-    const isAdmin = await userIsAdmin()
-    if (!isAdmin) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 })
-    }
+export const GET = withHandler(async (req: NextRequest, ctx: { params: { userId: string } }, requestId?: string) => {
+  logger.info('[Admin Permissions] Request started', { requestId, userId: ctx.params.userId })
 
-    const targetUser = params.userId
-    if (!targetUser) {
-      return NextResponse.json({ success: false, error: 'Missing user id' }, { status: 400 })
-    }
+  const isAdmin = await userIsAdmin()
+  if (!isAdmin) {
+    logger.info('[Admin Permissions] Unauthorized access attempt', { requestId })
+    return NextResponse.json(fail('UNAUTHORIZED', 'Admin access required', undefined, requestId), { status: 403 })
+  }
 
-    const supabase = createServiceSupabaseClient()
-    const { data, error } = await supabase.rpc('get_admin_permissions', {
-      target_user: targetUser,
-    })
+  const targetUser = ctx.params.userId
+  if (!targetUser) {
+    logger.info('[Admin Permissions] Missing user id', { requestId })
+    return NextResponse.json(fail('BAD_REQUEST', 'Missing user id', undefined, requestId), { status: 400 })
+  }
 
-    if (error) {
-      console.error('[Admin Permissions] RPC error:', error)
-      return NextResponse.json(
-        { success: false, error: 'Failed to load permissions' },
-        { status: 500 }
-      )
-    }
+  const supabase = createServiceSupabaseClient()
+  const { data, error } = await supabase.rpc('get_admin_permissions', {
+    target_user: targetUser,
+  })
 
-    const record = Array.isArray(data) ? data[0] : data
-
-    return NextResponse.json({ success: true, data: record ?? null })
-  } catch (error) {
-    console.error('[Admin Permissions] Unexpected error:', error)
+  if (error) {
+    logger.error('[Admin Permissions] RPC error', error, { requestId, targetUser })
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      fail('DATABASE_ERROR', 'Failed to load permissions', { error: error.message }, requestId),
       { status: 500 }
     )
   }
-}
+
+  const record = Array.isArray(data) ? data[0] : data
+
+  logger.info('[Admin Permissions] Permissions loaded successfully', { requestId, targetUser })
+  return NextResponse.json(ok(record ?? null, requestId))
+})
 
 
