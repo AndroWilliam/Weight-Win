@@ -1,15 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, Eye, Bell, MoreVertical } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { SkeletonCard } from './SkeletonCard'
+import { Button } from '@/components/ui/button'
+import { UserActionsDrawer } from './UserActionsDrawer'
 
 interface UserProgress {
   user_id: string
@@ -35,6 +31,9 @@ export function UsersTable({ rows }: UsersTableProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [isLoadingPage, setIsLoadingPage] = useState(false)
+  const [drawerUserId, setDrawerUserId] = useState<string | null>(null)
+  const [drawerEmail, setDrawerEmail] = useState<string | null>(null)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const itemsPerPage = 5
 
   // Client-side search filter
@@ -115,11 +114,25 @@ export function UsersTable({ rows }: UsersTableProps) {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })
   }
 
+  const openDrawer = (userId: string, email: string) => {
+    setDrawerUserId(userId)
+    setDrawerEmail(email)
+    setIsDrawerOpen(true)
+  }
+
   if (rows.length === 0) {
     return (
-      <div className="bg-card rounded-xl border border-border p-12 text-center">
-        <p className="text-muted-foreground">No users found</p>
-      </div>
+      <>
+        <div className="bg-card rounded-xl border border-border p-12 text-center">
+          <p className="text-muted-foreground">No users found</p>
+        </div>
+        <UserActionsDrawer
+          userId={drawerUserId}
+          email={drawerEmail}
+          open={isDrawerOpen}
+          onOpenChange={setIsDrawerOpen}
+        />
+      </>
     )
   }
 
@@ -182,22 +195,14 @@ export function UsersTable({ rows }: UsersTableProps) {
                 <div>
                   <p className="text-base font-semibold text-foreground leading-tight">{userName}</p>
                 </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      className="p-2 rounded-md hover:bg-muted text-muted-foreground"
-                      aria-label="Open actions"
-                    >
-                      <MoreVertical className="w-4 h-4" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-44">
-                    <DropdownMenuItem disabled>View profile</DropdownMenuItem>
-                    <DropdownMenuItem disabled>Send nudge</DropdownMenuItem>
-                    <DropdownMenuItem disabled>Edit user</DropdownMenuItem>
-                    <DropdownMenuItem disabled>Delete user</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                  onClick={() => openDrawer(row.user_id, row.email)}
+                >
+                  Actions
+                </Button>
               </div>
 
               {/* Progress visual */}
@@ -243,19 +248,15 @@ export function UsersTable({ rows }: UsersTableProps) {
                       <span className="text-muted-foreground">Days to reward</span>
                       <span className="text-foreground">{row.days_to_reward}</span>
                     </div>
-                    <div className="flex items-center justify-end gap-2 pt-1">
-                      <button
-                        disabled
-                        className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-muted-foreground rounded-md border border-border"
+                    <div className="flex items-center justify-end pt-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-xs"
+                        onClick={() => openDrawer(row.user_id, row.email)}
                       >
-                        <Eye className="w-3.5 h-3.5" /> View
-                      </button>
-                      <button
-                        disabled
-                        className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-muted-foreground rounded-md border border-border"
-                      >
-                        <Bell className="w-3.5 h-3.5" /> Nudge
-                      </button>
+                        Actions
+                      </Button>
                     </div>
                   </motion.div>
                 )}
@@ -344,22 +345,13 @@ export function UsersTable({ rows }: UsersTableProps) {
                     )}
                   </td>
                   <td className="px-4 py-4 text-right">
-                    <div className="flex items-center justify-end gap-0.5">
-                      <button
-                        disabled
-                        className="inline-flex items-center gap-1 p-2 text-xs font-medium text-muted-foreground cursor-not-allowed hover:bg-muted rounded"
-                        title="View"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button
-                        disabled
-                        className="inline-flex items-center gap-1 p-2 text-xs font-medium text-muted-foreground cursor-not-allowed hover:bg-muted rounded"
-                        title="Nudge"
-                      >
-                        <Bell className="w-4 h-4" />
-                      </button>
-                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openDrawer(row.user_id, row.email)}
+                    >
+                      Actions
+                    </Button>
                   </td>
                 </tr>
                 )
@@ -414,6 +406,13 @@ export function UsersTable({ rows }: UsersTableProps) {
           No results found for "{searchTerm}"
         </div>
       )}
+
+      <UserActionsDrawer
+        userId={drawerUserId}
+        email={drawerEmail}
+        open={isDrawerOpen}
+        onOpenChange={setIsDrawerOpen}
+      />
     </div>
   )
 }
