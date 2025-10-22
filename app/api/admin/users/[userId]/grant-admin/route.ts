@@ -36,23 +36,66 @@ export const POST = withHandler(async (req: NextRequest, ctx: { params: { userId
   }
 
   const supabase = createServiceSupabaseClient()
-  const { data, error } = await supabase.rpc('set_admin_status', {
-    target_user: targetUser,
-    should_be_admin: parse.data.enable,
-  })
+  const { enable } = parse.data
 
-  if (error) {
-    logger.error('[Grant Admin] RPC error', error, { requestId, targetUser, enable: parse.data.enable })
-    return NextResponse.json(
-      fail('DATABASE_ERROR', 'Failed to update admin status', { error: error.message }, requestId),
-      { status: 500 }
-    )
+  // Get current admin user for tracking
+  const currentAdminClient = await (await import('@/lib/supabase/server')).createClient()
+  const { data: { user } } = await currentAdminClient.auth.getUser()
+  const callerUserId = user?.id
+
+  if (enable) {
+    // Grant admin access
+    const { error: insertError } = await supabase
+      .from('admins')
+      .insert({ user_id: targetUser, created_by: callerUserId })
+      .select()
+
+    if (insertError && insertError.code !== '23505') { // Ignore duplicate key errors
+      logger.error('[Grant Admin] Failed to grant admin access', insertError, { requestId, targetUser, enable })
+      return NextResponse.json(
+        fail('DATABASE_ERROR', 'Failed to update admin status', { error: insertError.message }, requestId),
+        { status: 500 }
+      )
+    }
+  } else {
+    // Revoke admin access
+    const { error: deleteError } = await supabase
+      .from('admins')
+      .delete()
+      .eq('user_id', targetUser)
+
+    if (deleteError) {
+      logger.error('[Grant Admin] Failed to revoke admin access', deleteError, { requestId, targetUser, enable })
+      return NextResponse.json(
+        fail('DATABASE_ERROR', 'Failed to update admin status', { error: deleteError.message }, requestId),
+        { status: 500 }
+      )
+    }
   }
 
-  const record = Array.isArray(data) ? data[0] : data
+  // Update admin_permissions table timestamp
+  const { error: permError } = await supabase
+    .from('admin_permissions')
+    .upsert(
+      { user_id: targetUser, updated_at: new Date().toISOString(), updated_by: callerUserId },
+      { onConflict: 'user_id' }
+    )
 
-  logger.info('[Grant Admin] Admin status updated successfully', { requestId, targetUser, enable: parse.data.enable })
-  return NextResponse.json(ok(record ?? null, requestId))
+  if (permError) {
+    logger.error('[Grant Admin] Failed to update permissions timestamp', permError, { requestId, targetUser })
+  }
+
+  // Return current admin status
+  const { data: adminCheck } = await supabase
+    .from('admins')
+    .select('user_id')
+    .eq('user_id', targetUser)
+    .maybeSingle()
+
+  const record = { is_admin: !!adminCheck }
+
+  logger.info('[Grant Admin] Admin status updated successfully', { requestId, targetUser, enable })
+  return NextResponse.json(ok(record, requestId))
 })
 
 

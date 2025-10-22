@@ -36,23 +36,45 @@ export const POST = withHandler(async (req: NextRequest, ctx: { params: { userId
   }
 
   const supabase = createServiceSupabaseClient()
-  const { data, error } = await supabase.rpc('set_admin_invitation_permission', {
-    target_user: targetUser,
-    allow: parse.data.allow,
-  })
+  const { allow } = parse.data
 
-  if (error) {
-    logger.error('[Toggle Invitations] RPC error', error, { requestId, targetUser, allow: parse.data.allow })
+  // Get current admin user for tracking
+  const currentAdminClient = await (await import('@/lib/supabase/server')).createClient()
+  const { data: { user } } = await currentAdminClient.auth.getUser()
+  const callerUserId = user?.id
+
+  // Update invitation permission
+  const { error: updateError } = await supabase
+    .from('admin_permissions')
+    .upsert(
+      {
+        user_id: targetUser,
+        can_manage_invitations: allow,
+        updated_at: new Date().toISOString(),
+        updated_by: callerUserId,
+      },
+      { onConflict: 'user_id' }
+    )
+
+  if (updateError) {
+    logger.error('[Toggle Invitations] Failed to update invitation permission', updateError, { requestId, targetUser, allow })
     return NextResponse.json(
-      fail('DATABASE_ERROR', 'Failed to update invitation permission', { error: error.message }, requestId),
+      fail('DATABASE_ERROR', 'Failed to update invitation permission', { error: updateError.message }, requestId),
       { status: 500 }
     )
   }
 
-  const record = Array.isArray(data) ? data[0] : data
+  // Return updated permission
+  const { data: permData } = await supabase
+    .from('admin_permissions')
+    .select('can_manage_invitations')
+    .eq('user_id', targetUser)
+    .maybeSingle()
 
-  logger.info('[Toggle Invitations] Invitation permission updated successfully', { requestId, targetUser, allow: parse.data.allow })
-  return NextResponse.json(ok(record ?? null, requestId))
+  const record = { can_manage_invitations: permData?.can_manage_invitations ?? false }
+
+  logger.info('[Toggle Invitations] Invitation permission updated successfully', { requestId, targetUser, allow })
+  return NextResponse.json(ok(record, requestId))
 })
 
 
