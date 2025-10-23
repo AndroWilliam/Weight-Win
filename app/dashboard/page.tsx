@@ -7,7 +7,7 @@ import { RewardCountdown } from "@/components/reward-countdown"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
-import { Camera, Home } from "lucide-react"
+import { Camera, Home, Shield } from "lucide-react"
 import { toast } from "sonner"
 
 interface ChallengeData {
@@ -28,6 +28,7 @@ export default function DashboardPage() {
   const [challengeData, setChallengeData] = useState<ChallengeData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isNavigating, setIsNavigating] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -45,6 +46,19 @@ export default function DashboardPage() {
         console.error('Error parsing badge data:', e)
       }
     }
+
+    // Check if user is admin
+    async function checkAdminStatus() {
+      try {
+        const response = await fetch('/api/admin/check')
+        const data = await response.json()
+        setIsAdmin(data.isAdmin || false)
+      } catch (error) {
+        console.error('Failed to check admin status:', error)
+        setIsAdmin(false)
+      }
+    }
+    checkAdminStatus()
   }, [])
 
   useEffect(() => {
@@ -188,6 +202,18 @@ export default function DashboardPage() {
             <ThemeToggle />
             <button onClick={() => router.push('/dashboard')} className="hover:text-foreground">Dashboard</button>
             <button onClick={() => router.push('/progress')} className="hover:text-foreground">Progress</button>
+            {isAdmin && (
+              <button
+                onClick={() => router.push('/admin/users')}
+                className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-indigo-500 rounded-lg text-zinc-300 hover:text-white transition-all duration-200 relative overflow-hidden group"
+                aria-label="Go to Admin Dashboard"
+              >
+                <span className="absolute inset-0 bg-indigo-500/30 scale-0 group-active:scale-100 rounded-full transition-transform duration-400" />
+                <Shield className="w-4 h-4 relative z-10" />
+                <span className="relative z-10 hidden lg:inline">Admin Dashboard</span>
+                <span className="relative z-10 lg:hidden">Admin</span>
+              </button>
+            )}
             <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white">A</div>
             <button onClick={handleSignOut} className="hover:text-foreground">Sign Out</button>
           </div>
