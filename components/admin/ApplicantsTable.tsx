@@ -350,7 +350,7 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
                   key={page}
                   onClick={() => handlePageChange(page)}
                   disabled={isLoadingPage}
-                  className={`w-8 h-8 text-sm rounded transition-colors ${
+                  className={`w-10 h-10 sm:w-8 sm:h-8 text-sm rounded transition-colors ${
                     page === currentPage
                       ? 'bg-primary text-primary-foreground'
                       : 'text-foreground hover:bg-muted disabled:cursor-not-allowed'

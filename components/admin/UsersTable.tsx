@@ -269,7 +269,7 @@ export function UsersTable({ rows }: UsersTableProps) {
 
       {/* Desktop Table (md+) */}
       <div className="hidden md:block overflow-x-auto">
-        <table className="w-full min-w-[1400px]">
+        <table className="w-full">
           <thead className="bg-muted/50 border-b-2 border-border">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-32">User</th>
@@ -380,7 +380,7 @@ export function UsersTable({ rows }: UsersTableProps) {
                 key={page}
                 onClick={() => handlePageChange(page)}
                 disabled={isLoadingPage}
-                className={`w-8 h-8 text-sm rounded transition-colors ${
+                className={`w-10 h-10 sm:w-8 sm:h-8 text-sm rounded transition-colors ${
                   page === currentPage
                     ? 'bg-primary text-primary-foreground'
                     : 'text-foreground hover:bg-muted disabled:cursor-not-allowed'

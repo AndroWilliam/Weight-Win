@@ -98,7 +98,7 @@ export function DailyTips({ className }: DailyTipsProps) {
             onClick={goToPrevious}
             variant="outline"
             size="icon"
-            className="h-8 w-8 border-border bg-background/60"
+            className="h-10 w-10 sm:h-8 sm:w-8 border-border bg-background/60"
             aria-label="Previous tip"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -107,7 +107,7 @@ export function DailyTips({ className }: DailyTipsProps) {
             onClick={goToNext}
             variant="outline"
             size="icon"
-            className="h-8 w-8 border-border bg-background/60"
+            className="h-10 w-10 sm:h-8 sm:w-8 border-border bg-background/60"
             aria-label="Next tip"
           >
             <ChevronRight className="w-4 h-4" />
