@@ -25,8 +25,8 @@ CREATE INDEX IF NOT EXISTS idx_application_documents_application_id
 CREATE INDEX IF NOT EXISTS idx_nutritionist_applications_email
   ON nutritionist_applications(email);
 
-CREATE INDEX IF NOT EXISTS idx_nutritionist_applications_phone
-  ON nutritionist_applications(phone);
+CREATE INDEX IF NOT EXISTS idx_nutritionist_applications_phone_e164
+  ON nutritionist_applications(phone_e164);
 
 -- Index for admin permissions table (used in admin checks)
 CREATE INDEX IF NOT EXISTS idx_admin_permissions_user_id
