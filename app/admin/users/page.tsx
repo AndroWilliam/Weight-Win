@@ -29,16 +29,29 @@ export default async function UsersPage() {
 
   if (kpiError) {
     console.error('[Users Page] Error fetching KPIs:', kpiError)
-    // Fallback to 0 values if KPI function fails
+    // Show error banner instead of misleading 0 values
     return (
-      <div className="space-y-4 sm:space-y-6">
-        <UsersKPICards
-          newUsersThisWeek={0}
-          usersInProgress={0}
-          completedThisWeek={0}
-          activeUsersToday={0}
-        />
-        
+      <div className="px-4 sm:px-6 space-y-4 sm:space-y-6">
+        <div className="p-6 bg-red-500/10 border border-red-500 rounded-lg">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 w-5 h-5 mt-0.5">
+              <svg className="w-5 h-5 text-red-500" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-red-500 font-medium text-sm sm:text-base">Failed to load KPI data</h3>
+              <p className="text-red-400 text-xs sm:text-sm mt-1">{kpiError.message}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-3 px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
+
         <UsersTable rows={rows ?? []} />
       </div>
     )
