@@ -235,7 +235,7 @@ export default function ProgressPage() {
             <span className="hidden sm:inline">Back</span>
           </button>
           <div className="flex-1 flex justify-center">
-            <h1 className="text-lg sm:text-xl font-bold text-foreground">Progress</h1>
+            <h1 className="text-fluid-xl font-bold text-foreground">Progress</h1>
           </div>
           <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
             <span className="text-white font-bold text-sm">A</span>
@@ -259,9 +259,9 @@ export default function ProgressPage() {
                     <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   )}
                 </div>
-                <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2">Weight Change</h3>
+                <h3 className="text-fluid-lg font-semibold text-foreground mb-2">Weight Change</h3>
                 <div className="flex items-center justify-center gap-2">
-                  <p className={`text-xl sm:text-2xl font-bold ${
+                  <p className={`text-fluid-2xl font-bold ${
                     weightSummary?.change_from_previous && weightSummary.change_from_previous < 0 
                       ? 'text-green-600' 
                       : weightSummary?.change_from_previous && weightSummary.change_from_previous > 0 
@@ -295,8 +295,8 @@ export default function ProgressPage() {
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Scale className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                 </div>
-                <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2">Current Weight</h3>
-                <p className="text-xl sm:text-2xl font-bold text-foreground">
+                <h3 className="text-fluid-lg font-semibold text-foreground mb-2">Current Weight</h3>
+                <p className="text-fluid-2xl font-bold text-foreground">
                   {weightSummary?.current_weight 
                     ? `${weightSummary.current_weight.toFixed(1)} kg`
                     : '-- kg'
@@ -312,8 +312,8 @@ export default function ProgressPage() {
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                 </div>
-                <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2">Streak</h3>
-                <p className="text-xl sm:text-2xl font-bold text-foreground">
+                <h3 className="text-fluid-lg font-semibold text-foreground mb-2">Streak</h3>
+                <p className="text-fluid-2xl font-bold text-foreground">
                   {streakInfo?.streak || 0} days
                 </p>
                 <p className="text-xs sm:text-sm text-muted-foreground mt-1">Consecutive tracking</p>
@@ -327,7 +327,7 @@ export default function ProgressPage() {
           {/* Weight Chart */}
           <Card className="border-border mb-6 sm:mb-8">
             <CardContent className="p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-semibold text-foreground mb-4 sm:mb-6">Weight Progress</h3>
+              <h3 className="text-fluid-lg font-semibold text-foreground mb-4 sm:mb-6">Weight Progress</h3>
               
               {weightEntries.length === 0 ? (
                 <div className="text-center py-8 sm:py-12">

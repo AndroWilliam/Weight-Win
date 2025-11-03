@@ -49,6 +49,16 @@
   --text-caption: 12px;      /* Small text */
   --text-caption-line: 16px;
 
+  /* Fluid Typography (Responsive Scaling) */
+  --font-fluid-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);    /* 12px → 14px */
+  --font-fluid-sm: clamp(0.875rem, 0.8rem + 0.5vw, 1rem);        /* 14px → 16px */
+  --font-fluid-base: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);      /* 16px → 18px */
+  --font-fluid-lg: clamp(1.125rem, 1rem + 0.625vw, 1.5rem);      /* 18px → 24px */
+  --font-fluid-xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.875rem);    /* 20px → 30px */
+  --font-fluid-2xl: clamp(1.5rem, 1.3rem + 1vw, 2.25rem);        /* 24px → 36px */
+  --font-fluid-3xl: clamp(1.875rem, 1.6rem + 1.375vw, 3rem);     /* 30px → 48px */
+  --font-fluid-4xl: clamp(2.25rem, 1.9rem + 1.75vw, 3.75rem);    /* 36px → 60px */
+
   /* Map to semantic design tokens */
   --background: var(--neutral-50);
   --foreground: var(--neutral-900);
@@ -209,6 +219,16 @@
       line-height: var(--text-caption-line);
     }
   }
+
+  /* Fluid Typography Utilities */
+  .text-fluid-xs { font-size: var(--font-fluid-xs); }
+  .text-fluid-sm { font-size: var(--font-fluid-sm); }
+  .text-fluid-base { font-size: var(--font-fluid-base); }
+  .text-fluid-lg { font-size: var(--font-fluid-lg); }
+  .text-fluid-xl { font-size: var(--font-fluid-xl); }
+  .text-fluid-2xl { font-size: var(--font-fluid-2xl); }
+  .text-fluid-3xl { font-size: var(--font-fluid-3xl); }
+  .text-fluid-4xl { font-size: var(--font-fluid-4xl); }
 
   /* Spacing Utilities (8px Grid) */
   .space-4 { margin: var(--space-4); }

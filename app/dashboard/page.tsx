@@ -246,11 +246,11 @@ export default function DashboardPage() {
           </button>
 
           <div className="text-center space-y-1.5 mb-5 sm:mb-8">
-            <h2 className="text-xl sm:text-3xl font-semibold text-foreground">
+            <h2 className="text-fluid-3xl font-semibold text-foreground">
               Day {currentDay} of {currentMilestone}
             </h2>
-            <p className="text-[13px] sm:text-base text-muted-foreground">
-              {checkedInToday 
+            <p className="text-fluid-base text-muted-foreground">
+              {checkedInToday
                 ? "Come back tomorrow for your weigh-in 🔥🎉" 
                 : "Ready for today's weigh-in?"
               }
@@ -269,10 +269,10 @@ export default function DashboardPage() {
                 <Camera className="w-7 h-7 sm:w-10 sm:h-10 text-primary" />
               </div>
               <div className="space-y-2">
-                <h3 id="take-photo-heading" className="text-lg sm:text-2xl font-semibold text-foreground">
+                <h3 id="take-photo-heading" className="text-fluid-2xl font-semibold text-foreground">
                   {checkedInToday ? "Today's check-in complete!" : "Take today's photo"}
                 </h3>
-                <p className="text-[13px] sm:text-base text-muted-foreground">
+                <p className="text-fluid-base text-muted-foreground">
                   {checkedInToday 
                     ? `You've recorded your weight for day ${currentDay}. Come back tomorrow! 🎉`
                     : `Snap a photo of your scale to track day ${currentDay}`
@@ -292,7 +292,7 @@ export default function DashboardPage() {
           {/* Progress Card - Full Width */}
           <section className="rounded-2xl border border-border bg-card p-5 sm:p-8 shadow-sm" aria-labelledby="progress-heading">
             <div className="text-center mb-5 sm:mb-8">
-              <h3 id="progress-heading" className="text-lg sm:text-2xl font-semibold text-card-foreground">Your Progress</h3>
+              <h3 id="progress-heading" className="text-fluid-2xl font-semibold text-card-foreground">Your Progress</h3>
             </div>
             <div className="max-w-2xl mx-auto space-y-3 sm:space-y-6">
               <div className="flex justify-center">

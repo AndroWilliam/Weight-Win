@@ -192,13 +192,18 @@ export function UsersTable({ rows }: UsersTableProps) {
             >
               {/* Header line */}
               <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="text-base font-semibold text-foreground leading-tight">{userName}</p>
+                <div className="flex-1 min-w-0">
+                  <p
+                    className="text-base font-semibold text-foreground leading-tight truncate"
+                    title={userName}
+                  >
+                    {userName}
+                  </p>
                 </div>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs"
+                  className="text-xs flex-shrink-0"
                   onClick={() => openDrawer(row.user_id, row.email)}
                 >
                   Actions
@@ -232,9 +237,14 @@ export function UsersTable({ rows }: UsersTableProps) {
                     transition={{ duration: 0.2 }}
                     className="overflow-hidden mt-3 border-t border-border pt-3 text-xs space-y-2"
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Email</span>
-                      <span className="text-foreground">{row.email}</span>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-muted-foreground flex-shrink-0">Email</span>
+                      <span
+                        className="text-foreground truncate text-right"
+                        title={row.email}
+                      >
+                        {row.email}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Streak</span>
@@ -310,10 +320,20 @@ export function UsersTable({ rows }: UsersTableProps) {
                   }`}
                 >
                   <td className="px-4 py-4 text-sm font-medium text-foreground">
-                    {userName}
+                    <span
+                      className="block truncate max-w-[150px]"
+                      title={userName}
+                    >
+                      {userName}
+                    </span>
                   </td>
                   <td className="px-4 py-4 text-sm text-foreground">
-                    {row.email}
+                    <span
+                      className="block truncate max-w-[200px]"
+                      title={row.email}
+                    >
+                      {row.email}
+                    </span>
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex flex-col gap-1">

@@ -202,8 +202,15 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
                 >
                 {/* Header */}
                 <div className="flex items-start justify-between gap-2">
-                  <p className="text-base font-semibold text-foreground leading-tight">{fullName}</p>
-                  {getStatusBadge(row.status)}
+                  <p
+                    className="text-base font-semibold text-foreground leading-tight truncate flex-1 min-w-0"
+                    title={fullName}
+                  >
+                    {fullName}
+                  </p>
+                  <div className="flex-shrink-0">
+                    {getStatusBadge(row.status)}
+                  </div>
                 </div>
 
                 {/* Contact */}
@@ -303,13 +310,28 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
                       {new Date(row.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </td>
                     <td className="px-6 py-5 text-sm font-medium text-foreground">
-                      {row.first_name} {row.family_name}
+                      <span
+                        className="block truncate max-w-[180px]"
+                        title={`${row.first_name} ${row.family_name}`}
+                      >
+                        {row.first_name} {row.family_name}
+                      </span>
                     </td>
                     <td className="px-6 py-5 text-sm text-foreground">
-                      {row.email}
+                      <span
+                        className="block truncate max-w-[200px]"
+                        title={row.email}
+                      >
+                        {row.email}
+                      </span>
                     </td>
                     <td className="px-6 py-5 text-sm text-foreground">
-                      {row.mobile_e164}
+                      <span
+                        className="block truncate max-w-[140px]"
+                        title={row.mobile_e164}
+                      >
+                        {row.mobile_e164}
+                      </span>
                     </td>
                     <td className="px-6 py-5 text-sm text-foreground">
                       {row.id_type.replace('_', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
