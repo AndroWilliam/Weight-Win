@@ -165,7 +165,7 @@ export function UserActionsDrawer({ userId, email, open, onOpenChange }: UserAct
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="md:max-w-lg">
+      <SheetContent side="right" className="w-full md:max-w-lg">
         <SheetHeader className="gap-2">
           <SheetTitle className="text-xl">User Actions</SheetTitle>
           <SheetDescription>

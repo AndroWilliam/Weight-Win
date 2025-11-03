@@ -140,12 +140,12 @@ export function UsersTable({ rows }: UsersTableProps) {
     <div className="bg-card rounded-xl border border-border overflow-hidden">
       {/* Toolbar */}
       <div className="p-4 border-b border-border bg-card">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col gap-4">
           <h2 className="text-lg font-semibold text-foreground pl-2">Users</h2>
-          
-          <div className="flex items-center gap-3">
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             {/* Search */}
-            <div className="relative">
+            <div className="relative flex-1 sm:flex-initial">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
@@ -160,7 +160,7 @@ export function UsersTable({ rows }: UsersTableProps) {
             <select
               value={userFilter}
               onChange={(e) => setUserFilter(e.target.value)}
-              className="px-3 py-1.5 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="px-3 py-1.5 w-full sm:w-auto bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="all">All Users</option>
               <option value="active">Active</option>

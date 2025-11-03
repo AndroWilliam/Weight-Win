@@ -442,7 +442,7 @@ export function WeightCheckContent() {
                 <h3 className="text-base sm:text-lg font-semibold text-foreground mb-4">Camera Preview</h3>
                 <div className="relative bg-muted rounded-lg overflow-hidden">
                   {isCameraLoading ? (
-                    <div className="w-full h-80 flex items-center justify-center">
+                    <div className="w-full h-48 sm:h-64 md:h-80 flex items-center justify-center">
                       <div className="text-center">
                         <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                         <p className="text-muted-foreground">Initializing camera...</p>
@@ -455,7 +455,7 @@ export function WeightCheckContent() {
                         autoPlay
                         playsInline
                         muted
-                        className="w-full h-80 object-cover"
+                        className="w-full h-48 sm:h-64 md:h-80 object-cover"
                         style={{ transform: 'scaleX(-1)' }} // Mirror the video for better UX
                         onLoadedMetadata={() => {
                           console.log('Video metadata loaded in JSX')

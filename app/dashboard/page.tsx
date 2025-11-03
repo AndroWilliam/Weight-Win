@@ -198,6 +198,19 @@ export default function DashboardPage() {
             </div>
             <h1 className="text-base sm:text-xl font-bold text-foreground">WeightWin</h1>
           </div>
+
+          {/* Mobile Admin Button (visible on mobile only) */}
+          {isAdmin && (
+            <button
+              onClick={() => router.push('/admin/users')}
+              className="md:hidden flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-indigo-500 rounded-lg text-zinc-300 hover:text-white transition-all text-sm"
+              aria-label="Go to Admin Dashboard"
+            >
+              <Shield className="w-4 h-4" />
+              <span>Admin</span>
+            </button>
+          )}
+
           <div className="hidden md:flex items-center gap-2 sm:gap-4 text-sm font-medium text-muted-foreground">
             <ThemeToggle />
             <button onClick={() => router.push('/dashboard')} className="hover:text-foreground">Dashboard</button>

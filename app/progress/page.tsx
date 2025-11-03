@@ -346,7 +346,7 @@ export default function ProgressPage() {
                   </Button>
                 </div>
               ) : (
-                <div className="h-64">
+                <div className="h-48 sm:h-64 md:h-80">
                   <Line data={getChartData()} options={chartOptions} />
                 </div>
               )}

@@ -121,7 +121,7 @@ export function NavigationHeader() {
                   <span className="sr-only">Open menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-80">
+              <SheetContent side="right" className="w-full sm:w-80">
                 <div className="flex flex-col gap-6 mt-6">
                   {/* Mobile Navigation Links with left padding spacer */}
                   <div className="space-y-4">

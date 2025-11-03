@@ -198,9 +198,16 @@
   }
   
   .text-caption {
-    font-size: var(--text-caption);
-    line-height: var(--text-caption-line);
+    font-size: 13px;
+    line-height: 18px;
     font-weight: 400;
+  }
+
+  @media (min-width: 640px) {
+    .text-caption {
+      font-size: var(--text-caption);
+      line-height: var(--text-caption-line);
+    }
   }
 
   /* Spacing Utilities (8px Grid) */

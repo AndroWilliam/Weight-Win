@@ -141,12 +141,12 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
       <div className="bg-card rounded-xl border border-border overflow-hidden">
         {/* Toolbar */}
         <div className="p-4 border-b border-border bg-card">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-4">
             <h2 className="text-lg font-semibold text-foreground pl-2">Applicants</h2>
-            
-            <div className="flex items-center gap-3">
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               {/* Search */}
-              <div className="relative">
+              <div className="relative flex-1 sm:flex-initial">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
                   type="text"
@@ -157,24 +157,27 @@ export function ApplicantsTable({ rows }: ApplicantsTableProps) {
                 />
               </div>
 
-              {/* Status Filter */}
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-3 py-1.5 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="all">All Status</option>
-                <option value="new">New</option>
-                <option value="in_review">In Review</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
-              </select>
+              <div className="flex gap-3">
+                {/* Status Filter */}
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="px-3 py-1.5 flex-1 sm:flex-initial bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="all">All Status</option>
+                  <option value="new">New</option>
+                  <option value="in_review">In Review</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
 
-              {/* Export Button */}
-              <button className="inline-flex items-center gap-2 px-3 py-1.5 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors">
-                <Download className="w-4 h-4" />
-                Export CSV
-              </button>
+                {/* Export Button */}
+                <button className="inline-flex items-center gap-2 px-3 py-1.5 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors whitespace-nowrap">
+                  <Download className="w-4 h-4" />
+                  <span className="hidden sm:inline">Export CSV</span>
+                  <span className="sm:hidden">Export</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
