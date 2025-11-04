@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { X, FileText, IdCard, Loader2, ExternalLink } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { X, FileText, IdCard, Loader2, ExternalLink, AlertTriangle, RefreshCw } from 'lucide-react'
 
 interface Applicant {
   id: string
@@ -31,28 +31,59 @@ interface FileUrls {
 export function ReviewDrawer({ applicant, onClose }: ReviewDrawerProps) {
   const [fileUrls, setFileUrls] = useState<FileUrls>({ cvUrl: null, idUrl: null })
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const timeoutRef = useRef<NodeJS.Timeout>()
 
   useEffect(() => {
-    async function fetchFileUrls() {
-      try {
-        const response = await fetch(`/api/admin/applicants/${applicant.id}/files`)
-        const data = await response.json()
-        
-        if (data.success) {
-          setFileUrls({
-            cvUrl: data.cvUrl,
-            idUrl: data.idUrl
-          })
-        }
-      } catch (error) {
-        console.error('[Review Drawer] Error fetching file URLs:', error)
-      } finally {
-        setLoading(false)
+    fetchFileUrls()
+
+    // Cleanup timeout on unmount
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
       }
     }
-
-    fetchFileUrls()
   }, [applicant.id])
+
+  async function fetchFileUrls() {
+    setLoading(true)
+    setError(null)
+
+    // Set 10-second timeout
+    timeoutRef.current = setTimeout(() => {
+      setError('File loading timed out after 10 seconds. The files may be too large or the connection is slow.')
+      setLoading(false)
+    }, 10000)
+
+    try {
+      const response = await fetch(`/api/admin/applicants/${applicant.id}/files`)
+
+      // Clear timeout if request completes
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+
+      if (!response.ok) {
+        throw new Error(`Failed to load files: ${response.statusText}`)
+      }
+
+      const data = await response.json()
+
+      if (data.success) {
+        setFileUrls({
+          cvUrl: data.cvUrl,
+          idUrl: data.idUrl
+        })
+      } else {
+        throw new Error(data.error || 'Failed to load document URLs')
+      }
+    } catch (err) {
+      console.error('[Review Drawer] Error fetching file URLs:', err)
+      setError(err instanceof Error ? err.message : 'Failed to load documents')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <>
@@ -127,11 +158,41 @@ export function ReviewDrawer({ applicant, onClose }: ReviewDrawerProps) {
           {/* Documents */}
           <section>
             <h3 className="text-lg font-semibold text-foreground mb-3">Documents</h3>
-            
+
             {loading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                <span className="ml-2 text-sm text-muted-foreground">Loading documents...</span>
+              <div className="flex items-center justify-center py-8 bg-muted/30 rounded-lg border border-border">
+                <div className="text-center space-y-3">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
+                  <div>
+                    <p className="text-sm text-foreground font-medium">Loading documents...</p>
+                    <p className="text-xs text-muted-foreground mt-1">This may take a few seconds</p>
+                  </div>
+                </div>
+              </div>
+            ) : error ? (
+              <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg p-6">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0">
+                    <div className="rounded-full bg-red-100 dark:bg-red-900/20 p-2">
+                      <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-red-800 dark:text-red-200 mb-1">
+                      Failed to Load Documents
+                    </h4>
+                    <p className="text-sm text-red-700 dark:text-red-300 mb-3">
+                      {error}
+                    </p>
+                    <button
+                      onClick={fetchFileUrls}
+                      className="inline-flex items-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition-colors"
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                      Try Again
+                    </button>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="space-y-3">

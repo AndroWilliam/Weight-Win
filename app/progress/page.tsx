@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { ErrorBoundary } from "@/components/ErrorBoundary"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, TrendingUp, TrendingDown, Calendar, Scale, Smile, Frown } from "lucide-react"
+import { ArrowLeft, TrendingUp, TrendingDown, Calendar, Scale, Smile, Frown, AlertTriangle, RefreshCw, Loader2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { Line } from 'react-chartjs-2'
 import {
@@ -58,6 +58,7 @@ export default function ProgressPage() {
   const [streakInfo, setStreakInfo] = useState<StreakInfo | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [motivationalQuote, setMotivationalQuote] = useState<string>("")
+  const [errors, setErrors] = useState<string[]>([])
   const router = useRouter()
   const supabase = createClient()
   const { theme } = useTheme()
@@ -67,6 +68,10 @@ export default function ProgressPage() {
   }, [])
 
   const loadWeightData = async () => {
+    setIsLoading(true)
+    setErrors([])
+    const errorList: string[] = []
+
     try {
       // Get current user
       const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -75,53 +80,81 @@ export default function ProgressPage() {
         return
       }
 
-      // Load weight entries
-      const { data: entries, error: entriesError } = await supabase
-        .from('weight_entries')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('recorded_at', { ascending: true })
+      // Query 1: Load weight entries
+      try {
+        const { data: entries, error: entriesError } = await supabase
+          .from('weight_entries')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('recorded_at', { ascending: true })
 
-      if (entriesError) throw entriesError
-      setWeightEntries(entries || [])
+        if (entriesError) throw entriesError
+        setWeightEntries(entries || [])
+      } catch (err) {
+        console.error('Failed to load weight entries:', err)
+        errorList.push('weight entries')
+      }
 
-      // Get weight summary
-      const { data: summary, error: summaryError } = await supabase
-        .rpc('get_weight_change_summary', { p_user_id: user.id })
+      // Query 2: Get weight summary
+      try {
+        const { data: summary, error: summaryError } = await supabase
+          .rpc('get_weight_change_summary', { p_user_id: user.id })
 
-      if (!summaryError && summary) {
-        setWeightSummary(summary)
-        
-        // Get a motivational quote if weight decreased
-        if (summary.trend === 'down') {
-          const { data: quotes } = await supabase
-            .from('motivational_quotes')
-            .select('quote')
-            .limit(1)
-            .single()
-          
-          if (quotes) {
-            setMotivationalQuote(quotes.quote)
+        if (summaryError) throw summaryError
+
+        if (summary) {
+          setWeightSummary(summary)
+
+          // Get a motivational quote if weight decreased (optional - don't track errors)
+          if (summary.trend === 'down') {
+            try {
+              const { data: quotes } = await supabase
+                .from('motivational_quotes')
+                .select('quote')
+                .limit(1)
+                .single()
+
+              if (quotes) {
+                setMotivationalQuote(quotes.quote)
+              }
+            } catch (quoteErr) {
+              // Quote is optional, don't add to error list
+              console.log('Could not load motivational quote:', quoteErr)
+            }
           }
         }
+      } catch (err) {
+        console.error('Failed to load weight summary:', err)
+        errorList.push('statistics')
       }
 
-      // Get streak info
-      const { data: streak, error: streakError } = await supabase
-        .from('user_streaks')
-        .select('*')
-        .eq('user_id', user.id)
-        .single()
+      // Query 3: Get streak info
+      try {
+        const { data: streak, error: streakError } = await supabase
+          .from('user_streaks')
+          .select('*')
+          .eq('user_id', user.id)
+          .single()
 
-      if (!streakError && streak) {
-        setStreakInfo({
-          streak: streak.current_streak,
-          message: 'Keep going! Consistency is key.'
-        })
+        if (streakError) throw streakError
+
+        if (streak) {
+          setStreakInfo({
+            streak: streak.current_streak,
+            message: 'Keep going! Consistency is key.'
+          })
+        }
+      } catch (err) {
+        console.error('Failed to load streak info:', err)
+        errorList.push('streak data')
       }
+
+      // Set errors if any occurred
+      setErrors(errorList)
 
     } catch (error) {
-      console.error('Error loading weight data:', error)
+      console.error('Critical error loading progress data:', error)
+      setErrors(['all data'])
     } finally {
       setIsLoading(false)
     }
@@ -212,13 +245,49 @@ export default function ProgressPage() {
     }
   }
 
+  // Complete failure - all critical data failed to load
+  const hasCompleteFailure = errors.includes('all data') ||
+    (errors.includes('weight entries') && errors.includes('statistics') && errors.includes('streak data'))
+
   return (
     <ErrorBoundary>
       {isLoading ? (
         <div className="min-h-screen bg-background flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="text-center space-y-3">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
             <p className="text-muted-foreground">Loading your progress...</p>
+          </div>
+        </div>
+      ) : hasCompleteFailure ? (
+        <div className="min-h-screen bg-background flex items-center justify-center p-6">
+          <div className="max-w-md w-full text-center space-y-4">
+            <div className="flex justify-center">
+              <div className="rounded-full bg-red-100 dark:bg-red-900/20 p-3">
+                <AlertTriangle className="h-12 w-12 text-red-600 dark:text-red-400" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold text-foreground">Failed to Load Progress</h2>
+              <p className="text-muted-foreground">
+                Unable to load your progress data. Please check your connection and try again.
+              </p>
+            </div>
+
+            <button
+              onClick={loadWeightData}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Try Again
+            </button>
+
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="block w-full px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Go to Dashboard
+            </button>
           </div>
         </div>
       ) : (
@@ -244,6 +313,30 @@ export default function ProgressPage() {
 
       <main className="px-4 sm:px-6 py-6 sm:py-8">
         <div className="max-w-4xl mx-auto">
+          {/* Partial Failure Warning */}
+          {errors.length > 0 && (
+            <div className="bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-6">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <h3 className="font-medium text-yellow-800 dark:text-yellow-200 mb-1">
+                    Some Data Couldn't Load
+                  </h3>
+                  <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-2">
+                    Failed to load: {errors.join(', ')}. Some sections may be incomplete.
+                  </p>
+                  <button
+                    onClick={loadWeightData}
+                    className="inline-flex items-center gap-1 text-sm text-yellow-800 dark:text-yellow-200 underline hover:no-underline"
+                  >
+                    <RefreshCw className="h-3.5 w-3.5" />
+                    Try reloading
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Stats Overview */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
             {/* Weight Change Card */}
