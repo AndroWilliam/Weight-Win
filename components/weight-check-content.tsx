@@ -5,7 +5,55 @@ import { Card, CardContent } from "@/components/ui/card"
 import { useState, useRef, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { maybeCompressImage } from "@/lib/images/compress"
-import { Camera, Upload, ArrowLeft, RotateCcw, Check, AlertCircle } from "lucide-react"
+import { Camera, Upload, ArrowLeft, RotateCcw, Check, AlertCircle, AlertTriangle, RefreshCw } from "lucide-react"
+
+// Camera error types
+type CameraError =
+  | 'permission-denied'
+  | 'no-camera'
+  | 'in-use'
+  | 'unknown'
+
+interface CameraErrorInfo {
+  type: CameraError
+  message: string
+  action: string
+}
+
+function getCameraErrorMessage(error: any): CameraErrorInfo {
+  const errorMessage = error?.message?.toLowerCase() || ''
+  const errorName = error?.name?.toLowerCase() || ''
+
+  if (errorMessage.includes('permission') || errorMessage.includes('denied') || errorName === 'notallowederror') {
+    return {
+      type: 'permission-denied',
+      message: 'Camera permission denied',
+      action: 'Go to Settings → Safari → Camera and allow access, then refresh this page'
+    }
+  }
+
+  if (errorMessage.includes('not found') || errorMessage.includes('no device') || errorName === 'notfounderror') {
+    return {
+      type: 'no-camera',
+      message: 'No camera found',
+      action: 'Make sure your device has a working camera'
+    }
+  }
+
+  if (errorMessage.includes('in use') || errorMessage.includes('already') || errorName === 'notreadableerror') {
+    return {
+      type: 'in-use',
+      message: 'Camera is already in use',
+      action: 'Close other apps using the camera (like FaceTime or Zoom) and try again'
+    }
+  }
+
+  return {
+    type: 'unknown',
+    message: 'Failed to access camera',
+    action: 'Try refreshing the page or restarting your browser'
+  }
+}
 
 export function WeightCheckContent() {
   const [currentStep, setCurrentStep] = useState<'upload' | 'camera' | 'preview' | 'processing' | 'success' | 'error'>('upload')
@@ -15,6 +63,7 @@ export function WeightCheckContent() {
   const [weight, setWeight] = useState<number | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isAuthChecking, setIsAuthChecking] = useState(true)
+  const [cameraError, setCameraError] = useState<CameraErrorInfo | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -51,6 +100,7 @@ export function WeightCheckContent() {
   const handleTakePhoto = async () => {
     try {
       setIsCameraLoading(true)
+      setCameraError(null) // Clear any previous errors
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
           facingMode: 'environment', // Use back camera
@@ -164,7 +214,8 @@ export function WeightCheckContent() {
     } catch (error) {
       console.error('Error accessing camera:', error)
       setIsCameraLoading(false)
-      alert('Unable to access camera. Please check permissions.')
+      const errorInfo = getCameraErrorMessage(error)
+      setCameraError(errorInfo)
     }
   }
 
@@ -562,6 +613,44 @@ export function WeightCheckContent() {
                   onChange={handleFileChange}
                   className="hidden"
                 />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Camera Error Display */}
+          {cameraError && (
+            <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/10 mb-6">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0">
+                    <div className="rounded-full bg-red-100 dark:bg-red-900/20 p-2">
+                      <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-medium text-red-800 dark:text-red-200 mb-1">
+                      {cameraError.message}
+                    </h3>
+                    <p className="text-sm text-red-700 dark:text-red-300 mb-3">
+                      {cameraError.action}
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleTakePhoto}
+                        className="inline-flex items-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition-colors"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                        Try Again
+                      </button>
+                      <button
+                        onClick={() => setCameraError(null)}
+                        className="px-3 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 text-sm rounded-lg transition-colors"
+                      >
+                        Dismiss
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           )}

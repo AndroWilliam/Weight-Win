@@ -76,11 +76,35 @@ export default function DashboardPage() {
         }
         
         // Check if user has completed setup
-        const settingsResponse = await fetch('/api/settings/get')
-        const settingsData = await settingsResponse.json()
-        
-        if (!settingsData.success || !settingsData.setupCompleted) {
+        let settingsData
+        try {
+          const settingsResponse = await fetch('/api/settings/get')
+
+          if (!settingsResponse.ok) {
+            throw new Error(`Failed to load settings: ${settingsResponse.statusText}`)
+          }
+
+          settingsData = await settingsResponse.json()
+
+          if (!settingsData.success) {
+            throw new Error(settingsData.error || 'Failed to load settings')
+          }
+        } catch (error) {
+          console.error('Settings load error:', error)
+          toast.error('Failed to load settings. Redirecting to setup...', {
+            description: 'Please complete your profile setup to continue.'
+          })
+
+          // Wait for user to see toast before redirecting
+          await new Promise(resolve => setTimeout(resolve, 2000))
+          router.push('/setup')
+          return
+        }
+
+        if (!settingsData.setupCompleted) {
           // User hasn't completed setup, redirect to setup flow
+          toast.info('Please complete your setup to continue')
+          await new Promise(resolve => setTimeout(resolve, 1500))
           router.push('/setup')
           return
         }

@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Target, Clock, Globe, ArrowLeft, ArrowRight } from "lucide-react"
+import { toast } from "sonner"
 
 interface UserSettings {
   weightUnit: string
@@ -43,16 +44,34 @@ export default function CommitPage() {
         
         // Fallback: Try to load from database (for returning users)
         console.log('[Commit] Attempting to load settings from database')
-        const response = await fetch('/api/settings/get')
-        
-        // If unauthorized (401), user needs to complete setup flow first
-        if (response.status === 401) {
-          console.log('[Commit] Unauthorized - redirecting to consent page')
-          router.push('/consent')
+
+        let data
+        try {
+          const response = await fetch('/api/settings/get')
+
+          // If unauthorized (401), user needs to complete setup flow first
+          if (response.status === 401) {
+            console.log('[Commit] Unauthorized - redirecting to consent page')
+            toast.info('Please complete the setup flow first')
+            await new Promise(resolve => setTimeout(resolve, 1500))
+            router.push('/consent')
+            return
+          }
+
+          if (!response.ok) {
+            throw new Error(`Failed to load settings: ${response.statusText}`)
+          }
+
+          data = await response.json()
+        } catch (error) {
+          console.error('Settings load error:', error)
+          toast.error('Failed to load settings. Redirecting to setup...', {
+            description: 'Please complete your profile setup to continue.'
+          })
+          await new Promise(resolve => setTimeout(resolve, 2000))
+          router.push('/setup')
           return
         }
-        
-        const data = await response.json()
         
         if (data.success && data.settings) {
           // Settings found in database
