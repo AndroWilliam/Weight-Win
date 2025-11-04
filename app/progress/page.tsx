@@ -2,6 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { ErrorBoundary } from "@/components/ErrorBoundary"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, TrendingUp, TrendingDown, Calendar, Scale, Smile, Frown } from "lucide-react"
@@ -211,18 +212,16 @@ export default function ProgressPage() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading your progress...</p>
-        </div>
-      </div>
-    )
-  }
-
   return (
+    <ErrorBoundary>
+      {isLoading ? (
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading your progress...</p>
+          </div>
+        </div>
+      ) : (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="px-4 sm:px-6 py-4 border-b border-border">
@@ -376,5 +375,7 @@ export default function ProgressPage() {
         </div>
       </main>
     </div>
+      )}
+    </ErrorBoundary>
   )
 }

@@ -42,12 +42,12 @@ export default async function UsersPage() {
             <div className="flex-1">
               <h3 className="text-red-500 font-medium text-sm sm:text-base">Failed to load KPI data</h3>
               <p className="text-red-400 text-xs sm:text-sm mt-1">{kpiError.message}</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="mt-3 px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg transition-colors"
+              <a
+                href="/admin/users"
+                className="mt-3 inline-block px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg transition-colors text-center"
               >
                 Retry
-              </button>
+              </a>
             </div>
           </div>
         </div>

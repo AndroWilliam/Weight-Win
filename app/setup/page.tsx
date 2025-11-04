@@ -7,9 +7,10 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AnimatedTimePicker } from "@/components/animated-time-picker"
+import { ErrorBoundary } from "@/components/ErrorBoundary"
 import { useState, useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { Clock, Globe, ArrowRight } from "lucide-react"
+import { Clock, Globe, ArrowRight, AlertTriangle, Loader2, MapPin } from "lucide-react"
 
 export default function SetupPage() {
   const [weightUnit, setWeightUnit] = useState("kg")
@@ -17,6 +18,9 @@ export default function SetupPage() {
   const [timezone, setTimezone] = useState("")
   const [tzLocked, setTzLocked] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isCheckingSetup, setIsCheckingSetup] = useState(true)
+  const [setupCheckError, setSetupCheckError] = useState<string | null>(null)
+  const [isGettingLocation, setIsGettingLocation] = useState(false)
   const baseTimezones = useMemo(() => ([
     'Africa/Cairo',
     'Africa/Johannesburg',
@@ -47,10 +51,13 @@ export default function SetupPage() {
   useEffect(() => {
     // Check if user has already completed setup
     async function checkSetupStatus() {
+      setIsCheckingSetup(true)
+      setSetupCheckError(null)
+
       try {
         const response = await fetch('/api/settings/get')
         const data = await response.json()
-        
+
         if (data.success && data.setupCompleted) {
           // User already completed setup, redirect to dashboard
           console.log('[Setup] User already completed setup, redirecting to dashboard')
@@ -59,9 +66,12 @@ export default function SetupPage() {
         }
       } catch (error) {
         console.error('[Setup] Error checking setup status:', error)
+        setSetupCheckError('Failed to check setup status. Please try again.')
+      } finally {
+        setIsCheckingSetup(false)
       }
     }
-    
+
     checkSetupStatus()
     
     // Auto-detect timezone
@@ -74,9 +84,12 @@ export default function SetupPage() {
 
   const requestLocationPermission = async () => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by this browser.")
+      setLocationPermission("denied")
+      setSetupCheckError("Geolocation is not supported by this browser. Please select your timezone manually.")
       return
     }
+
+    setIsGettingLocation(true)
 
     try {
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
@@ -97,12 +110,14 @@ export default function SetupPage() {
       }
       setTimezone(browserTz)
       setTzLocked(true)
-      
+
       setLocationPermission("granted")
     } catch (error) {
       console.error("Error getting location:", error)
       setLocationPermission("denied")
-      alert("Unable to detect your location. Please select your timezone manually.")
+      setSetupCheckError("Unable to detect your location. Please select your timezone manually.")
+    } finally {
+      setIsGettingLocation(false)
     }
   }
 
@@ -122,6 +137,41 @@ export default function SetupPage() {
   }
 
   return (
+    <ErrorBoundary>
+      {isCheckingSetup ? (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" />
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Checking your setup status...
+            </p>
+          </div>
+        </div>
+      ) : setupCheckError ? (
+        <div className="min-h-screen flex items-center justify-center p-6">
+          <div className="max-w-md w-full text-center space-y-4">
+            <div className="flex justify-center">
+              <div className="rounded-full bg-red-100 dark:bg-red-900/20 p-3">
+                <AlertTriangle className="h-8 w-8 text-red-600 dark:text-red-400" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold">Setup Check Failed</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {setupCheckError}
+              </p>
+            </div>
+
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      ) : (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="px-4 sm:px-6 py-4 border-b border-border">
@@ -199,10 +249,21 @@ export default function SetupPage() {
                   <div className="mb-3 sm:mb-4 pl-2">
                     <Button
                       onClick={requestLocationPermission}
+                      disabled={isGettingLocation}
                       variant="outline"
-                      className="border-primary text-primary hover:bg-primary/10"
+                      className="border-primary text-primary hover:bg-primary/10 disabled:opacity-50"
                     >
-                      Detect My Location
+                      {isGettingLocation ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          Detecting...
+                        </>
+                      ) : (
+                        <>
+                          <MapPin className="h-4 w-4 mr-2" />
+                          Detect My Location
+                        </>
+                      )}
                     </Button>
                     <p className="text-xs sm:text-sm text-muted-foreground mt-2">
                       We'll use your location to automatically detect your timezone for accurate reminders.
@@ -283,5 +344,7 @@ export default function SetupPage() {
         </div>
       </main>
     </div>
+      )}
+    </ErrorBoundary>
   )
 }

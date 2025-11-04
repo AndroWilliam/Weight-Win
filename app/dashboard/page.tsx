@@ -5,6 +5,7 @@ import { StreakPills } from "@/components/streak-pills"
 import { DailyTips } from "@/components/daily-tips"
 import { RewardCountdown } from "@/components/reward-countdown"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { ErrorBoundary } from "@/components/ErrorBoundary"
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import { Camera, Home, Shield } from "lucide-react"
@@ -177,18 +178,16 @@ export default function DashboardPage() {
     router.push('/auth/login')
   }
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading your challenge...</p>
-        </div>
-      </div>
-    )
-  }
-
   return (
+    <ErrorBoundary>
+      {isLoading ? (
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading your challenge...</p>
+          </div>
+        </div>
+      ) : (
     <div className="min-h-screen bg-background">
       <header className="px-3 sm:px-6 py-3 sm:py-4 border-b border-border">
         <div className="max-w-5xl mx-auto flex justify-between items-center">
@@ -355,5 +354,7 @@ export default function DashboardPage() {
         </div>
       </main>
     </div>
+      )}
+    </ErrorBoundary>
   )
 }

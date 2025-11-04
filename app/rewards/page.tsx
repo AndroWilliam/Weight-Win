@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, Trophy, Award, Star, Crown, Lock, TrendingUp, Flame } from "lucide-react"
+import { ArrowLeft, Trophy, Award, Star, Crown, Lock, TrendingUp, Flame, AlertTriangle, RefreshCw, Loader2 } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
+import { ErrorBoundary } from "@/components/ErrorBoundary"
 
 interface Badge {
   badge_id: string
@@ -34,26 +35,38 @@ export default function RewardsPage() {
   const [badgesData, setBadgesData] = useState<BadgesData | null>(null)
   const [progressData, setProgressData] = useState<ProgressData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    async function loadBadges() {
-      try {
-        const response = await fetch('/api/badges')
-        const data = await response.json()
-
-        if (data.success) {
-          setBadgesData(data.badges)
-          setProgressData(data.progress)
-        }
-      } catch (error) {
-        console.error('Error loading badges:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
     loadBadges()
   }, [])
+
+  async function loadBadges() {
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const response = await fetch('/api/badges')
+
+      if (!response.ok) {
+        throw new Error(`Failed to load badges: ${response.statusText}`)
+      }
+
+      const data = await response.json()
+
+      if (data.success) {
+        setBadgesData(data.badges)
+        setProgressData(data.progress)
+      } else {
+        throw new Error(data.error || 'Failed to load badges')
+      }
+    } catch (err) {
+      console.error('Error loading badges:', err)
+      setError(err instanceof Error ? err.message : 'Failed to load badges')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const getBadgeIcon = (milestone: number) => {
     switch (milestone) {
@@ -70,22 +83,47 @@ export default function RewardsPage() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading your achievements...</p>
-        </div>
-      </div>
-    )
-  }
-
   const badges = badgesData?.badges || []
   const totalEarned = badgesData?.total_earned || 0
   const progress = progressData
 
   return (
+    <ErrorBoundary>
+      {isLoading ? (
+        <div className="min-h-[400px] flex items-center justify-center">
+          <div className="text-center space-y-3">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" />
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Loading your badges...
+            </p>
+          </div>
+        </div>
+      ) : error ? (
+        <div className="min-h-[400px] flex items-center justify-center p-6">
+          <div className="max-w-md w-full text-center space-y-4">
+            <div className="flex justify-center">
+              <div className="rounded-full bg-red-100 dark:bg-red-900/20 p-3">
+                <AlertTriangle className="h-8 w-8 text-red-600 dark:text-red-400" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold">Failed to Load Badges</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {error}
+              </p>
+            </div>
+
+            <button
+              onClick={loadBadges}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Try Again
+            </button>
+          </div>
+        </div>
+      ) : (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="px-4 sm:px-6 py-4 border-b border-border">
@@ -332,6 +370,8 @@ export default function RewardsPage() {
         </div>
       </main>
     </div>
+      )}
+    </ErrorBoundary>
   )
 }
 

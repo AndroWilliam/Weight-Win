@@ -1,50 +1,101 @@
-'use client';
-import { Component, ReactNode } from 'react';
+'use client'
 
-interface ErrorBoundaryState {
-  hasError: boolean;
+import { Component, ReactNode } from 'react'
+import { AlertTriangle, RefreshCw } from 'lucide-react'
+
+interface Props {
+  children: ReactNode
+  fallback?: ReactNode
+  onReset?: () => void
 }
 
-interface ErrorBoundaryProps {
-  children: ReactNode;
+interface State {
+  hasError: boolean
+  error?: Error
+  errorInfo?: any
 }
 
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = { hasError: false };
+export class ErrorBoundary extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props)
+    this.state = { hasError: false }
   }
 
-  static getDerivedStateFromError(): ErrorBoundaryState {
-    return { hasError: true };
+  static getDerivedStateFromError(error: Error): State {
+    return {
+      hasError: true,
+      error
+    }
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('UI_ERROR', { error: error.message, stack: error.stack, errorInfo });
+  componentDidCatch(error: Error, errorInfo: any) {
+    // Log error to console (could send to error tracking service)
+    console.error('ErrorBoundary caught error:', error, errorInfo)
+  }
+
+  handleReset = () => {
+    this.setState({ hasError: false, error: undefined })
+    this.props.onReset?.()
   }
 
   render() {
     if (this.state.hasError) {
+      // Use custom fallback if provided
+      if (this.props.fallback) {
+        return this.props.fallback
+      }
+
+      // Default error UI
       return (
-        <div className="p-6 text-center">
-          <div className="max-w-md mx-auto">
-            <div className="text-red-600 text-lg font-semibold mb-2">
-              Something went wrong
+        <div className="min-h-[400px] flex items-center justify-center p-6">
+          <div className="max-w-md w-full text-center space-y-4">
+            <div className="flex justify-center">
+              <div className="rounded-full bg-red-100 dark:bg-red-900/20 p-3">
+                <AlertTriangle className="h-8 w-8 text-red-600 dark:text-red-400" />
+              </div>
             </div>
-            <p className="text-gray-600 mb-4">
-              We're sorry, but something unexpected happened. Please reload the page to try again.
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            >
-              Reload page
-            </button>
+
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                Something went wrong
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {this.state.error?.message || 'An unexpected error occurred'}
+              </p>
+            </div>
+
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={this.handleReset}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Try Again
+              </button>
+
+              <button
+                onClick={() => window.location.href = '/dashboard'}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-lg transition-colors"
+              >
+                Go to Dashboard
+              </button>
+            </div>
+
+            {process.env.NODE_ENV === 'development' && (
+              <details className="mt-4 text-left">
+                <summary className="cursor-pointer text-sm text-gray-500 hover:text-gray-700">
+                  Error Details (Dev Only)
+                </summary>
+                <pre className="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded text-xs overflow-auto">
+                  {this.state.error?.stack}
+                </pre>
+              </details>
+            )}
           </div>
         </div>
-      );
+      )
     }
 
-    return this.props.children;
+    return this.props.children
   }
 }
