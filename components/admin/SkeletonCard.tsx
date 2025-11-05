@@ -30,3 +30,17 @@ export function SkeletonCard() {
     </div>
   )
 }
+
+export function SkeletonKPICard() {
+  return (
+    <div className="bg-card border border-border rounded-lg p-4 sm:p-6 animate-pulse">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 bg-muted rounded-full" />
+        <div className="flex-1">
+          <div className="h-4 bg-muted rounded w-20 mb-2" />
+          <div className="h-6 bg-muted rounded w-12" />
+        </div>
+      </div>
+    </div>
+  )
+}

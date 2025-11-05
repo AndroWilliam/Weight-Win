@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { ApplicantsTable } from '@/components/admin/ApplicantsTable'
 import { ApplicantsKPICards } from '@/components/admin/ApplicantsKPICards'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ApplicantsPage() {
   const supabase = await createClient()
   

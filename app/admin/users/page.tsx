@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { UsersTable } from '@/components/admin/UsersTable'
 import { UsersKPICards } from '@/components/admin/UsersKPICards'
 
+export const dynamic = 'force-dynamic'
+
 export default async function UsersPage() {
   const supabase = await createClient()
   
