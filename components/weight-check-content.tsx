@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { maybeCompressImage } from "@/lib/images/compress"
 import { Camera, Upload, ArrowLeft, RotateCcw, Check, AlertCircle, AlertTriangle, RefreshCw } from "lucide-react"
+import { ManualWeightEntry } from "./ManualWeightEntry"
 
 // Camera error types
 type CameraError =
@@ -18,6 +19,20 @@ interface CameraErrorInfo {
   type: CameraError
   message: string
   action: string
+}
+
+// OCR error types
+type OCRError = 
+  | 'no-weight-found'
+  | 'image-unclear'
+  | 'invalid-weight'
+  | 'processing-timeout'
+  | 'api-error'
+
+interface OCRErrorInfo {
+  type: OCRError
+  message: string
+  suggestion: string
 }
 
 function getCameraErrorMessage(error: any): CameraErrorInfo {
@@ -55,6 +70,48 @@ function getCameraErrorMessage(error: any): CameraErrorInfo {
   }
 }
 
+function getOCRErrorMessage(error: any): OCRErrorInfo {
+  const errorMsg = error?.message?.toLowerCase() || ''
+  
+  if (errorMsg.includes('no weight') || errorMsg.includes('not detected')) {
+    return {
+      type: 'no-weight-found',
+      message: 'No weight number found in image',
+      suggestion: 'Make sure the scale display is clearly visible and well-lit, then try again'
+    }
+  }
+
+  if (errorMsg.includes('timeout')) {
+    return {
+      type: 'processing-timeout',
+      message: 'Processing took too long',
+      suggestion: 'The image may be too large or unclear. Try taking a new photo.'
+    }
+  }
+
+  if (errorMsg.includes('invalid') || errorMsg.includes('unrealistic')) {
+    return {
+      type: 'invalid-weight',
+      message: 'Detected weight seems unrealistic',
+      suggestion: 'Please verify the image or enter the weight manually below'
+    }
+  }
+
+  if (errorMsg.includes('unclear') || errorMsg.includes('blurry')) {
+    return {
+      type: 'image-unclear',
+      message: 'Image is too unclear to read',
+      suggestion: 'Try taking a clearer photo with better lighting'
+    }
+  }
+
+  return {
+    type: 'api-error',
+    message: 'Failed to process image',
+    suggestion: 'Try taking a new photo or enter the weight manually below'
+  }
+}
+
 export function WeightCheckContent() {
   const [currentStep, setCurrentStep] = useState<'upload' | 'camera' | 'preview' | 'processing' | 'success' | 'error'>('upload')
   const [capturedImage, setCapturedImage] = useState<string | null>(null)
@@ -65,6 +122,8 @@ export function WeightCheckContent() {
   const [isAuthChecking, setIsAuthChecking] = useState(true)
   const [cameraError, setCameraError] = useState<CameraErrorInfo | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [ocrError, setOcrError] = useState<OCRErrorInfo | null>(null)
+  const [showManualEntry, setShowManualEntry] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -313,6 +372,8 @@ export function WeightCheckContent() {
 
   const handleUsePhoto = async () => {
     if (capturedImage) {
+      setOcrError(null)
+      setShowManualEntry(false)
       setIsProcessing(true)
       setCurrentStep('processing')
       
@@ -348,6 +409,10 @@ export function WeightCheckContent() {
         
         const photoUrl = uploadData.path
         
+        // Add timeout to OCR request
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 30000) // 30s timeout
+
         // Process with OCR
         const ocrRes = await fetch('/api/weight/process', {
           method: 'POST',
@@ -357,8 +422,11 @@ export function WeightCheckContent() {
           body: JSON.stringify({
             imageBase64: capturedImage,
             photoUrl
-          })
+          }),
+          signal: controller.signal
         })
+
+        clearTimeout(timeoutId)
         
         const result = await ocrRes.json()
         
@@ -371,10 +439,14 @@ export function WeightCheckContent() {
         
         if (!ocrRes.ok || !result.success) {
           const errorMsg = result.error?.message || result.error || 'Failed to process weight'
-          const rawText = result.error?.details?.rawText || 'No raw text available'
           console.error('OCR failed with error:', errorMsg)
-          console.error('Raw text from OCR:', rawText)
-          throw new Error(errorMsg + (rawText !== 'No raw text available' ? `\n\nRaw OCR text: "${rawText}"` : ''))
+          
+          const errorInfo = getOCRErrorMessage(new Error(errorMsg))
+          setOcrError(errorInfo)
+          setShowManualEntry(true)
+          setIsProcessing(false)
+          setCurrentStep('preview')
+          return
         }
         
         // Success - show success state
@@ -398,19 +470,42 @@ export function WeightCheckContent() {
       } catch (error: any) {
         console.error('Error processing weight:', error)
         setIsProcessing(false)
-        setCurrentStep('error')
+        setCurrentStep('preview')
         
-        // Use the actual error message from the API or OCR
-        const errorMsg = error.message || 'Failed to process weight. Please try again.'
-        setErrorMessage(errorMsg)
+        if (error.name === 'AbortError') {
+          const errorInfo: OCRErrorInfo = {
+            type: 'processing-timeout',
+            message: 'Processing took too long',
+            suggestion: 'Try taking a new photo or enter the weight manually below'
+          }
+          setOcrError(errorInfo)
+        } else {
+          const errorInfo = getOCRErrorMessage(error)
+          setOcrError(errorInfo)
+        }
         
-        // Allow retry after showing error
-        setTimeout(() => {
-          setCurrentStep('preview')
-          setErrorMessage(null)
-        }, 3000)
+        setShowManualEntry(true)
       }
     }
+  }
+
+  const handleManualWeightSubmit = (weight: number) => {
+    setWeight(weight)
+    setOcrError(null)
+    setShowManualEntry(false)
+    setCurrentStep('success')
+    
+    // Redirect to dashboard after showing success
+    setTimeout(() => {
+      router.push('/dashboard')
+    }, 2000)
+  }
+
+  const handleCancelManualEntry = () => {
+    setOcrError(null)
+    setShowManualEntry(false)
+    setCapturedImage(null)
+    setCurrentStep('upload')
   }
 
   const handleBack = () => {
@@ -701,32 +796,44 @@ export function WeightCheckContent() {
 
           {/* Photo Preview */}
           {currentStep === 'preview' && capturedImage && (
-            <Card className="border-border mb-6">
-              <CardContent className="p-4 sm:p-6">
-                <h3 className="text-base sm:text-lg font-semibold text-foreground mb-4">Review Photo</h3>
-                <div className="relative bg-muted rounded-lg overflow-hidden mb-4">
-                  <img src={capturedImage} alt="Captured Weight" className="w-full h-auto object-cover rounded-lg" />
-                </div>
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-                  <Button
-                    onClick={handleUsePhoto}
-                    disabled={isProcessing}
-                    className="bg-primary hover:bg-primary/90 text-white px-6 py-3"
-                  >
-                    {isProcessing ? 'Processing...' : <><Check className="w-4 h-4 mr-2" />Use This Photo</>}
-                  </Button>
-                  <Button
-                    onClick={handleRetake}
-                    variant="outline"
-                    disabled={isProcessing}
-                    className="border-border px-6 py-3"
-                  >
-                    <RotateCcw className="w-4 h-4 mr-2" />
-                    Retake
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <>
+              {/* Manual Weight Entry (if OCR failed) */}
+              {showManualEntry && ocrError && (
+                <ManualWeightEntry
+                  errorMessage={ocrError.message}
+                  errorSuggestion={ocrError.suggestion}
+                  onSubmit={handleManualWeightSubmit}
+                  onCancel={handleCancelManualEntry}
+                />
+              )}
+
+              <Card className="border-border mb-6">
+                <CardContent className="p-4 sm:p-6">
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground mb-4">Review Photo</h3>
+                  <div className="relative bg-muted rounded-lg overflow-hidden mb-4">
+                    <img src={capturedImage} alt="Captured Weight" className="w-full h-auto object-cover rounded-lg" />
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+                    <Button
+                      onClick={handleUsePhoto}
+                      disabled={isProcessing}
+                      className="bg-primary hover:bg-primary/90 text-white px-6 py-3"
+                    >
+                      {isProcessing ? 'Processing...' : <><Check className="w-4 h-4 mr-2" />Use This Photo</>}
+                    </Button>
+                    <Button
+                      onClick={handleRetake}
+                      variant="outline"
+                      disabled={isProcessing}
+                      className="border-border px-6 py-3"
+                    >
+                      <RotateCcw className="w-4 h-4 mr-2" />
+                      Retake
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
           )}
 
           {/* Processing State */}
