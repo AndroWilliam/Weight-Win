@@ -6,6 +6,7 @@ import { ArrowLeft, Trophy, Award, Star, Crown, Lock, TrendingUp, Flame, AlertTr
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { ErrorBoundary } from "@/components/ErrorBoundary"
+import { fetchWithTimeout, TIMEOUT_PRESETS } from "@/lib/fetch-with-timeout"
 
 interface Badge {
   badge_id: string
@@ -46,7 +47,11 @@ export default function RewardsPage() {
     setError(null)
 
     try {
-      const response = await fetch('/api/badges')
+      const response = await fetchWithTimeout(
+        '/api/badges',
+        { method: 'GET' },
+        TIMEOUT_PRESETS.SHORT // 5s for badge loading
+      )
 
       if (!response.ok) {
         throw new Error(`Failed to load badges: ${response.statusText}`)
@@ -60,9 +65,13 @@ export default function RewardsPage() {
       } else {
         throw new Error(data.error || 'Failed to load badges')
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error loading badges:', err)
-      setError(err instanceof Error ? err.message : 'Failed to load badges')
+      if (err.message?.includes('timed out')) {
+        setError('Request timed out. Please check your connection and try again.')
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to load badges')
+      }
     } finally {
       setIsLoading(false)
     }
