@@ -64,6 +64,7 @@ export function WeightCheckContent() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isAuthChecking, setIsAuthChecking] = useState(true)
   const [cameraError, setCameraError] = useState<CameraErrorInfo | null>(null)
+  const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -224,26 +225,49 @@ export function WeightCheckContent() {
   }
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    setUploadError(null)
     const file = event.target.files?.[0]
-    if (file) {
-      try {
-        // Compress image if needed (already an image format)
-        const compressedFile = await maybeCompressImage(file)
-        
-        const reader = new FileReader()
-        reader.onloadend = () => {
-          setCapturedImage(reader.result as string)
-          setCurrentStep('preview')
-        }
-        reader.readAsDataURL(compressedFile)
-      } catch (error) {
-        console.warn('Compression failed, using original file:', error)
-        const reader = new FileReader()
-        reader.onloadend = () => {
-          setCapturedImage(reader.result as string)
-          setCurrentStep('preview')
-        }
-        reader.readAsDataURL(file)
+
+    if (!file) return
+
+    // Validate file size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadError('File size exceeds 10MB. Please choose a smaller image.')
+      return
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setUploadError('Please upload an image file (JPG, PNG, etc.)')
+      return
+    }
+
+    try {
+      setIsProcessing(true)
+      
+      // Compress with timeout (30 seconds)
+      const compressedFile = await Promise.race([
+        maybeCompressImage(file),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Compression timeout')), 30000)
+        )
+      ]) as File
+
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setCapturedImage(reader.result as string)
+        setCurrentStep('preview')
+        setIsProcessing(false)
+      }
+      reader.readAsDataURL(compressedFile)
+    } catch (error: any) {
+      setIsProcessing(false)
+      if (error.message === 'Compression timeout') {
+        setUploadError('Image processing timed out. Try a smaller image.')
+      } else if (error.message?.includes('compression')) {
+        setUploadError('Failed to compress image. Try another photo.')
+      } else {
+        setUploadError('Failed to process image. Please try again.')
       }
     }
   }
@@ -569,6 +593,26 @@ export function WeightCheckContent() {
                   >
                     Cancel
                   </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Upload Error Display */}
+          {uploadError && (
+            <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/10 mb-6">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <h4 className="font-medium text-red-800 dark:text-red-200 text-sm">{uploadError}</h4>
+                    <button 
+                      onClick={() => setUploadError(null)} 
+                      className="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 underline mt-2"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
