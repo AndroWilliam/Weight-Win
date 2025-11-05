@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { AlertCircle } from "lucide-react"
 
 interface WeightConfirmationProps {
   photoUrl: string
@@ -15,6 +16,7 @@ interface WeightConfirmationProps {
 export function WeightConfirmation({ photoUrl, detectedWeight, onConfirm, onRetake }: WeightConfirmationProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editedWeight, setEditedWeight] = useState(detectedWeight.toString())
+  const [validationError, setValidationError] = useState<string | null>(null)
 
   const handleConfirm = () => {
     onConfirm(detectedWeight)
@@ -22,13 +24,42 @@ export function WeightConfirmation({ photoUrl, detectedWeight, onConfirm, onReta
 
   const handleEdit = () => {
     setIsEditing(true)
+    setValidationError(null)
+  }
+
+  const validateWeight = (weight: string): string | null => {
+    if (!weight || weight.trim() === '') {
+      return 'Weight is required'
+    }
+
+    const weightNum = parseFloat(weight)
+
+    if (isNaN(weightNum)) {
+      return 'Please enter a valid number'
+    }
+
+    if (weightNum < 30) {
+      return 'Weight must be at least 30 kg'
+    }
+
+    if (weightNum > 300) {
+      return 'Weight must be less than 300 kg'
+    }
+
+    return null
   }
 
   const handleSaveEdit = () => {
-    const weight = Number.parseFloat(editedWeight)
-    if (weight > 0 && weight < 1000) {
-      onConfirm(weight)
+    const error = validateWeight(editedWeight)
+    
+    if (error) {
+      setValidationError(error)
+      return
     }
+
+    const weight = parseFloat(editedWeight)
+    setValidationError(null)
+    onConfirm(weight)
   }
 
   return (
@@ -47,17 +78,42 @@ export function WeightConfirmation({ photoUrl, detectedWeight, onConfirm, onReta
         <div className="text-center bg-muted p-6 md:p-8 rounded-lg mb-6">
           {isEditing ? (
             <div className="space-y-4">
-              <Input
-                type="number"
-                step="0.1"
-                value={editedWeight}
-                onChange={(e) => setEditedWeight(e.target.value)}
-                className="text-center text-2xl md:text-3xl font-bold"
-                placeholder="Enter weight"
-              />
-              <p className="text-sm text-muted-foreground">Enter weight in kg</p>
+              <div>
+                <Input
+                  type="number"
+                  step="0.1"
+                  min="30"
+                  max="300"
+                  value={editedWeight}
+                  onChange={(e) => {
+                    setEditedWeight(e.target.value)
+                    // Clear error when user types
+                    if (validationError) {
+                      setValidationError(null)
+                    }
+                  }}
+                  className={`text-center text-2xl md:text-3xl font-bold ${
+                    validationError ? 'border-red-500 focus:ring-red-500' : ''
+                  }`}
+                  placeholder="Enter weight"
+                />
+                {validationError && (
+                  <p className="text-sm text-red-600 dark:text-red-400 flex items-center justify-center gap-1 mt-2">
+                    <AlertCircle className="h-4 w-4" />
+                    {validationError}
+                  </p>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground">Enter weight in kg (30-300)</p>
               <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setIsEditing(false)} className="flex-1">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setIsEditing(false)
+                    setValidationError(null)
+                  }} 
+                  className="flex-1"
+                >
                   Cancel
                 </Button>
                 <Button onClick={handleSaveEdit} className="flex-1">
