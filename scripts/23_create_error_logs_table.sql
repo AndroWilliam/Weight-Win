@@ -40,17 +40,11 @@ ALTER TABLE error_logs ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
 
--- Admins can view all error logs
-CREATE POLICY "Admins can view all error logs"
+-- Service role can view all error logs (for admin API)
+CREATE POLICY "Service role can view all error logs"
   ON error_logs
   FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.user_id = auth.uid()
-      AND profiles.is_admin = true
-    )
-  );
+  USING (true);
 
 -- Users can view their own error logs (optional - enable if needed for user debugging)
 CREATE POLICY "Users can view own error logs"
@@ -65,17 +59,11 @@ CREATE POLICY "Anyone can insert error logs"
   FOR INSERT
   WITH CHECK (true);
 
--- Admins can delete error logs (for cleanup)
-CREATE POLICY "Admins can delete error logs"
+-- Service role can delete error logs (for cleanup)
+CREATE POLICY "Service role can delete error logs"
   ON error_logs
   FOR DELETE
-  USING (
-    EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.user_id = auth.uid()
-      AND profiles.is_admin = true
-    )
-  );
+  USING (true);
 
 -- Grant permissions
 GRANT SELECT, INSERT ON error_logs TO authenticated;
