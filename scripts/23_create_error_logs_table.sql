@@ -82,9 +82,73 @@ GRANT SELECT, INSERT ON error_logs TO authenticated;
 GRANT SELECT, INSERT ON error_logs TO anon;
 GRANT ALL ON error_logs TO service_role;
 
+-- Helper functions for error analytics
+
+-- Function: Get errors by category
+CREATE OR REPLACE FUNCTION get_errors_by_category(since_date TIMESTAMP WITH TIME ZONE)
+RETURNS TABLE (
+  category error_category,
+  count BIGINT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    el.category,
+    COUNT(*) as count
+  FROM error_logs el
+  WHERE el.created_at >= since_date
+  GROUP BY el.category
+  ORDER BY count DESC;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function: Get top error messages
+CREATE OR REPLACE FUNCTION get_top_error_messages(since_date TIMESTAMP WITH TIME ZONE, limit_count INTEGER DEFAULT 10)
+RETURNS TABLE (
+  message TEXT,
+  count BIGINT,
+  category error_category
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    el.message,
+    COUNT(*) as count,
+    el.category
+  FROM error_logs el
+  WHERE el.created_at >= since_date
+  GROUP BY el.message, el.category
+  ORDER BY count DESC
+  LIMIT limit_count;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function: Get daily error trend
+CREATE OR REPLACE FUNCTION get_daily_error_trend(since_date TIMESTAMP WITH TIME ZONE)
+RETURNS TABLE (
+  date DATE,
+  count BIGINT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    DATE(el.created_at) as date,
+    COUNT(*) as count
+  FROM error_logs el
+  WHERE el.created_at >= since_date
+  GROUP BY DATE(el.created_at)
+  ORDER BY date ASC;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Grant execute permissions on functions
+GRANT EXECUTE ON FUNCTION get_errors_by_category TO authenticated;
+GRANT EXECUTE ON FUNCTION get_top_error_messages TO authenticated;
+GRANT EXECUTE ON FUNCTION get_daily_error_trend TO authenticated;
+
 -- Success message
 DO $$
 BEGIN
-  RAISE NOTICE 'Successfully created error_logs table with RLS policies';
+  RAISE NOTICE 'Successfully created error_logs table with RLS policies and analytics functions';
 END $$;
 

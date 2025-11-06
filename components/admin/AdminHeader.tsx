@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Bell, Shield, Settings, LayoutDashboard, Gift, LogOut } from 'lucide-react'
+import { Home, Bell, Shield, Settings, LayoutDashboard, Gift, LogOut, AlertCircle } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { MobileTopNav } from '@/components/layout/mobile-top-nav'
 import {
@@ -127,6 +127,17 @@ export function AdminHeader({ userInitials, notificationCount = 0 }: AdminHeader
               }`}
             >
               Users
+            </Link>
+            <Link
+              href="/admin/errors"
+              className={`px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors inline-flex items-center gap-2 ${
+                isActive('/admin/errors')
+                  ? 'bg-primary text-white'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              }`}
+            >
+              <AlertCircle className="w-4 h-4" />
+              Errors
             </Link>
           </nav>
         </div>
