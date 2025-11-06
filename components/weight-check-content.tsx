@@ -7,6 +7,9 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { maybeCompressImage } from "@/lib/images/compress"
 import { Camera, Upload, ArrowLeft, RotateCcw, Check, AlertCircle, AlertTriangle, RefreshCw } from "lucide-react"
 import { ManualWeightEntry } from "./ManualWeightEntry"
+import { fetchWithTimeout, TIMEOUT_PRESETS, RETRY_PRESETS } from "@/lib/fetch-with-timeout"
+import { toast } from "sonner"
+import { logNetworkError, logOcrError } from "@/lib/error-logger"
 
 // Camera error types
 type CameraError =
@@ -124,6 +127,7 @@ export function WeightCheckContent() {
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [ocrError, setOcrError] = useState<OCRErrorInfo | null>(null)
   const [showManualEntry, setShowManualEntry] = useState(false)
+  const [retryAttempt, setRetryAttempt] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -376,6 +380,7 @@ export function WeightCheckContent() {
       setShowManualEntry(false)
       setIsProcessing(true)
       setCurrentStep('processing')
+      setRetryAttempt(0)
       
       try {
         // Upload image to Supabase Storage
@@ -408,25 +413,32 @@ export function WeightCheckContent() {
         }
         
         const photoUrl = uploadData.path
-        
-        // Add timeout to OCR request
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 30000) // 30s timeout
 
-        // Process with OCR
-        const ocrRes = await fetch('/api/weight/process', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
+        // Process with OCR using fetchWithTimeout with retry
+        const ocrRes = await fetchWithTimeout(
+          '/api/weight/process',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              imageBase64: capturedImage,
+              photoUrl
+            })
           },
-          body: JSON.stringify({
-            imageBase64: capturedImage,
-            photoUrl
-          }),
-          signal: controller.signal
-        })
-
-        clearTimeout(timeoutId)
+          TIMEOUT_PRESETS.LONG, // 30s timeout for OCR
+          {
+            retry: RETRY_PRESETS.PATIENT, // 3 attempts with exponential backoff
+            onRetry: (attempt, delay, error) => {
+              setRetryAttempt(attempt)
+              toast.info(`Retrying... (Attempt ${attempt}/3)`, {
+                description: 'The request is taking longer than expected',
+                duration: 3000
+              })
+            }
+          }
+        )
         
         const result = await ocrRes.json()
         
@@ -471,6 +483,16 @@ export function WeightCheckContent() {
         console.error('Error processing weight:', error)
         setIsProcessing(false)
         setCurrentStep('preview')
+        
+        // Log errors for analytics
+        if (error.message?.includes('offline') || error.message?.includes('network') || error.message?.includes('Connection lost')) {
+          await logNetworkError('/api/weight/process', 'POST', error.message || 'Network error during OCR')
+        } else {
+          await logOcrError(error.message || 'OCR processing failed', {
+            errorType: error.name,
+            retryAttempts: retryAttempt
+          })
+        }
         
         if (error.name === 'AbortError') {
           const errorInfo: OCRErrorInfo = {
@@ -841,6 +863,11 @@ export function WeightCheckContent() {
             <div className="text-center py-12">
               <div className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
               <p className="text-muted-foreground text-base sm:text-lg">Analyzing your weight...</p>
+              {retryAttempt > 0 && (
+                <p className="text-sm text-orange-500 mt-2">
+                  Retry attempt {retryAttempt}/3
+                </p>
+              )}
             </div>
           )}
           

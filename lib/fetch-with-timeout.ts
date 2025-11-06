@@ -1,47 +1,71 @@
+import { retryWithBackoff, RETRY_PRESETS } from './retry-with-backoff'
+
+// Re-export for convenience
+export { RETRY_PRESETS }
+
+interface FetchWithTimeoutOptions {
+  retry?: typeof RETRY_PRESETS[keyof typeof RETRY_PRESETS]
+  onRetry?: (attempt: number, delay: number, error: any) => void
+}
+
 /**
- * Fetch with automatic timeout
+ * Fetch with automatic timeout and optional retry
  * Throws error if request exceeds timeout duration
  */
 export async function fetchWithTimeout(
   url: string,
   options: RequestInit = {},
-  timeoutMs: number = 10000
+  timeoutMs: number = 10000,
+  extraOptions?: FetchWithTimeoutOptions
 ): Promise<Response> {
-  // Check if offline before making request
-  if (typeof navigator !== 'undefined' && !navigator.onLine) {
-    throw new Error('You appear to be offline. Please check your internet connection.')
-  }
-
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
-
-  try {
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal
-    })
-    clearTimeout(timeoutId)
-    return response
-  } catch (error: any) {
-    clearTimeout(timeoutId)
-    
-    // Check if went offline during request
+  const fetchFn = async () => {
+    // Check if offline before making request
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
-      throw new Error('Connection lost. Please check your internet connection.')
+      throw new Error('You appear to be offline. Please check your internet connection.')
     }
-    
-    if (error.name === 'AbortError') {
-      throw new Error('Request timed out. Please check your connection and try again.')
+
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal
+      })
+      clearTimeout(timeoutId)
+      return response
+    } catch (error: any) {
+      clearTimeout(timeoutId)
+      
+      // Check if went offline during request
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        throw new Error('Connection lost. Please check your internet connection.')
+      }
+      
+      if (error.name === 'AbortError') {
+        throw new Error('Request timed out. Please check your connection and try again.')
+      }
+      
+      // Network error (could be offline or server down)
+      if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
+        throw new Error('Network error. Please check your internet connection and try again.')
+      }
+      
+      // Re-throw other errors
+      throw error
     }
-    
-    // Network error (could be offline or server down)
-    if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
-      throw new Error('Network error. Please check your internet connection and try again.')
-    }
-    
-    // Re-throw other errors
-    throw error
   }
+
+  // If retry is enabled, use retryWithBackoff
+  if (extraOptions?.retry) {
+    return retryWithBackoff(fetchFn, {
+      ...extraOptions.retry,
+      onRetry: extraOptions.onRetry
+    })
+  }
+
+  // Otherwise, just call once
+  return fetchFn()
 }
 
 /**
