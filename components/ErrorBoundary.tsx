@@ -2,6 +2,7 @@
 
 import { Component, ReactNode } from 'react'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
+import { logClientError } from '@/lib/error-logger'
 
 interface Props {
   children: ReactNode
@@ -29,8 +30,22 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: any) {
-    // Log error to console (could send to error tracking service)
+    // Log error to console
     console.error('ErrorBoundary caught error:', error, errorInfo)
+    
+    // Log to error tracking service
+    logClientError(
+      error.message || 'Unhandled React error',
+      error.stack,
+      {
+        componentStack: errorInfo?.componentStack,
+        errorName: error.name,
+        errorType: 'react_error_boundary'
+      }
+    ).catch(err => {
+      // Silently fail if error logging fails
+      console.error('Failed to log error:', err)
+    })
   }
 
   handleReset = () => {
