@@ -7,6 +7,7 @@ import { Toaster } from '@/components/ui/toaster'
 import { Toaster as Sonner } from 'sonner'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { ThemeProvider } from '@/components/theme-provider'
+import { OfflineBanner } from '@/components/OfflineBanner'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -40,6 +41,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          {/* Offline Detection Banner */}
+          <OfflineBanner />
+          
           <ErrorBoundary>
             {children}
             <Toaster />

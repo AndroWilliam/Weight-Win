@@ -7,6 +7,11 @@ export async function fetchWithTimeout(
   options: RequestInit = {},
   timeoutMs: number = 10000
 ): Promise<Response> {
+  // Check if offline before making request
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    throw new Error('You appear to be offline. Please check your internet connection.')
+  }
+
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
 
@@ -20,8 +25,18 @@ export async function fetchWithTimeout(
   } catch (error: any) {
     clearTimeout(timeoutId)
     
+    // Check if went offline during request
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      throw new Error('Connection lost. Please check your internet connection.')
+    }
+    
     if (error.name === 'AbortError') {
       throw new Error('Request timed out. Please check your connection and try again.')
+    }
+    
+    // Network error (could be offline or server down)
+    if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
+      throw new Error('Network error. Please check your internet connection and try again.')
     }
     
     // Re-throw other errors
