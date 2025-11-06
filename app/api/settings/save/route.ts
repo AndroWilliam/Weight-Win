@@ -9,7 +9,8 @@ const settingsSchema = z.object({
   locationPermission: z.enum(['granted', 'denied', 'not_asked']).default('not_asked'),
   consentOcr: z.boolean().default(false),
   consentStorage: z.boolean().default(false),
-  consentNutritionist: z.boolean().default(false)
+  consentNutritionist: z.boolean().default(false),
+  setupCompleted: z.boolean().optional()
 })
 
 export async function POST(req: NextRequest) {
@@ -39,6 +40,7 @@ export async function POST(req: NextRequest) {
     const settings = parsed.data
     
     // Save settings to database
+    // Note: setupCompleted is handled automatically by the upsert_user_settings function
     const { data, error } = await supabase.rpc('upsert_user_settings', {
       p_user_id: user.id,
       p_weight_unit: settings.weightUnit,
