@@ -58,7 +58,10 @@ export async function updateSession(request: NextRequest) {
       !request.nextUrl.pathname.startsWith("/setup") &&
       !request.nextUrl.pathname.startsWith("/commit") &&
       !request.nextUrl.pathname.startsWith("/weight-check") &&
-      !request.nextUrl.pathname.startsWith("/progress")
+      !request.nextUrl.pathname.startsWith("/progress") &&
+      !request.nextUrl.pathname.startsWith("/preview") &&
+      !request.nextUrl.pathname.startsWith("/preview-signup") &&
+      !request.nextUrl.pathname.startsWith("/preview-confirmation")
     ) {
       console.log("[v0] Redirecting to login - path is not root and user not authenticated")
       const url = request.nextUrl.clone()
