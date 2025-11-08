@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { CheckCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { usePreviewData } from '@/hooks/usePreviewData'
 
-export default function PreviewSignupPage() {
+function PreviewSignupContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { data } = usePreviewData()
@@ -162,4 +162,22 @@ export default function PreviewSignupPage() {
   )
 }
 
+export default function PreviewSignupPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-pulse">
+            <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <span className="text-white font-bold text-2xl">W</span>
+            </div>
+            <p className="text-gray-600">Loading...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <PreviewSignupContent />
+    </Suspense>
+  )
+}
 
