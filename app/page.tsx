@@ -1,13 +1,45 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
 import { CheckCircle, TrendingUp, Award, ArrowRight, Users } from "lucide-react"
 import { NavigationHeader } from "@/components/navigation-header"
 import { ThemeToggle } from "@/components/theme-toggle"
-
-export const revalidate = 3600 // 1 hour
+import { createClient } from '@/lib/supabase/client'
+import { isPreviewCompleted } from '@/lib/preview/previewCookies'
 
 export default function HomePage() {
+  const router = useRouter()
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function checkAuth() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      setIsAuthenticated(!!user)
+      setLoading(false)
+    }
+
+    checkAuth()
+  }, [])
+
+  const handleStartTrial = () => {
+    // Check if user already completed preview
+    const completed = isPreviewCompleted()
+    
+    if (completed) {
+      // Redirect to signup prompt with message
+      router.push('/preview-signup?returning=true')
+    } else {
+      // Start fresh preview
+      router.push('/preview/weight-check')
+    }
+  }
+
   return (
     <main className="min-h-screen bg-background text-foreground">
       {/* Header */}
@@ -27,15 +59,38 @@ export default function HomePage() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/auth/login">
+            {!loading && !isAuthenticated && (
               <Button 
                 size="lg"
                 className="text-lg font-semibold px-8 min-w-fit"
+                onClick={handleStartTrial}
               >
-                Start the 7-Day Challenge
-                <ArrowRight className="w-5 h-5" />
+                Start Free Trial 🚀
               </Button>
-            </Link>
+            )}
+
+            {!loading && isAuthenticated && (
+              <Link href="/dashboard">
+                <Button 
+                  size="lg"
+                  className="text-lg font-semibold px-8 min-w-fit"
+                >
+                  Go to Dashboard
+                  <ArrowRight className="w-5 h-5" />
+                </Button>
+              </Link>
+            )}
+
+            {loading && (
+              <Button 
+                size="lg"
+                className="text-lg font-semibold px-8 min-w-fit"
+                disabled
+              >
+                Loading...
+              </Button>
+            )}
+
             <Button 
               variant="outline" 
               className="border-border px-8 py-4 text-lg font-semibold rounded-lg"

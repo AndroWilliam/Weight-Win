@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
+import { getPreviewData } from "@/lib/preview/previewCookies"
 
 export default function AuthCallbackPage() {
   const router = useRouter()
@@ -69,8 +70,19 @@ export default function AuthCallbackPage() {
             }
           }
           
-          // New user or setup not completed -> start onboarding flow
-          console.log('[Auth Debug] New user detected - starting onboarding flow')
+          // New user or setup not completed -> check preview data first
+          console.log('[Auth Debug] New user detected - checking for preview data')
+          
+          // Check if we have preview data to transfer
+          const previewData = getPreviewData()
+          if (previewData && previewData.tourCompleted) {
+            console.log('[Auth Debug] Found preview data - redirecting to confirmation')
+            setTimeout(() => router.replace('/preview-confirmation'), 200)
+            return
+          }
+          
+          // No preview data -> start normal onboarding flow
+          console.log('[Auth Debug] No preview data - starting onboarding flow')
           let dest = next || "/consent"
           try {
             const stored = localStorage.getItem("postAuthNext")
@@ -141,8 +153,19 @@ export default function AuthCallbackPage() {
             }
           }
           
-          // New user or setup not completed -> start onboarding flow
-          console.log('[Auth Debug] New user detected - starting onboarding flow')
+          // New user or setup not completed -> check preview data first
+          console.log('[Auth Debug] New user detected - checking for preview data')
+          
+          // Check if we have preview data to transfer
+          const previewData = getPreviewData()
+          if (previewData && previewData.tourCompleted) {
+            console.log('[Auth Debug] Found preview data - redirecting to confirmation')
+            setTimeout(() => router.replace('/preview-confirmation'), 200)
+            return
+          }
+          
+          // No preview data -> start normal onboarding flow
+          console.log('[Auth Debug] No preview data - starting onboarding flow')
           let dest = next || "/consent"
           try {
             const stored = localStorage.getItem("postAuthNext")

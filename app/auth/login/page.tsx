@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useState, useEffect } from "react"
 import { ArrowLeft, Mail, Lock } from "lucide-react"
 import Link from "next/link"
 import { EnvDebug } from "@/components/env-debug"
+import { getPreviewData } from "@/lib/preview/previewCookies"
 
 export default function LoginPage() {
   // Debug environment variables
@@ -80,6 +81,10 @@ export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const router = useRouter()
+  const searchParams = useSearchParams()
+  
+  // Check if coming from preview
+  const fromPreview = searchParams.get('from') === 'preview'
 
   const isDevelopment =
     typeof window !== "undefined" &&
@@ -126,6 +131,14 @@ export default function LoginPage() {
         if (data.user && !data.user.email_confirmed_at) {
           setError("Please check your email for a confirmation link.")
             } else {
+              // Check if we have preview data to transfer
+              if (fromPreview) {
+                const previewData = getPreviewData()
+                if (previewData && !previewData.tourCompleted) {
+                  router.push('/preview-confirmation')
+                  return
+                }
+              }
               router.push("/consent")
             }
       } else {
@@ -136,6 +149,14 @@ export default function LoginPage() {
 
         if (error) throw error
 
+        // Check if we have preview data to transfer
+        if (fromPreview) {
+          const previewData = getPreviewData()
+          if (previewData && previewData.tourCompleted) {
+            router.push('/preview-confirmation')
+            return
+          }
+        }
         router.push("/consent")
       }
     } catch (error: unknown) {
