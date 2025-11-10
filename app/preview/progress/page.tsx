@@ -14,10 +14,13 @@ const TOTAL_STEPS = 5
 
 export default function PreviewProgressPage() {
   const router = useRouter()
-  const { data, updateData } = usePreviewData()
+  const { data, loading, updateData } = usePreviewData()
   const [showTooltip, setShowTooltip] = useState(true)
 
   useEffect(() => {
+    // Wait for data to load
+    if (loading) return
+
     if (!data) {
       router.push('/preview/weight-check')
       return
@@ -25,7 +28,7 @@ export default function PreviewProgressPage() {
 
     updateData({ currentStep: 4 })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [loading, data])
 
   const handlePrevious = () => {
     router.push('/preview/dashboard')
@@ -35,6 +38,8 @@ export default function PreviewProgressPage() {
     router.push('/preview/rewards')
   }
 
+  // Show loading state while data is being fetched
+  if (loading) return <div>Loading...</div>
   if (!data) return null
 
   // Update first day with actual weight if valid, otherwise keep sample data

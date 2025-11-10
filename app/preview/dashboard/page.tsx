@@ -13,10 +13,13 @@ const TOTAL_STEPS = 5
 
 export default function PreviewDashboardPage() {
   const router = useRouter()
-  const { data, updateData } = usePreviewData()
+  const { data, loading, updateData } = usePreviewData()
   const [showTooltip, setShowTooltip] = useState(true)
 
   useEffect(() => {
+    // Wait for data to load
+    if (loading) return
+
     if (!data) {
       router.push('/preview/weight-check')
       return
@@ -24,7 +27,7 @@ export default function PreviewDashboardPage() {
 
     updateData({ currentStep: 3 })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [loading, data])
 
   const handlePrevious = () => {
     router.push('/preview/ocr-processing')
@@ -34,6 +37,8 @@ export default function PreviewDashboardPage() {
     router.push('/preview/progress')
   }
 
+  // Show loading state while data is being fetched
+  if (loading) return <div>Loading...</div>
   if (!data) return null
 
   return (

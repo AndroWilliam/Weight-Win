@@ -13,23 +13,34 @@ const TOTAL_STEPS = 5
 
 export default function PreviewOCRProcessingPage() {
   const router = useRouter()
-  const { data, updateData } = usePreviewData()
-  
+  const { data, loading, updateData } = usePreviewData()
+
   const [processing, setProcessing] = useState(true)
   const [weight, setWeight] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Check if we have photo data
+    // Wait for data to load from localStorage
+    if (loading) {
+      console.log('⏳ Waiting for preview data to load...')
+      return
+    }
+
+    console.log('📊 Preview data loaded:', data ? 'Data found' : 'No data')
+
+    // Check if we have photo data AFTER loading is complete
     if (!data?.photoBase64) {
+      console.log('❌ No photo data found, redirecting back to weight-check')
       router.push('/preview/weight-check')
       return
     }
 
+    console.log('✅ Photo data found, starting OCR processing')
+
     // Process with OCR
     processImage()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [loading, data])
 
   const processImage = async () => {
     try {

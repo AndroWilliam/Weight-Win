@@ -13,23 +13,26 @@ const TOTAL_STEPS = 5
 
 export default function PreviewRewardsPage() {
   const router = useRouter()
-  const { data, updateData } = usePreviewData()
+  const { data, loading, updateData } = usePreviewData()
   const [showTooltip, setShowTooltip] = useState(true)
 
   useEffect(() => {
+    // Wait for data to load
+    if (loading) return
+
     if (!data) {
       router.push('/preview/weight-check')
       return
     }
 
     // Mark badge as earned and tour as completed
-    updateData({ 
+    updateData({
       firstStepBadgeEarned: true,
       tourCompleted: true,
       currentStep: 5
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [loading, data])
 
   const handlePrevious = () => {
     router.push('/preview/progress')
@@ -39,6 +42,8 @@ export default function PreviewRewardsPage() {
     router.push('/preview-signup')
   }
 
+  // Show loading state while data is being fetched
+  if (loading) return <div>Loading...</div>
   if (!data) return null
 
   return (
