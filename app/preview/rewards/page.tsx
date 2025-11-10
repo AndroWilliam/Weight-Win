@@ -16,30 +16,70 @@ export default function PreviewRewardsPage() {
   const { data, loading, updateData } = usePreviewData()
   const [showTooltip, setShowTooltip] = useState(true)
 
+  // ✅ NEW: Guard flag to prevent infinite localStorage loop
+  const [hasUpdatedStep, setHasUpdatedStep] = useState(false)
+
   useEffect(() => {
     // Wait for data to load
-    if (loading) return
-
-    if (!data) {
-      router.push('/preview/weight-check')
+    if (loading) {
+      console.log('⏳ Waiting for preview data to load...')
       return
     }
 
-    // Mark badge as earned and tour as completed
+    console.log('📊 Preview data loaded:', data ? 'Data found' : 'No data')
+
+    // ✅ FIX: If we already updated the step, don't update again
+    if (hasUpdatedStep) {
+      console.log('⏭️ Already updated step, skipping')
+      return
+    }
+
+    // Check if we have required data
+    if (!data || !data.weight) {
+      console.log('❌ No weight data found, redirecting to weight-check')
+      window.location.href = '/preview/weight-check'
+      return
+    }
+
+    // ✅ FIX: Check if step is already 5 and badges are set
+    if (data.currentStep === 5 && data.firstStepBadgeEarned && data.tourCompleted) {
+      console.log('✅ Step already set to 5 with badges, skipping update')
+      setHasUpdatedStep(true)
+      return
+    }
+
+    console.log('💾 Setting currentStep to 5 and marking badges (first time)')
+
+    // ✅ FIX: Mark as updated BEFORE calling updateData
+    setHasUpdatedStep(true)
+
+    // Mark badge as earned and tour as completed (will only happen once)
     updateData({
       firstStepBadgeEarned: true,
       tourCompleted: true,
       currentStep: 5
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, data])
+  }, [loading, data, hasUpdatedStep])
 
   const handlePrevious = () => {
-    router.push('/preview/progress')
+    try {
+      console.log('🔄 Navigating back to progress page')
+      // Use window.location as router.push is hanging
+      window.location.href = '/preview/progress'
+    } catch (error) {
+      console.error('❌ Navigation error:', error)
+    }
   }
 
   const handleFinish = () => {
-    router.push('/preview-signup')
+    try {
+      console.log('✅ Navigating to signup page')
+      // Use window.location as router.push is hanging
+      window.location.href = '/preview-signup'
+    } catch (error) {
+      console.error('❌ Navigation error:', error)
+    }
   }
 
   // Show loading state while data is being fetched

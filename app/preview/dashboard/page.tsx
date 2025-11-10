@@ -16,25 +16,66 @@ export default function PreviewDashboardPage() {
   const { data, loading, updateData } = usePreviewData()
   const [showTooltip, setShowTooltip] = useState(true)
 
+  // ✅ NEW: Guard flag to prevent infinite localStorage loop
+  const [hasUpdatedStep, setHasUpdatedStep] = useState(false)
+
   useEffect(() => {
     // Wait for data to load
-    if (loading) return
-
-    if (!data) {
-      router.push('/preview/weight-check')
+    if (loading) {
+      console.log('⏳ Waiting for preview data to load...')
       return
     }
 
+    console.log('📊 Preview data loaded:', data ? 'Data found' : 'No data')
+
+    // ✅ FIX: If we already updated the step, don't update again
+    if (hasUpdatedStep) {
+      console.log('⏭️ Already updated step, skipping')
+      return
+    }
+
+    // Check if we have required data
+    if (!data || !data.weight) {
+      console.log('❌ No weight data found, redirecting to weight-check')
+      window.location.href = '/preview/weight-check'
+      return
+    }
+
+    // ✅ FIX: Check if currentStep is already 3
+    if (data.currentStep === 3) {
+      console.log('✅ Step already set to 3, skipping update')
+      setHasUpdatedStep(true)
+      return
+    }
+
+    console.log('💾 Setting currentStep to 3 (first time)')
+
+    // ✅ FIX: Mark as updated BEFORE calling updateData
+    setHasUpdatedStep(true)
+
+    // Update step (will only happen once)
     updateData({ currentStep: 3 })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, data])
+  }, [loading, data, hasUpdatedStep])
 
   const handlePrevious = () => {
-    router.push('/preview/ocr-processing')
+    try {
+      console.log('🔄 Navigating back to OCR page')
+      // Use window.location as router.push is hanging
+      window.location.href = '/preview/ocr-processing'
+    } catch (error) {
+      console.error('❌ Navigation error:', error)
+    }
   }
 
   const handleNext = () => {
-    router.push('/preview/progress')
+    try {
+      console.log('➡️ Navigating to progress page')
+      // Use window.location as router.push is hanging
+      window.location.href = '/preview/progress'
+    } catch (error) {
+      console.error('❌ Navigation error:', error)
+    }
   }
 
   // Show loading state while data is being fetched
