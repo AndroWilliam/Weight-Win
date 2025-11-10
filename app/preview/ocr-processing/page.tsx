@@ -19,6 +19,9 @@ export default function PreviewOCRProcessingPage() {
   const [weight, setWeight] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  // ✅ NEW: Guard flag to prevent infinite loop
+  const [hasProcessed, setHasProcessed] = useState(false)
+
   useEffect(() => {
     // Wait for data to load from localStorage
     if (loading) {
@@ -28,6 +31,12 @@ export default function PreviewOCRProcessingPage() {
 
     console.log('📊 Preview data loaded:', data ? 'Data found' : 'No data')
 
+    // ✅ FIX: If we already processed, don't process again
+    if (hasProcessed) {
+      console.log('⏭️ Already processed, skipping OCR call')
+      return
+    }
+
     // Check if we have photo data AFTER loading is complete
     if (!data?.photoBase64) {
       console.log('❌ No photo data found, redirecting back to weight-check')
@@ -35,12 +44,25 @@ export default function PreviewOCRProcessingPage() {
       return
     }
 
-    console.log('✅ Photo data found, starting OCR processing')
+    // ✅ FIX: If weight already exists in data, OCR was already completed
+    if (data.weight && data.weight > 0) {
+      console.log('✅ Weight already exists in localStorage:', data.weight, 'kg')
+      console.log('⏭️ Skipping OCR processing, showing success screen')
+      setHasProcessed(true)
+      setWeight(data.weight)
+      setProcessing(false)
+      return
+    }
 
-    // Process with OCR
+    console.log('✅ Photo data found, starting OCR processing (first time)')
+
+    // ✅ FIX: Mark as processed BEFORE calling processImage
+    setHasProcessed(true)
+
+    // Process with OCR (will only happen once)
     processImage()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, data])
+  }, [loading, data, hasProcessed])
 
   const processImage = async () => {
     try {
