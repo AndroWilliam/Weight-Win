@@ -86,9 +86,10 @@ export default function PreviewWeightCheckPage() {
         reader.readAsDataURL(selectedFile)
       })
 
-      console.log('✅ Image converted to base64, size:', base64String.length)
+      console.log('✅ Image converted to base64, size:', base64String.length, 'bytes')
 
-      // Step 2: Save to cookie FIRST (before navigation)
+      // Step 2: Save to localStorage FIRST (before navigation)
+      // Note: Using localStorage instead of cookies because cookies have 4KB limit
       const previewData = {
         photoBase64: base64String,
         photoTimestamp: new Date().toISOString(),
@@ -101,21 +102,21 @@ export default function PreviewWeightCheckPage() {
         firstStepBadgeEarned: false
       }
 
-      // Save to cookie
+      // Save to localStorage
       updateData(previewData)
 
-      console.log('✅ Cookie saved with photo data')
+      console.log('✅ Preview data saved to localStorage')
 
-      // Step 3: Wait a moment to ensure cookie is written
+      // Step 3: Wait a moment to ensure storage is written
       await new Promise(resolve => setTimeout(resolve, 100))
 
-      // Step 4: Verify cookie was saved
+      // Step 4: Verify data was saved
       const savedData = getPreviewData()
       if (!savedData || !savedData.photoBase64) {
-        throw new Error('Failed to save preview data to cookie')
+        throw new Error('Failed to save preview data to localStorage. Please ensure your browser allows localStorage and is not in private/incognito mode.')
       }
 
-      console.log('✅ Cookie verified, navigating to OCR page')
+      console.log('✅ Preview data verified, navigating to OCR page')
 
       // Step 5: Navigate to OCR processing
       router.push('/preview/ocr-processing')

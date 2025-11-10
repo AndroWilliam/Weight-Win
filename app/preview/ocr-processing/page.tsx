@@ -39,7 +39,7 @@ export default function PreviewOCRProcessingPage() {
       console.log('🔄 Starting OCR processing for preview')
 
       if (!data?.photoBase64) {
-        throw new Error('No photo data found in preview cookies')
+        throw new Error('No photo data found in preview localStorage')
       }
 
       // Call PREVIEW OCR API (not the authenticated endpoint)
@@ -72,7 +72,7 @@ export default function PreviewOCRProcessingPage() {
       const detectedWeight = parseFloat(result.data.weight)
       setWeight(detectedWeight)
 
-      console.log('💾 Saving weight to cookie:', detectedWeight)
+      console.log('💾 Saving weight to localStorage:', detectedWeight)
 
       updateData({
         weight: detectedWeight,
@@ -80,10 +80,10 @@ export default function PreviewOCRProcessingPage() {
         currentStep: 2
       })
 
-      // Wait to ensure cookie is saved
+      // Wait to ensure localStorage is updated
       await new Promise(resolve => setTimeout(resolve, 100))
 
-      console.log('✅ Weight saved, OCR complete')
+      console.log('✅ Weight saved to localStorage, OCR complete')
 
       setProcessing(false)
 

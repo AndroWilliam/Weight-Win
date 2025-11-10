@@ -1,41 +1,53 @@
-import Cookies from 'js-cookie'
-import { 
-  PreviewData, 
-  DEFAULT_PREVIEW_DATA, 
-  PREVIEW_COOKIE_NAME, 
-  PREVIEW_COOKIE_EXPIRY_DAYS 
+import {
+  PreviewData,
+  DEFAULT_PREVIEW_DATA,
+  PREVIEW_COOKIE_NAME,
+  PREVIEW_COOKIE_EXPIRY_DAYS
 } from './previewData'
 
 /**
- * Get preview data from cookies
+ * Get preview data from localStorage (changed from cookies due to 4KB size limit)
+ * localStorage supports up to 5-10MB which is needed for base64 images
  */
 export function getPreviewData(): PreviewData | null {
   try {
-    const cookieData = Cookies.get(PREVIEW_COOKIE_NAME)
-    
-    if (!cookieData) {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined') {
       return null
     }
-    
-    const parsed = JSON.parse(cookieData) as PreviewData
+
+    const storageData = localStorage.getItem(PREVIEW_COOKIE_NAME)
+
+    if (!storageData) {
+      return null
+    }
+
+    const parsed = JSON.parse(storageData) as PreviewData
     return parsed
   } catch (error) {
-    console.error('Failed to parse preview cookie:', error)
+    console.error('Failed to parse preview data from localStorage:', error)
     return null
   }
 }
 
 /**
- * Save preview data to cookies
+ * Save preview data to localStorage (changed from cookies due to 4KB size limit)
  */
 export function savePreviewData(data: PreviewData): void {
   try {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined') {
+      console.warn('Cannot save preview data: not in browser environment')
+      return
+    }
+
     const jsonString = JSON.stringify(data)
-    Cookies.set(PREVIEW_COOKIE_NAME, jsonString, {
-      expires: PREVIEW_COOKIE_EXPIRY_DAYS
-    })
+    localStorage.setItem(PREVIEW_COOKIE_NAME, jsonString)
+
+    console.log('📦 Preview data saved to localStorage, size:', jsonString.length, 'bytes')
   } catch (error) {
-    console.error('Failed to save preview cookie:', error)
+    console.error('Failed to save preview data to localStorage:', error)
+    throw error  // Re-throw so the calling code knows it failed
   }
 }
 
@@ -49,10 +61,14 @@ export function updatePreviewData(updates: Partial<PreviewData>): void {
 }
 
 /**
- * Clear preview data cookie
+ * Clear preview data from localStorage
  */
 export function clearPreviewData(): void {
-  Cookies.remove(PREVIEW_COOKIE_NAME)
+  if (typeof window === 'undefined') {
+    return
+  }
+  localStorage.removeItem(PREVIEW_COOKIE_NAME)
+  console.log('🗑️ Preview data cleared from localStorage')
 }
 
 /**
