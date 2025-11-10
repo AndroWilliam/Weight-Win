@@ -117,7 +117,16 @@ export default function PreviewDashboardPage() {
                 {data.weight} {data.weightUnit}
               </p>
               <p className="text-sm text-gray-600">
-                {new Date(data.photoTimestamp).toLocaleString()}
+                {data.photoTimestamp
+                  ? new Date(data.photoTimestamp).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })
+                  : 'Just now'
+                }
               </p>
               <span className="inline-flex items-center gap-1 text-xs text-green-600 mt-1">
                 ✅ Verified by AI

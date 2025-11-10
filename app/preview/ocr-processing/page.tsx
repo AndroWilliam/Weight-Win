@@ -36,33 +36,43 @@ export default function PreviewOCRProcessingPage() {
       setProcessing(true)
       setError(null)
 
-      // Convert base64 to blob
-      const response = await fetch(data!.photoBase64!)
-      const blob = await response.blob()
-      
-      // Create FormData
-      const formData = new FormData()
-      formData.append('image', blob, 'scale-photo.jpg')
+      console.log('🔄 Starting OCR processing for preview')
 
-      // Call your existing OCR API
-      const ocrResponse = await fetch('/api/weight/process', {
+      if (!data?.photoBase64) {
+        throw new Error('No photo data found in preview cookies')
+      }
+
+      // Call PREVIEW OCR API (not the authenticated endpoint)
+      const ocrResponse = await fetch('/api/preview/ocr', {
         method: 'POST',
-        body: formData
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          imageBase64: data.photoBase64
+        })
       })
 
+      console.log('📡 OCR API response status:', ocrResponse.status)
+
       if (!ocrResponse.ok) {
-        throw new Error('OCR processing failed')
+        const errorData = await ocrResponse.json().catch(() => ({}))
+        console.error('❌ OCR API error:', errorData)
+        throw new Error(errorData.error?.message || 'OCR processing failed')
       }
 
       const result = await ocrResponse.json()
+      console.log('✅ OCR result:', result)
 
-      if (!result.success || !result.weight) {
+      if (!result.data?.success || !result.data?.weight) {
         throw new Error('No weight detected in image')
       }
 
       // Success! Save weight to preview data
-      const detectedWeight = parseFloat(result.weight)
+      const detectedWeight = parseFloat(result.data.weight)
       setWeight(detectedWeight)
+
+      console.log('💾 Saving weight to cookie:', detectedWeight)
 
       updateData({
         weight: detectedWeight,
@@ -70,15 +80,20 @@ export default function PreviewOCRProcessingPage() {
         currentStep: 2
       })
 
+      // Wait to ensure cookie is saved
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      console.log('✅ Weight saved, OCR complete')
+
       setProcessing(false)
 
     } catch (error: any) {
-      console.error('OCR error:', error)
+      console.error('❌ OCR processing error:', error)
       setError(error.message || 'Failed to process image')
       setProcessing(false)
-      
+
       toast.error('Could not read weight', {
-        description: 'You can enter it manually in the next step'
+        description: 'Make sure your scale display is clearly visible'
       })
     }
   }

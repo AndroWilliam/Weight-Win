@@ -37,12 +37,13 @@ export default function PreviewProgressPage() {
 
   if (!data) return null
 
-  // Update first day with actual weight
-  const chartData = SAMPLE_PROGRESS_DATA.map((item, index) => 
-    index === 0 ? { ...item, weight: data.weight } : item
+  // Update first day with actual weight if valid, otherwise keep sample data
+  const chartData = SAMPLE_PROGRESS_DATA.map((item, index) =>
+    index === 0 && data.weight > 0 ? { ...item, weight: data.weight } : item
   )
 
-  const startingWeight = data.weight
+  // Use chart data for calculations to ensure consistency
+  const startingWeight = chartData[0].weight
   const currentWeight = chartData[chartData.length - 1].weight
   const averageWeight = chartData.reduce((sum, item) => sum + item.weight, 0) / chartData.length
   const totalChange = currentWeight - startingWeight

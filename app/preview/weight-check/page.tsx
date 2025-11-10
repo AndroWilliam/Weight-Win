@@ -9,6 +9,7 @@ import { PreviewStepIndicator } from '@/components/preview/PreviewStepIndicator'
 import { PreviewNavigation } from '@/components/preview/PreviewNavigation'
 import { Button } from '@/components/ui/button'
 import { usePreviewData } from '@/hooks/usePreviewData'
+import { getPreviewData } from '@/lib/preview/previewCookies'
 import { toast } from 'sonner'
 
 const TOTAL_STEPS = 5
@@ -69,32 +70,61 @@ export default function PreviewWeightCheckPage() {
     setIsProcessing(true)
 
     try {
-      // Convert image to base64
-      const reader = new FileReader()
-      
-      reader.onload = async () => {
-        const base64String = reader.result as string
-        
-        // Update preview data with photo
-        updateData({
-          photoBase64: base64String,
-          photoTimestamp: new Date().toISOString(),
-          currentStep: 1
-        })
+      // Step 1: Convert image to base64
+      const base64String = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
 
-        // Navigate to OCR processing page
-        router.push('/preview/ocr-processing')
+        reader.onload = () => {
+          const result = reader.result as string
+          resolve(result)
+        }
+
+        reader.onerror = () => {
+          reject(new Error('Failed to read file'))
+        }
+
+        reader.readAsDataURL(selectedFile)
+      })
+
+      console.log('✅ Image converted to base64, size:', base64String.length)
+
+      // Step 2: Save to cookie FIRST (before navigation)
+      const previewData = {
+        photoBase64: base64String,
+        photoTimestamp: new Date().toISOString(),
+        currentStep: 1,
+        weight: 0, // Will be updated in OCR step
+        weightUnit: 'kg' as const,
+        streakCount: 1,
+        sessionStarted: data?.sessionStarted || new Date().toISOString(),
+        tourCompleted: false,
+        firstStepBadgeEarned: false
       }
 
-      reader.onerror = () => {
-        toast.error('Failed to process image')
-        setIsProcessing(false)
+      // Save to cookie
+      updateData(previewData)
+
+      console.log('✅ Cookie saved with photo data')
+
+      // Step 3: Wait a moment to ensure cookie is written
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      // Step 4: Verify cookie was saved
+      const savedData = getPreviewData()
+      if (!savedData || !savedData.photoBase64) {
+        throw new Error('Failed to save preview data to cookie')
       }
 
-      reader.readAsDataURL(selectedFile)
-    } catch (error) {
-      console.error('Error processing image:', error)
-      toast.error('Failed to process image')
+      console.log('✅ Cookie verified, navigating to OCR page')
+
+      // Step 5: Navigate to OCR processing
+      router.push('/preview/ocr-processing')
+
+    } catch (error: any) {
+      console.error('❌ Error in handleNext:', error)
+      toast.error('Failed to process image', {
+        description: error.message || 'Please try again'
+      })
       setIsProcessing(false)
     }
   }
