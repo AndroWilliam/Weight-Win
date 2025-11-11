@@ -9,16 +9,28 @@ import { usePreviewData } from '@/hooks/usePreviewData'
 function PreviewSignupContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { data } = usePreviewData()
-  
+  const { data, loading } = usePreviewData()  // ✅ FIX: Get loading state
+
   const isReturning = searchParams.get('returning') === 'true'
   const [daysSinceDemo, setDaysSinceDemo] = useState(0)
 
   useEffect(() => {
+    // ✅ FIX: Wait for loading to complete before checking data
+    if (loading) {
+      console.log('⏳ Waiting for preview data to load...')
+      return
+    }
+
+    console.log('📊 Preview data loaded:', data ? 'Data found' : 'No data')
+
+    // ✅ FIX: Only redirect if loading is complete AND data is missing
     if (!data) {
+      console.log('❌ No preview data found after loading, redirecting to homepage')
       router.push('/')
       return
     }
+
+    console.log('✅ Preview data found, staying on signup page')
 
     // Calculate days since demo
     if (data.sessionStarted) {
@@ -26,8 +38,9 @@ function PreviewSignupContent() {
       const now = new Date()
       const days = Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
       setDaysSinceDemo(days)
+      console.log('📅 Days since demo:', days)
     }
-  }, [data, router])
+  }, [data, router, loading]) // ✅ Add 'loading' to dependencies
 
   if (!data) return null
 
@@ -146,17 +159,7 @@ function PreviewSignupContent() {
           </div>
         </div>
 
-        {/* Back to Demo */}
-        {!isReturning && (
-          <div className="text-center">
-            <button
-              onClick={() => router.push('/preview/weight-check')}
-              className="text-sm text-gray-600 hover:text-gray-900 underline"
-            >
-              ← Back to Demo
-            </button>
-          </div>
-        )}
+        {/* ✅ FIX: "Back to Demo" button REMOVED - demo should be one-time only */}
       </div>
     </div>
   )
@@ -166,12 +169,23 @@ export default function PreviewSignupPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-pulse">
-            <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-white font-bold text-2xl">W</span>
+        <div className="text-center space-y-4">
+          <div className="relative">
+            <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
+              <span className="text-white font-bold text-3xl">W</span>
             </div>
-            <p className="text-gray-600">Loading...</p>
+            {/* Animated ring around logo */}
+            <div className="absolute inset-0 animate-ping">
+              <div className="w-20 h-20 bg-blue-400 rounded-2xl opacity-20 mx-auto"></div>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <p className="text-lg font-semibold text-gray-900">Preparing your summary...</p>
+            <div className="flex items-center justify-center gap-2">
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            </div>
           </div>
         </div>
       </div>
