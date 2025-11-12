@@ -107,10 +107,15 @@ export default function CommitPage() {
 
   const handleStartChallenge = async () => {
     setIsSubmitting(true)
-    
+
     try {
       // Save settings to database
       if (settings && consents) {
+        // Ensure reminderTime has seconds format (HH:MM:SS)
+        const formattedReminderTime = settings.reminderTime.split(':').length === 2
+          ? `${settings.reminderTime}:00`
+          : settings.reminderTime
+
         const response = await fetch('/api/settings/save', {
           method: 'POST',
           headers: {
@@ -118,7 +123,7 @@ export default function CommitPage() {
           },
           body: JSON.stringify({
             weightUnit: settings.weightUnit,
-            reminderTime: settings.reminderTime,
+            reminderTime: formattedReminderTime,
             timezone: settings.timezone,
             locationPermission: settings.locationPermission,
             consentOcr: consents.ocrProcessing,
@@ -129,13 +134,19 @@ export default function CommitPage() {
         })
         
         const data = await response.json()
-        
-        if (!data.success) {
-          console.error('Failed to save settings:', data.error)
-          alert('Failed to save settings. Please try again.')
+
+        console.log('[Commit] API response:', response.status, data)
+
+        if (!response.ok || !data.success) {
+          console.error('[Commit] Failed to save settings:', data)
+          toast.error('Failed to save settings', {
+            description: data.error || 'Please try again or contact support.'
+          })
           setIsSubmitting(false)
           return
         }
+
+        console.log('[Commit] Settings saved successfully')
       }
       
       // Save to localStorage as backup

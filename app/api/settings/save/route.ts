@@ -4,7 +4,13 @@ import { z } from 'zod'
 
 const settingsSchema = z.object({
   weightUnit: z.enum(['kg', 'lb']).default('kg'),
-  reminderTime: z.string().default('08:00'),
+  reminderTime: z.string()
+    .regex(/^\d{2}:\d{2}(:\d{2})?$/, 'Invalid time format')
+    .transform((time) => {
+      // Ensure time has seconds format (HH:MM:SS)
+      return time.split(':').length === 2 ? `${time}:00` : time
+    })
+    .default('08:00:00'),
   timezone: z.string().default('UTC'),
   locationPermission: z.enum(['granted', 'denied', 'not_asked']).default('not_asked'),
   consentOcr: z.boolean().default(false),
@@ -38,7 +44,10 @@ export async function POST(req: NextRequest) {
     }
     
     const settings = parsed.data
-    
+
+    console.log('[Settings API] Saving settings for user:', user.id)
+    console.log('[Settings API] Validated settings:', settings)
+
     // Save settings to database
     // Note: setupCompleted is handled automatically by the upsert_user_settings function
     const { data, error } = await supabase.rpc('upsert_user_settings', {
@@ -51,6 +60,8 @@ export async function POST(req: NextRequest) {
       p_consent_storage: settings.consentStorage,
       p_consent_nutritionist: settings.consentNutritionist
     })
+
+    console.log('[Settings API] Database response:', { success: !error, data, error })
     
     if (error) {
       console.error('Error saving settings:', error)

@@ -45,7 +45,7 @@ export default function SetupPage() {
     'Pacific/Auckland'
   ]), [])
   const [timezones, setTimezones] = useState<string[]>(baseTimezones)
-  const [locationPermission, setLocationPermission] = useState<"granted" | "denied" | "pending">("pending")
+  const [locationPermission, setLocationPermission] = useState<"granted" | "denied" | "not_asked">("not_asked")
   const router = useRouter()
 
   useEffect(() => {
@@ -245,7 +245,7 @@ export default function SetupPage() {
                 </div>
                 <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4 pl-2">Your time zone (auto-detected)</p>
                 
-                {locationPermission === "pending" && (
+                {locationPermission === "not_asked" && (
                   <div className="mb-3 sm:mb-4 pl-2">
                     <Button
                       onClick={requestLocationPermission}
