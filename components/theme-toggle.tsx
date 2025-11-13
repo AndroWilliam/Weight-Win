@@ -40,30 +40,44 @@ export function ThemeToggle() {
       role="switch"
       aria-checked={isDark}
     >
-      {/* Sun Icon (visible in light mode) */}
+      {/* Sun Icon (always visible, bright in light mode, dimmed in dark mode) */}
       <motion.div
         animate={{
-          opacity: isDark ? 0 : 1,
-          rotate: isDark ? 180 : 0
+          opacity: isDark ? 0.3 : 1,
+          scale: isDark ? 0.9 : 1
         }}
-        transition={{ duration: 0.2 }}
+        transition={{ duration: 0.3 }}
         className="absolute left-3 top-1/2 -translate-y-1/2 z-10"
         style={{ pointerEvents: 'none' }}
       >
-        <Sun className="h-5 w-5 text-amber-400 fill-amber-400" style={{ filter: 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.8))' }} />
+        <Sun
+          className="h-5 w-5 text-amber-400 fill-amber-400"
+          style={{
+            filter: isDark
+              ? 'drop-shadow(0 0 4px rgba(251, 191, 36, 0.3))'
+              : 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.8))'
+          }}
+        />
       </motion.div>
 
-      {/* Moon Icon (visible in dark mode) */}
+      {/* Moon Icon (always visible, bright in dark mode, dimmed in light mode) */}
       <motion.div
         animate={{
-          opacity: isDark ? 1 : 0,
-          rotate: isDark ? 0 : -180
+          opacity: isDark ? 1 : 0.3,
+          scale: isDark ? 1 : 0.9
         }}
-        transition={{ duration: 0.2 }}
+        transition={{ duration: 0.3 }}
         className="absolute right-3 top-1/2 -translate-y-1/2 z-10"
         style={{ pointerEvents: 'none' }}
       >
-        <Moon className="h-5 w-5 text-indigo-400 fill-indigo-400" style={{ filter: 'drop-shadow(0 0 8px rgba(129, 140, 248, 0.8))' }} />
+        <Moon
+          className="h-5 w-5 text-indigo-400 fill-indigo-400"
+          style={{
+            filter: isDark
+              ? 'drop-shadow(0 0 8px rgba(129, 140, 248, 0.8))'
+              : 'drop-shadow(0 0 4px rgba(129, 140, 248, 0.3))'
+          }}
+        />
       </motion.div>
 
       {/* Toggle Circle */}
