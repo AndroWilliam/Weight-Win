@@ -47,10 +47,10 @@ export function ThemeToggle() {
           rotate: isDark ? 180 : 0
         }}
         transition={{ duration: 0.2 }}
-        className="absolute left-3 top-1/2 -translate-y-1/2"
+        className="absolute left-3 top-1/2 -translate-y-1/2 z-10"
         style={{ pointerEvents: 'none' }}
       >
-        <Sun className="h-5 w-5 text-amber-400" style={{ filter: 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.6))' }} />
+        <Sun className="h-5 w-5 text-amber-400 fill-amber-400" style={{ filter: 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.8))' }} />
       </motion.div>
 
       {/* Moon Icon (visible in dark mode) */}
@@ -60,10 +60,10 @@ export function ThemeToggle() {
           rotate: isDark ? 0 : -180
         }}
         transition={{ duration: 0.2 }}
-        className="absolute right-3 top-1/2 -translate-y-1/2"
+        className="absolute right-3 top-1/2 -translate-y-1/2 z-10"
         style={{ pointerEvents: 'none' }}
       >
-        <Moon className="h-5 w-5 text-indigo-400" style={{ filter: 'drop-shadow(0 0 8px rgba(129, 140, 248, 0.6))' }} />
+        <Moon className="h-5 w-5 text-indigo-400 fill-indigo-400" style={{ filter: 'drop-shadow(0 0 8px rgba(129, 140, 248, 0.8))' }} />
       </motion.div>
 
       {/* Toggle Circle */}
@@ -71,7 +71,7 @@ export function ThemeToggle() {
         animate={{ x: isDark ? 34 : 4 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
         className={`
-          inline-block h-8 w-8 rounded-full shadow-lg
+          inline-block h-8 w-8 rounded-full shadow-lg relative z-20
           ${isDark
             ? 'bg-gradient-to-br from-violet-500 to-indigo-600 shadow-violet-500/40'
             : 'bg-gradient-to-br from-white to-gray-100 shadow-black/10'
