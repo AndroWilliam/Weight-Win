@@ -40,7 +40,7 @@ export default function PreviewOCRProcessingPage() {
     // Check if we have photo data AFTER loading is complete
     if (!data?.photoBase64) {
       console.log('❌ No photo data found, redirecting back to weight-check')
-      router.push('/preview/weight-check')
+      window.location.href = '/preview/weight-check'
       return
     }
 
@@ -132,11 +132,13 @@ export default function PreviewOCRProcessingPage() {
   }
 
   const handleContinue = () => {
-    router.push('/preview/dashboard')
+    console.log('✅ [OCRProcessing] OCR complete, navigating to dashboard')
+    window.location.href = '/preview/dashboard'
   }
 
   const handleRetry = () => {
-    router.push('/preview/weight-check')
+    console.log('🔄 [OCRProcessing] Retrying, navigating back to weight-check')
+    window.location.href = '/preview/weight-check'
   }
 
   if (processing) {

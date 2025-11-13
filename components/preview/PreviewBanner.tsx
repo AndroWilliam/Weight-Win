@@ -13,7 +13,8 @@ export function PreviewBanner({ currentStep, totalSteps }: PreviewBannerProps) {
 
   const handleExit = () => {
     if (confirm('Exit demo mode? Your progress will be saved.')) {
-      router.push('/')
+      console.log('🚪 [PreviewBanner] Exiting demo, navigating to homepage')
+      window.location.href = '/'
     }
   }
 

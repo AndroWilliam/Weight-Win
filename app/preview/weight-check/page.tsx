@@ -119,7 +119,8 @@ export default function PreviewWeightCheckPage() {
       console.log('✅ Preview data verified, navigating to OCR page')
 
       // Step 5: Navigate to OCR processing
-      router.push('/preview/ocr-processing')
+      console.log('📸 [WeightCheck] Navigating to OCR processing')
+      window.location.href = '/preview/ocr-processing'
 
     } catch (error: any) {
       console.error('❌ Error in handleNext:', error)
