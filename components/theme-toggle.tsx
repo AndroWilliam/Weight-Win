@@ -16,7 +16,7 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <div className="w-14 h-7 bg-muted rounded-full animate-pulse" />
+      <div className="w-[70px] h-10 md:h-10 bg-white/10 border border-white/20 rounded-full animate-pulse" />
     )
   }
 
@@ -25,43 +25,59 @@ export function ThemeToggle() {
   return (
     <motion.button
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
-      whileTap={{ scale: 0.95 }}
-      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.2 }}
       className={`
-        relative inline-flex h-7 w-14 items-center rounded-full transition-colors duration-500 ease-in-out
+        relative inline-flex h-10 md:h-10 w-[70px] items-center rounded-[20px] transition-all duration-300
         focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background
-        ${isDark ? 'bg-primary' : 'bg-muted'}
+        ${isDark
+          ? 'bg-violet-500/15 border border-violet-500/30 hover:shadow-[0_0_20px_rgba(129,140,248,0.8)]'
+          : 'bg-white/10 border border-white/20 hover:shadow-[0_0_20px_rgba(251,191,36,0.8)]'
+        }
       `}
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+      role="switch"
+      aria-checked={isDark}
     >
-      <motion.span
-        animate={{ x: isDark ? 28 : 2 }}
-        transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-background shadow-lg relative"
+      {/* Sun Icon (visible in light mode) */}
+      <motion.div
+        animate={{
+          opacity: isDark ? 0 : 1,
+          rotate: isDark ? 180 : 0
+        }}
+        transition={{ duration: 0.2 }}
+        className="absolute left-3 top-1/2 -translate-y-1/2"
+        style={{ pointerEvents: 'none' }}
       >
-        <motion.div
-          animate={{ 
-            opacity: isDark ? 0 : 1,
-            scale: isDark ? 0.5 : 1,
-            rotate: isDark ? 180 : 0
-          }}
-          transition={{ duration: 0.3 }}
-          className="absolute"
-        >
-          <Sun className="h-4 w-4 text-slate-500" />
-        </motion.div>
-        <motion.div
-          animate={{ 
-            opacity: isDark ? 1 : 0,
-            scale: isDark ? 1 : 0.5,
-            rotate: isDark ? 0 : -180
-          }}
-          transition={{ duration: 0.3 }}
-          className="absolute"
-        >
-          <Moon className="h-4 w-4 text-white" />
-        </motion.div>
-      </motion.span>
+        <Sun className="h-5 w-5 text-amber-400" style={{ filter: 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.6))' }} />
+      </motion.div>
+
+      {/* Moon Icon (visible in dark mode) */}
+      <motion.div
+        animate={{
+          opacity: isDark ? 1 : 0,
+          rotate: isDark ? 0 : -180
+        }}
+        transition={{ duration: 0.2 }}
+        className="absolute right-3 top-1/2 -translate-y-1/2"
+        style={{ pointerEvents: 'none' }}
+      >
+        <Moon className="h-5 w-5 text-indigo-400" style={{ filter: 'drop-shadow(0 0 8px rgba(129, 140, 248, 0.6))' }} />
+      </motion.div>
+
+      {/* Toggle Circle */}
+      <motion.span
+        animate={{ x: isDark ? 34 : 4 }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        className={`
+          inline-block h-8 w-8 rounded-full shadow-lg
+          ${isDark
+            ? 'bg-gradient-to-br from-violet-500 to-indigo-600 shadow-violet-500/40'
+            : 'bg-gradient-to-br from-white to-gray-100 shadow-black/10'
+          }
+        `}
+      />
     </motion.button>
   )
 }

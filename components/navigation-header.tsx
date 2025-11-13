@@ -84,72 +84,43 @@ export function NavigationHeader() {
         
         {/* Right side - Desktop */}
         <div className="hidden md:flex items-center gap-4">
-          {!isLoading && user && (
-            <ThemeToggle />
-          )}
+          <ThemeToggle />
           {!isLoading && user ? (
-            <ProfileDropdown 
+            <ProfileDropdown
               userInitials={user.initials}
               isAdmin={user.isAdmin}
             />
           ) : (
             <Link href="/auth/login">
-              <Button className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg font-medium">
-                Start the 7-Day Challenge
+              <Button
+                variant="outline"
+                className="border-primary border-[1.5px] text-foreground hover:bg-primary/10 hover:scale-105 transition-all duration-200 px-5 py-2 h-10 font-medium"
+              >
+                Log In
               </Button>
             </Link>
           )}
         </div>
 
         {/* Mobile Menu */}
-        <div className="md:hidden flex items-center gap-2">
-          {!isLoading && user && (
-            <ThemeToggle />
-          )}
+        <div className="md:hidden flex items-center gap-3">
+          <ThemeToggle />
           {!isLoading && user ? (
             /* Show profile dropdown when logged in on mobile */
-            <ProfileDropdown 
+            <ProfileDropdown
               userInitials={user.initials}
               isAdmin={user.isAdmin}
             />
           ) : (
-            /* Show hamburger menu when not logged in */
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="sm" className="p-2">
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">Open menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-full sm:w-80">
-                <div className="flex flex-col gap-6 mt-6">
-                  {/* Mobile Navigation Links with left padding spacer */}
-                  <div className="space-y-4">
-                    <button 
-                      onClick={() => scrollToSection('how-it-works')}
-                      className="block w-full text-left text-muted-foreground hover:text-foreground font-medium transition-colors py-2 pl-4"
-                    >
-                      How it works
-                    </button>
-                    <button 
-                      onClick={() => scrollToSection('for-nutritionists')}
-                      className="block w-full text-left text-muted-foreground hover:text-foreground font-medium transition-colors py-2 pl-4"
-                    >
-                      For Nutritionists
-                    </button>
-                  </div>
-
-                  {/* Mobile CTA Button - Centered with top/bottom spacers */}
-                  <div className="flex-1 flex items-center justify-center px-4 py-8">
-                    <Link href="/auth/login" className="w-full">
-                      <Button className="w-full bg-primary hover:bg-primary/90 text-white py-3 rounded-lg font-medium">
-                        Start the 7-Day Challenge
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+            /* Show Log In button when not logged in */
+            <Link href="/auth/login">
+              <Button
+                variant="outline"
+                className="border-primary border-[1.5px] text-foreground hover:bg-primary/10 h-11 px-4 font-medium"
+              >
+                Log In
+              </Button>
+            </Link>
           )}
         </div>
       </div>
