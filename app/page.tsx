@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
-import { CheckCircle, TrendingUp, Award, ArrowRight, Users } from "lucide-react"
+import { CheckCircle, TrendingUp, Award, ArrowRight, Users, Loader2 } from "lucide-react"
 import { NavigationHeader } from "@/components/navigation-header"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { createClient } from '@/lib/supabase/client'
@@ -15,6 +15,7 @@ export default function HomePage() {
   const router = useRouter()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [isNavigating, setIsNavigating] = useState(false)
 
   useEffect(() => {
     async function checkAuth() {
@@ -27,17 +28,50 @@ export default function HomePage() {
     checkAuth()
   }, [])
 
-  const handleStartTrial = () => {
+  const handleStartTrial = async () => {
+    // Prevent multiple clicks
+    if (isNavigating) {
+      console.log('⏳ [Homepage] Navigation already in progress')
+      return
+    }
+
+    console.log('🚀 [Homepage] Start Trial button clicked at:', new Date().toISOString())
+    console.log('🚀 [Homepage] Current URL:', window.location.href)
+
+    setIsNavigating(true)
+
     // Check if user already completed preview
     const completed = isPreviewCompleted()
-    
-    if (completed) {
-      // Redirect to signup prompt with message
-      router.push('/preview-signup?returning=true')
-    } else {
-      // Start fresh preview
-      router.push('/preview/weight-check')
+    const targetUrl = completed ? '/preview-signup?returning=true' : '/preview/weight-check'
+
+    console.log('🚀 [Homepage] Target URL:', targetUrl)
+    console.log('🚀 [Homepage] Preview completed:', completed)
+
+    try {
+      // Create timeout promise (2 seconds)
+      const timeoutMs = 2000
+      console.log(`🚀 [Homepage] Starting navigation with ${timeoutMs}ms timeout`)
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Navigation timeout')), timeoutMs)
+      )
+
+      // Create navigation promise
+      const navigationPromise = router.push(targetUrl)
+
+      // Race between navigation and timeout
+      await Promise.race([navigationPromise, timeoutPromise])
+
+      console.log('✅ [Homepage] Router navigation successful')
+    } catch (error) {
+      console.warn('⚠️ [Homepage] Router navigation failed or timed out:', error)
+      console.log('🔄 [Homepage] Falling back to window.location.href')
+
+      // Fallback to full page navigation
+      window.location.href = targetUrl
     }
+
+    // Note: Don't reset isNavigating - let page navigation complete
   }
 
   return (
@@ -60,12 +94,20 @@ export default function HomePage() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {!loading && !isAuthenticated && (
-              <Button 
+              <Button
                 size="lg"
                 className="text-lg font-semibold px-8 min-w-fit"
                 onClick={handleStartTrial}
+                disabled={isNavigating}
               >
-                Start Free Trial 🚀
+                {isNavigating ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Starting Demo...
+                  </span>
+                ) : (
+                  'Start Free Trial 🚀'
+                )}
               </Button>
             )}
 
