@@ -6,6 +6,8 @@ import { Loader2, CheckCircle, AlertTriangle } from 'lucide-react'
 import { PreviewBanner } from '@/components/preview/PreviewBanner'
 import { PreviewStepIndicator } from '@/components/preview/PreviewStepIndicator'
 import { usePreviewData } from '@/hooks/usePreviewData'
+import { useDemoMode } from '@/hooks/useDemoMode'
+import { getDemoData } from '@/lib/preview/demoData'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 
@@ -14,6 +16,7 @@ const TOTAL_STEPS = 5
 export default function PreviewOCRProcessingPage() {
   const router = useRouter()
   const { data, loading, updateData } = usePreviewData()
+  const { isDemoMode } = useDemoMode()
 
   const [processing, setProcessing] = useState(true)
   const [weight, setWeight] = useState<number | null>(null)
@@ -22,7 +25,21 @@ export default function PreviewOCRProcessingPage() {
   // ✅ NEW: Guard flag to prevent infinite loop
   const [hasProcessed, setHasProcessed] = useState(false)
 
+  // Use demo data if in demo mode
+  const displayData = isDemoMode ? getDemoData('ocr') : data
+
   useEffect(() => {
+    // Log demo mode status and skip processing
+    if (isDemoMode) {
+      console.log('🎭 Demo mode active - using sample data for OCR')
+      console.log('📊 Demo data:', displayData)
+      // Show demo result immediately
+      setWeight(displayData?.weight || 0)
+      setProcessing(false)
+      setHasProcessed(true)
+      return
+    }
+
     // Wait for data to load from localStorage
     if (loading) {
       console.log('⏳ Waiting for preview data to load...')
@@ -37,15 +54,15 @@ export default function PreviewOCRProcessingPage() {
       return
     }
 
-    // Check if we have photo data AFTER loading is complete
-    if (!data?.photoBase64) {
+    // Check if we have photo data AFTER loading is complete (skip validation in demo mode)
+    if (!isDemoMode && !data?.photoBase64) {
       console.log('❌ No photo data found, redirecting back to weight-check')
       window.location.href = '/preview/weight-check'
       return
     }
 
     // ✅ FIX: If weight already exists in data, OCR was already completed
-    if (data.weight && data.weight > 0) {
+    if (data && data.weight && data.weight > 0) {
       console.log('✅ Weight already exists in localStorage:', data.weight, 'kg')
       console.log('⏭️ Skipping OCR processing, showing success screen')
       setHasProcessed(true)
@@ -144,6 +161,16 @@ export default function PreviewOCRProcessingPage() {
   if (processing) {
     return (
       <div className="min-h-screen bg-gray-50">
+        {/* Demo Mode Banner */}
+        {isDemoMode && (
+          <div className="bg-yellow-100 border-b-2 border-yellow-400 text-yellow-900 px-4 py-2 flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <span className="text-lg">🎭</span>
+              <span className="font-medium text-sm sm:text-base">DEMO MODE - Using Sample Data</span>
+            </span>
+          </div>
+        )}
+
         <PreviewBanner currentStep={2} totalSteps={TOTAL_STEPS} />
 
         <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
@@ -153,10 +180,10 @@ export default function PreviewOCRProcessingPage() {
             </h1>
 
             {/* Image Preview */}
-            {data?.photoBase64 && (
+            {displayData?.photoBase64 && (
               <div className="bg-white rounded-xl p-4 shadow-sm">
                 <img
-                  src={data.photoBase64}
+                  src={displayData.photoBase64}
                   alt="Your scale"
                   className="w-full h-auto rounded-lg"
                 />
@@ -187,6 +214,16 @@ export default function PreviewOCRProcessingPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50">
+        {/* Demo Mode Banner */}
+        {isDemoMode && (
+          <div className="bg-yellow-100 border-b-2 border-yellow-400 text-yellow-900 px-4 py-2 flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <span className="text-lg">🎭</span>
+              <span className="font-medium text-sm sm:text-base">DEMO MODE - Using Sample Data</span>
+            </span>
+          </div>
+        )}
+
         <PreviewBanner currentStep={2} totalSteps={TOTAL_STEPS} />
 
         <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
@@ -224,6 +261,16 @@ export default function PreviewOCRProcessingPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Demo Mode Banner */}
+      {isDemoMode && (
+        <div className="bg-yellow-100 border-b-2 border-yellow-400 text-yellow-900 px-4 py-2 flex items-center justify-between">
+          <span className="flex items-center gap-2">
+            <span className="text-lg">🎭</span>
+            <span className="font-medium text-sm sm:text-base">DEMO MODE - Using Sample Data</span>
+          </span>
+        </div>
+      )}
+
       <PreviewBanner currentStep={2} totalSteps={TOTAL_STEPS} />
 
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
@@ -240,10 +287,10 @@ export default function PreviewOCRProcessingPage() {
           </div>
 
           {/* Image with highlight */}
-          {data?.photoBase64 && (
+          {displayData?.photoBase64 && (
             <div className="bg-white rounded-xl p-4 shadow-sm">
               <img
-                src={data.photoBase64}
+                src={displayData.photoBase64}
                 alt="Your scale with detected weight"
                 className="w-full h-auto rounded-lg"
               />

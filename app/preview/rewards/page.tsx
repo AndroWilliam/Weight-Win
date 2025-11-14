@@ -7,6 +7,8 @@ import { PreviewTooltip } from '@/components/preview/PreviewTooltip'
 import { PreviewStepIndicator } from '@/components/preview/PreviewStepIndicator'
 import { PreviewNavigation } from '@/components/preview/PreviewNavigation'
 import { usePreviewData } from '@/hooks/usePreviewData'
+import { useDemoMode } from '@/hooks/useDemoMode'
+import { getDemoData } from '@/lib/preview/demoData'
 import { Lock } from 'lucide-react'
 
 const TOTAL_STEPS = 5
@@ -14,12 +16,23 @@ const TOTAL_STEPS = 5
 export default function PreviewRewardsPage() {
   const router = useRouter()
   const { data, loading, updateData } = usePreviewData()
+  const { isDemoMode } = useDemoMode()
   const [showTooltip, setShowTooltip] = useState(true)
 
   // ✅ NEW: Guard flag to prevent infinite localStorage loop
   const [hasUpdatedStep, setHasUpdatedStep] = useState(false)
 
+  // Use demo data if in demo mode
+  const displayData = isDemoMode ? getDemoData('rewards') : data
+
   useEffect(() => {
+    // Log demo mode status
+    if (isDemoMode) {
+      console.log('🎭 Demo mode active - using sample data for rewards')
+      console.log('📊 Demo data:', displayData)
+      return
+    }
+
     // Wait for data to load
     if (loading) {
       console.log('⏳ Waiting for preview data to load...')
@@ -34,15 +47,15 @@ export default function PreviewRewardsPage() {
       return
     }
 
-    // Check if we have required data
-    if (!data || !data.weight) {
+    // Check if we have required data (skip validation in demo mode)
+    if (!isDemoMode && (!data || !data.weight)) {
       console.log('❌ No weight data found, redirecting to weight-check')
       window.location.href = '/preview/weight-check'
       return
     }
 
     // ✅ FIX: Check if step is already 5 and badges are set
-    if (data.currentStep === 5 && data.firstStepBadgeEarned && data.tourCompleted) {
+    if (data && data.currentStep === 5 && data.firstStepBadgeEarned && data.tourCompleted) {
       console.log('✅ Step already set to 5 with badges, skipping update')
       setHasUpdatedStep(true)
       return
@@ -83,11 +96,21 @@ export default function PreviewRewardsPage() {
   }
 
   // Show loading state while data is being fetched
-  if (loading) return <div>Loading...</div>
-  if (!data) return null
+  if (!isDemoMode && loading) return <div>Loading...</div>
+  if (!isDemoMode && !data) return null
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Demo Mode Banner */}
+      {isDemoMode && (
+        <div className="bg-yellow-100 border-b-2 border-yellow-400 text-yellow-900 px-4 py-2 flex items-center justify-between">
+          <span className="flex items-center gap-2">
+            <span className="text-lg">🎭</span>
+            <span className="font-medium text-sm sm:text-base">DEMO MODE - Using Sample Data</span>
+          </span>
+        </div>
+      )}
+
       <PreviewBanner currentStep={5} totalSteps={TOTAL_STEPS} />
 
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
