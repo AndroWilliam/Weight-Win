@@ -15,7 +15,92 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 const TOTAL_STEPS = 5
 
 /**
+ * PROGRESS PAGE - Preview Flow Step 4
+ * ====================================
+ * 
+ * PURPOSE:
+ * Detailed progress tracking showing weight history, statistics,
+ * and visual charts of weight change over time.
+ * 
+ * STORAGE OPERATIONS:
+ * - Reads:
+ *   1. 'weightwin_preview_data' (localStorage): Current preview data
+ *      Structure: PreviewData {
+ *        weight: number (current weight from OCR step)
+ *        weightUnit: 'kg' | 'lb'
+ *        ...other fields
+ *      }
+ * 
+ * - Writes:
+ *   1. 'weightwin_preview_data' (localStorage): Updates currentStep to 4
+ *      Updates: { currentStep: 4 }
+ * 
+ * DATA PROCESSING:
+ * - Uses SAMPLE_PROGRESS_DATA for chart display (7-day sample data)
+ * - Replaces first day's weight with actual weight if available
+ * - Calculates statistics using helper functions (BUG-005):
+ *   - getStartingWeight(weights): Finds earliest weight by timestamp
+ *   - getCurrentWeight(weights): Finds latest weight by timestamp
+ *   - calculateWeightChange(current, starting): Calculates difference
+ *   - sortWeightsByDate(weights): Sorts chronologically
+ * 
+ * STATISTICS CALCULATED:
+ * - Starting Weight: Earliest weight by timestamp (not array position)
+ * - Current Weight: Latest weight by timestamp (not array position)
+ * - Weight Change: Current - Starting (can be negative for loss)
+ * - Average Weight: Mean of all weight entries
+ * - Days Completed: Count of weight entries (from sample data: 7)
+ * 
+ * NAVIGATION:
+ * - Previous: /preview/dashboard (back button)
+ * - Next: /preview/rewards (user choice via navigation)
+ * - Redirect: /preview/weight-check (if no weight data found)
+ * 
+ * USER FLOW:
+ * 1. Page loads and validates weight data exists
+ * 2. If no data → Redirect to weight-check
+ * 3. If data exists → Prepare chart data
+ * 4. Calculate statistics using BUG-005 helper functions
+ * 5. Display weight chart/graph (7-day sample data)
+ * 6. Show detailed statistics cards
+ * 7. Display progress information
+ * 
+ * CHART DATA:
+ * - Uses SAMPLE_PROGRESS_DATA for consistent 7-day display
+ * - First day's weight replaced with actual weight if available
+ * - Chart shows "Day 1" through "Day 7" on x-axis
+ * - Weight values on y-axis
+ * - Line chart visualization using recharts library
+ * 
+ * DATA VALIDATION:
+ * - All dates formatted using dateFormat utility (BUG-004)
+ * - Weights validated as numbers
+ * - Handles single entry case
+ * - Handles empty data case
+ * - Statistics handle null values gracefully
+ * 
+ * GUARD FLAGS:
+ * - hasUpdatedStep: Prevents currentStep from being updated multiple times
+ * - If currentStep is already 4, skip update
+ * - This prevents infinite loops when component re-renders
+ * 
+ * DEMO MODE:
+ * - When ?demo=true: Shows sample progress data from getDemoData('progress')
+ * - Sample data has 4 weight entries with dates
+ * - Demonstrates weight loss trend (76.8 → 75.5 kg)
+ * - Shows demo mode banner at top
+ * - See: hooks/useDemoMode.ts and lib/preview/demoData.ts
+ * 
+ * RELATED FILES:
+ * - lib/utils/dateFormat.ts (date formatting - BUG-004)
+ * - lib/preview/previewData.ts (SAMPLE_PROGRESS_DATA constant)
+ * - lib/preview/demoData.ts (demo mode sample data)
+ * - BUG-005 helper functions (statistics calculation in this file)
+ */
+
+/**
  * Weight entry type for statistics calculation
+ * Used internally for processing weight data
  */
 type WeightEntry = {
   weight: number
@@ -193,41 +278,48 @@ export default function PreviewProgressPage() {
   if (!isDemoMode && !data) return null
 
   // Prepare weight entries for statistics calculation
+  // Demo mode uses different data source than normal mode
   let weightEntries: WeightEntry[] = []
   
   if (isDemoMode && displayData && 'weights' in displayData && displayData.weights) {
-    // Demo mode: use weights array with date field
+    // Demo mode: use weights array with date field from getDemoData('progress')
+    // Demo data has 4 entries with ISO date strings
     weightEntries = displayData.weights.map((item: any) => ({
       weight: item.weight,
-      date: item.date,
-      timestamp: item.date ? new Date(item.date).getTime() : undefined
+      date: item.date, // ISO date string
+      timestamp: item.date ? new Date(item.date).getTime() : undefined // Convert to timestamp
     }))
   } else {
     // Normal mode: use SAMPLE_PROGRESS_DATA with date field
+    // Replace first day's weight with actual weight from localStorage if available
     weightEntries = SAMPLE_PROGRESS_DATA.map((item, index) => ({
       weight: index === 0 && data && data.weight > 0 ? data.weight : item.weight,
-      date: item.date,
-      timestamp: item.date ? new Date(item.date).getTime() : undefined
+      date: item.date, // Date string like '2024-01-01'
+      timestamp: item.date ? new Date(item.date).getTime() : undefined // Convert to timestamp
     }))
   }
 
   // Sort weights by date/timestamp (oldest first) for consistent display
+  // This ensures statistics are calculated correctly regardless of array order
+  // See BUG-005: Statistics calculation fix
   const sortedWeights = sortWeightsByDate(weightEntries)
 
   // Calculate statistics using helper functions (by timestamp, not array position)
-  const startingWeight = getStartingWeight(sortedWeights)
-  const currentWeight = getCurrentWeight(sortedWeights)
-  const weightChange = calculateWeightChange(currentWeight, startingWeight)
+  // These functions find earliest/latest by timestamp, not by array index
+  // This fixes the bug where statistics were wrong if data wasn't sorted
+  const startingWeight = getStartingWeight(sortedWeights) // Earliest weight by timestamp
+  const currentWeight = getCurrentWeight(sortedWeights)   // Latest weight by timestamp
+  const weightChange = calculateWeightChange(currentWeight, startingWeight) // Current - Starting
 
-  // Calculate average weight
+  // Calculate average weight across all entries
   const averageWeight = sortedWeights.length > 0
     ? sortedWeights.reduce((sum: number, item: WeightEntry) => sum + item.weight, 0) / sortedWeights.length
     : 0
 
-  // Calculate days completed
+  // Calculate days completed (number of weight entries)
   const daysCompleted = sortedWeights.length
 
-  // Log for debugging
+  // Log for debugging - helps verify calculations are correct
   console.log('📊 === STATISTICS CALCULATION START ===')
   console.log('Raw weight entries:', weightEntries)
   console.log('Sorted weights:', sortedWeights)
@@ -239,9 +331,11 @@ export default function PreviewProgressPage() {
   console.log('📊 === STATISTICS CALCULATION END ===')
 
   // Prepare chart data (sorted by date)
+  // Chart uses "Day 1", "Day 2", etc. as labels
+  // Weight values are plotted on y-axis
   const chartData = sortedWeights.map((item, index) => ({
-    day: `Day ${index + 1}`,
-    weight: item.weight
+    day: `Day ${index + 1}`, // Chart label
+    weight: item.weight // Chart value
   }))
 
   return (

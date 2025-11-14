@@ -1,5 +1,82 @@
 'use client'
 
+/**
+ * REWARDS PAGE - Preview Flow Step 5 (Final Step)
+ * ================================================
+ * 
+ * PURPOSE:
+ * Shows user's achievements and unlocked rewards based on
+ * completed steps in the preview flow. This is the final step
+ * before prompting user to sign up.
+ * 
+ * STORAGE OPERATIONS:
+ * - Reads:
+ *   1. 'weightwin_preview_data' (localStorage): Preview data including badges
+ *      Structure: PreviewData {
+ *        weight: number
+ *        firstStepBadgeEarned: boolean (whether first step badge was earned)
+ *        tourCompleted: boolean (whether preview tour was completed)
+ *        currentStep: number (5)
+ *        ...other fields
+ *      }
+ * 
+ * - Writes:
+ *   1. 'weightwin_preview_data' (localStorage): Updates badges and completion status
+ *      Updates: {
+ *        firstStepBadgeEarned: true,
+ *        tourCompleted: true,
+ *        currentStep: 5
+ *      }
+ * 
+ * NAVIGATION:
+ * - Previous: /preview/progress or /preview/dashboard
+ * - Next: /preview-signup (final step, prompts user to create account)
+ * - Redirect: /preview/weight-check (if no weight data found)
+ * 
+ * USER FLOW:
+ * 1. Page loads and checks for weight data
+ * 2. If none → Redirect to weight-check
+ * 3. If data exists → Display rewards
+ * 4. Show earned badge (First Step badge)
+ * 5. Show locked rewards (future achievements)
+ * 6. Mark badges as earned and tour as completed
+ * 7. User clicks "Finish Demo" → Navigate to signup page
+ * 
+ * REWARDS LOGIC:
+ * - First Step badge: Earned when user completes first weight entry
+ * - Badge earned date: Current date (formatted using dateFormat utility)
+ * - Locked rewards: Shown in gray/disabled state
+ * - Unlocked rewards: Shown in color/enabled state
+ * - Progress indicator: Shows completion status
+ * 
+ * DISPLAYED DATA:
+ * - Earned Badge: First Step badge with earned date
+ * - Locked Rewards: List of future achievements (3-Day Streak, Week Warrior, etc.)
+ * - Badge Icons: Visual representation of each reward
+ * - Completion Status: Visual indicator of tour completion
+ * 
+ * DATA VALIDATION:
+ * - Must have at least one weight entry (weight > 0)
+ * - Badge earned date formatted using dateFormat utility (BUG-004)
+ * - Guard flag prevents multiple badge updates (hasUpdatedStep)
+ * 
+ * GUARD FLAGS:
+ * - hasUpdatedStep: Prevents badges from being marked multiple times
+ * - If badges already set and step is 5, skip update
+ * - This prevents infinite loops when component re-renders
+ * 
+ * DEMO MODE:
+ * - When ?demo=true: Shows sample rewards data from getDemoData('rewards')
+ * - Demonstrates 4 days completed with partial progress
+ * - Shows mix of locked/unlocked rewards
+ * - See: hooks/useDemoMode.ts and lib/preview/demoData.ts
+ * 
+ * RELATED FILES:
+ * - /preview-signup (next page, prompts account creation)
+ * - lib/utils/dateFormat.ts (date formatting - BUG-004)
+ * - hooks/usePreviewData.ts (data management hook)
+ */
+
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { PreviewBanner } from '@/components/preview/PreviewBanner'
@@ -21,9 +98,11 @@ export default function PreviewRewardsPage() {
   const [showTooltip, setShowTooltip] = useState(true)
 
   // ✅ NEW: Guard flag to prevent infinite localStorage loop
+  // Prevents badges from being marked multiple times on re-render
   const [hasUpdatedStep, setHasUpdatedStep] = useState(false)
 
   // Use demo data if in demo mode
+  // Demo mode bypasses localStorage and uses sample data
   const displayData = isDemoMode ? getDemoData('rewards') : data
 
   useEffect(() => {
@@ -56,6 +135,7 @@ export default function PreviewRewardsPage() {
     }
 
     // ✅ FIX: Check if step is already 5 and badges are set
+    // If already completed, no need to update localStorage again
     if (data && data.currentStep === 5 && data.firstStepBadgeEarned && data.tourCompleted) {
       console.log('✅ Step already set to 5 with badges, skipping update')
       setHasUpdatedStep(true)
@@ -65,13 +145,16 @@ export default function PreviewRewardsPage() {
     console.log('💾 Setting currentStep to 5 and marking badges (first time)')
 
     // ✅ FIX: Mark as updated BEFORE calling updateData
+    // This prevents the useEffect from running again if updateData triggers a re-render
     setHasUpdatedStep(true)
 
     // Mark badge as earned and tour as completed (will only happen once)
+    // Updates 'weightwin_preview_data' in localStorage with completion status
+    // This data is used by /preview-signup page to show completion summary
     updateData({
-      firstStepBadgeEarned: true,
-      tourCompleted: true,
-      currentStep: 5
+      firstStepBadgeEarned: true, // First Step badge earned
+      tourCompleted: true, // Preview tour completed
+      currentStep: 5 // Final step
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, data, hasUpdatedStep])

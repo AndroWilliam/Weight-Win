@@ -1,5 +1,79 @@
 'use client'
 
+/**
+ * DASHBOARD PAGE - Preview Flow Step 3
+ * =====================================
+ * 
+ * PURPOSE:
+ * Main dashboard showing user's current weight, progress summary,
+ * and quick navigation to other preview pages.
+ * 
+ * STORAGE OPERATIONS:
+ * - Reads:
+ *   1. 'weightwin_preview_data' (localStorage): Current preview data
+ *      Structure: PreviewData {
+ *        weight: number (extracted weight from OCR step)
+ *        weightUnit: 'kg' | 'lb'
+ *        photoBase64: string (base64-encoded scale photo)
+ *        photoTimestamp: string (ISO date string)
+ *        streakCount: number
+ *        currentStep: number (3)
+ *        sessionStarted: string (ISO date string)
+ *        tourCompleted: boolean
+ *        firstStepBadgeEarned: boolean
+ *      }
+ * 
+ * - Writes:
+ *   1. 'weightwin_preview_data' (localStorage): Updates currentStep to 3
+ *      Updates: { currentStep: 3 }
+ * 
+ * NAVIGATION:
+ * - Previous: /preview/ocr-processing (after weight entry)
+ * - Next: /preview/progress, /preview/rewards (user choice via navigation)
+ * - Redirect: /preview/weight-check (if no weight data found)
+ * 
+ * USER FLOW:
+ * 1. Page loads and validates weight data exists in localStorage
+ * 2. If no data → Redirect to weight-check (user must complete flow)
+ * 3. If data exists → Display dashboard
+ * 4. Show current weight prominently
+ * 5. Show quick stats (streak count, days left)
+ * 6. Display latest entry with photo preview
+ * 7. Provide navigation to Progress and Rewards pages
+ * 
+ * DISPLAYED DATA:
+ * - Current Weight: Latest weight from preview data (weight field)
+ * - Weight Unit: kg or lb from preview data
+ * - Streak Count: Number of consecutive days from preview data
+ * - Days Left: Calculated (7 - days completed)
+ * - Latest Entry: Photo and timestamp from photoBase64 and photoTimestamp
+ * - Photo Preview: Base64 image displayed directly
+ * 
+ * DATA VALIDATION:
+ * - Must have at least one weight entry (weight > 0)
+ * - Weight must be a valid number
+ * - Photo timestamp formatted using dateFormat utility (BUG-004)
+ * - Guard flag prevents infinite localStorage updates (hasUpdatedStep)
+ * 
+ * GUARD FLAGS:
+ * - hasUpdatedStep: Prevents currentStep from being updated multiple times
+ * - If currentStep is already 3, skip update
+ * - This prevents infinite loops when component re-renders
+ * 
+ * DEMO MODE:
+ * - When ?demo=true: Shows sample dashboard data from getDemoData('dashboard')
+ * - Bypasses validation requirements
+ * - Shows demo mode banner at top
+ * - Uses sample weight, photo, and streak data
+ * - See: hooks/useDemoMode.ts and lib/preview/demoData.ts
+ * 
+ * RELATED FILES:
+ * - /preview/progress (detailed progress view)
+ * - /preview/rewards (achievements view)
+ * - lib/utils/dateFormat.ts (date formatting - BUG-004)
+ * - hooks/usePreviewData.ts (data management hook)
+ */
+
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { PreviewBanner } from '@/components/preview/PreviewBanner'
@@ -21,9 +95,11 @@ export default function PreviewDashboardPage() {
   const [showTooltip, setShowTooltip] = useState(true)
 
   // ✅ NEW: Guard flag to prevent infinite localStorage loop
+  // Prevents currentStep from being updated multiple times on re-render
   const [hasUpdatedStep, setHasUpdatedStep] = useState(false)
 
   // Use demo data if in demo mode
+  // Demo mode bypasses localStorage and uses sample data
   const displayData = isDemoMode ? getDemoData('dashboard') : data
 
   useEffect(() => {
@@ -49,6 +125,7 @@ export default function PreviewDashboardPage() {
     }
 
     // Check if we have required data (skip validation in demo mode)
+    // Weight data is required - without it, dashboard can't display meaningful info
     if (!isDemoMode && (!data || !data.weight)) {
       console.log('❌ No weight data found, redirecting to weight-check')
       window.location.href = '/preview/weight-check'
@@ -56,6 +133,7 @@ export default function PreviewDashboardPage() {
     }
 
     // ✅ FIX: Check if currentStep is already 3
+    // If already set, no need to update localStorage again
     if (data && data.currentStep === 3) {
       console.log('✅ Step already set to 3, skipping update')
       setHasUpdatedStep(true)
@@ -65,9 +143,11 @@ export default function PreviewDashboardPage() {
     console.log('💾 Setting currentStep to 3 (first time)')
 
     // ✅ FIX: Mark as updated BEFORE calling updateData
+    // This prevents the useEffect from running again if updateData triggers a re-render
     setHasUpdatedStep(true)
 
     // Update step (will only happen once)
+    // Updates 'weightwin_preview_data' in localStorage with currentStep: 3
     updateData({ currentStep: 3 })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, data, hasUpdatedStep])

@@ -1,5 +1,79 @@
 'use client'
 
+/**
+ * OCR PROCESSING PAGE - Preview Flow Step 2
+ * ==========================================
+ * 
+ * PURPOSE:
+ * Simulates OCR (Optical Character Recognition) processing of the scale photo.
+ * Extracts weight value from photo and stores it for use in dashboard/progress.
+ * 
+ * STORAGE OPERATIONS:
+ * - Reads:
+ *   1. 'weightwin_preview_data' (localStorage): Gets preview data including photo
+ *      Structure: PreviewData {
+ *        photoBase64: string (base64-encoded image from weight-check step)
+ *        photoTimestamp: string (ISO date string)
+ *        weight: number (0 initially, updated here)
+ *        ...other fields
+ *      }
+ * 
+ * - Writes:
+ *   1. 'weightwin_preview_data' (localStorage): Updates weight field after OCR
+ *      Updates: { weight: number (extracted weight value) }
+ * 
+ * NAVIGATION:
+ * - Previous: /preview/weight-check (back button)
+ * - Next: /preview/dashboard (after processing complete)
+ * - Redirect: /preview/weight-check (if no photo data found)
+ * 
+ * USER FLOW:
+ * 1. Page loads and checks for photo data in localStorage
+ * 2. If no photo → Redirect to weight-check (user must capture photo first)
+ * 3. If photo exists → Show processing animation
+ * 4. Call /api/preview/ocr endpoint with photo base64
+ * 5. Simulate OCR processing (2-3 seconds delay)
+ * 6. Extract weight from photo (simulated in preview mode)
+ * 7. Update preview data with extracted weight
+ * 8. Store weight in localStorage
+ * 9. Navigate to dashboard
+ * 
+ * OCR SIMULATION:
+ * In preview mode, OCR is simulated with:
+ * - API call to /api/preview/ocr endpoint
+ * - Random weight between 70-80 kg (for demo purposes)
+ * - 2-second processing delay for realistic UX
+ * - Success rate: 100% (no errors in preview)
+ * 
+ * NOTE: Real OCR integration would happen here in production
+ * using a service like Google Cloud Vision API or Tesseract.js
+ * See: lib/ocr/google-vision.ts for production OCR implementation
+ * 
+ * DATA VALIDATION:
+ * - Photo must exist in localStorage (photoBase64 field)
+ * - Weight must be extracted successfully from API response
+ * - Weight must be a valid number > 0
+ * - Guard flag prevents infinite loops (hasProcessed)
+ * 
+ * GUARD FLAGS:
+ * - hasProcessed: Prevents OCR from running multiple times
+ * - If weight already exists in data, skip OCR and show success screen
+ * - This prevents infinite loops when component re-renders
+ * 
+ * DEMO MODE:
+ * - When ?demo=true: Uses predefined weight value from getDemoData('ocr')
+ * - Skips photo validation
+ * - Skips API call
+ * - Still shows processing animation for consistency
+ * - See: hooks/useDemoMode.ts and lib/preview/demoData.ts
+ * 
+ * RELATED FILES:
+ * - /preview/weight-check (previous step, stores photo)
+ * - /preview/dashboard (next step, displays weight)
+ * - /api/preview/ocr (OCR processing endpoint)
+ * - lib/ocr/google-vision.ts (production OCR implementation)
+ */
+
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, CheckCircle, AlertTriangle } from 'lucide-react'
@@ -41,6 +115,7 @@ export default function PreviewOCRProcessingPage() {
     }
 
     // Wait for data to load from localStorage
+    // usePreviewData hook loads 'weightwin_preview_data' from localStorage
     if (loading) {
       console.log('⏳ Waiting for preview data to load...')
       return
@@ -49,12 +124,14 @@ export default function PreviewOCRProcessingPage() {
     console.log('📊 Preview data loaded:', data ? 'Data found' : 'No data')
 
     // ✅ FIX: If we already processed, don't process again
+    // Guard flag prevents infinite loops when component re-renders
     if (hasProcessed) {
       console.log('⏭️ Already processed, skipping OCR call')
       return
     }
 
     // Check if we have photo data AFTER loading is complete (skip validation in demo mode)
+    // Photo data is required - without it, we can't process OCR
     if (!isDemoMode && !data?.photoBase64) {
       console.log('❌ No photo data found, redirecting back to weight-check')
       window.location.href = '/preview/weight-check'
@@ -62,6 +139,8 @@ export default function PreviewOCRProcessingPage() {
     }
 
     // ✅ FIX: If weight already exists in data, OCR was already completed
+    // This handles page refresh or direct navigation to this page
+    // If weight > 0, OCR was successful in a previous visit
     if (data && data.weight && data.weight > 0) {
       console.log('✅ Weight already exists in localStorage:', data.weight, 'kg')
       console.log('⏭️ Skipping OCR processing, showing success screen')
@@ -88,11 +167,15 @@ export default function PreviewOCRProcessingPage() {
 
       console.log('🔄 Starting OCR processing for preview')
 
+      // Validate photo data exists before making API call
+      // This should never happen due to earlier checks, but good to be safe
       if (!data?.photoBase64) {
         throw new Error('No photo data found in preview localStorage')
       }
 
       // Call PREVIEW OCR API (not the authenticated endpoint)
+      // This endpoint doesn't require authentication and has rate limiting
+      // See: app/api/preview/ocr/route.ts
       const ocrResponse = await fetch('/api/preview/ocr', {
         method: 'POST',
         headers: {
