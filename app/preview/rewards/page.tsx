@@ -9,6 +9,7 @@ import { PreviewNavigation } from '@/components/preview/PreviewNavigation'
 import { usePreviewData } from '@/hooks/usePreviewData'
 import { useDemoMode } from '@/hooks/useDemoMode'
 import { getDemoData } from '@/lib/preview/demoData'
+import { formatWeightCheckDate } from '@/lib/utils/dateFormat'
 import { Lock } from 'lucide-react'
 
 const TOTAL_STEPS = 5
@@ -154,7 +155,7 @@ export default function PreviewRewardsPage() {
 
             {/* Earned Date */}
             <p className="text-sm text-gray-600">
-              Earned {new Date().toLocaleDateString()}
+              Earned {formatWeightCheckDate(new Date())}
             </p>
           </div>
         </div>

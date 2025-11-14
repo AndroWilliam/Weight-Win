@@ -9,6 +9,7 @@ import { PreviewNavigation } from '@/components/preview/PreviewNavigation'
 import { usePreviewData } from '@/hooks/usePreviewData'
 import { useDemoMode } from '@/hooks/useDemoMode'
 import { getDemoData } from '@/lib/preview/demoData'
+import { formatDateTime } from '@/lib/utils/dateFormat'
 import { Flame, Calendar, TrendingDown } from 'lucide-react'
 
 const TOTAL_STEPS = 5
@@ -187,13 +188,7 @@ export default function PreviewDashboardPage() {
               </p>
               <p className="text-sm text-gray-600">
                 {displayData?.photoTimestamp
-                  ? new Date(displayData.photoTimestamp).toLocaleString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })
+                  ? formatDateTime(displayData.photoTimestamp)
                   : 'Just now'
                 }
               </p>

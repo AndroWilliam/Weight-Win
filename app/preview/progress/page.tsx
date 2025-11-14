@@ -98,8 +98,8 @@ export default function PreviewProgressPage() {
 
   // Update first day with actual weight if valid, otherwise keep sample data
   const chartData = isDemoMode && displayData && 'weights' in displayData && displayData.weights
-    ? displayData.weights.map((item: any) => ({
-        date: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    ? displayData.weights.map((item: any, index: number) => ({
+        day: `Day ${index + 1}`,
         weight: item.weight
       }))
     : SAMPLE_PROGRESS_DATA.map((item, index) =>
