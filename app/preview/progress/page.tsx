@@ -14,6 +14,102 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 const TOTAL_STEPS = 5
 
+/**
+ * Weight entry type for statistics calculation
+ */
+type WeightEntry = {
+  weight: number
+  date?: string
+  timestamp?: string | number | Date
+}
+
+/**
+ * Helper function to find the starting (earliest) weight entry
+ * Finds the weight with the oldest timestamp/date
+ */
+function getStartingWeight(weights: WeightEntry[]): number | null {
+  if (!weights || weights.length === 0) {
+    return null
+  }
+
+  // Find weight entry with earliest timestamp/date
+  const earliestWeight = weights.reduce((earliest, current) => {
+    const earliestTime = getTimestamp(earliest)
+    const currentTime = getTimestamp(current)
+    
+    return currentTime < earliestTime ? current : earliest
+  })
+
+  return earliestWeight?.weight ?? null
+}
+
+/**
+ * Helper function to find the current (latest) weight entry
+ * Finds the weight with the most recent timestamp/date
+ */
+function getCurrentWeight(weights: WeightEntry[]): number | null {
+  if (!weights || weights.length === 0) {
+    return null
+  }
+
+  // Find weight entry with most recent timestamp/date
+  const latestWeight = weights.reduce((latest, current) => {
+    const latestTime = getTimestamp(latest)
+    const currentTime = getTimestamp(current)
+    
+    return currentTime > latestTime ? current : latest
+  })
+
+  return latestWeight?.weight ?? null
+}
+
+/**
+ * Helper function to get timestamp from weight entry
+ * Handles date, timestamp, or converts to timestamp
+ */
+function getTimestamp(entry: WeightEntry): number {
+  if (entry.timestamp) {
+    const ts = typeof entry.timestamp === 'number' 
+      ? entry.timestamp 
+      : new Date(entry.timestamp).getTime()
+    return ts
+  }
+  
+  if (entry.date) {
+    return new Date(entry.date).getTime()
+  }
+  
+  // Fallback: use current time (shouldn't happen)
+  return Date.now()
+}
+
+/**
+ * Helper function to calculate weight change
+ * Returns the difference between current and starting weight
+ */
+function calculateWeightChange(
+  currentWeight: number | null,
+  startingWeight: number | null
+): number {
+  if (currentWeight === null || startingWeight === null) {
+    return 0
+  }
+
+  return currentWeight - startingWeight
+}
+
+/**
+ * Helper function to sort weights by timestamp/date (oldest first)
+ * Returns a new sorted array
+ */
+function sortWeightsByDate(weights: WeightEntry[]): WeightEntry[] {
+  return [...weights].sort((a, b) => {
+    const timeA = getTimestamp(a)
+    const timeB = getTimestamp(b)
+    return timeA - timeB  // Ascending order (oldest first)
+  })
+}
+
 export default function PreviewProgressPage() {
   const router = useRouter()
   const { data, loading, updateData } = usePreviewData()
@@ -96,21 +192,57 @@ export default function PreviewProgressPage() {
   if (!isDemoMode && loading) return <div>Loading...</div>
   if (!isDemoMode && !data) return null
 
-  // Update first day with actual weight if valid, otherwise keep sample data
-  const chartData = isDemoMode && displayData && 'weights' in displayData && displayData.weights
-    ? displayData.weights.map((item: any, index: number) => ({
-        day: `Day ${index + 1}`,
-        weight: item.weight
-      }))
-    : SAMPLE_PROGRESS_DATA.map((item, index) =>
-        index === 0 && data && data.weight > 0 ? { ...item, weight: data.weight } : item
-      )
+  // Prepare weight entries for statistics calculation
+  let weightEntries: WeightEntry[] = []
+  
+  if (isDemoMode && displayData && 'weights' in displayData && displayData.weights) {
+    // Demo mode: use weights array with date field
+    weightEntries = displayData.weights.map((item: any) => ({
+      weight: item.weight,
+      date: item.date,
+      timestamp: item.date ? new Date(item.date).getTime() : undefined
+    }))
+  } else {
+    // Normal mode: use SAMPLE_PROGRESS_DATA with date field
+    weightEntries = SAMPLE_PROGRESS_DATA.map((item, index) => ({
+      weight: index === 0 && data && data.weight > 0 ? data.weight : item.weight,
+      date: item.date,
+      timestamp: item.date ? new Date(item.date).getTime() : undefined
+    }))
+  }
 
-  // Use chart data for calculations to ensure consistency
-  const startingWeight = chartData[0].weight
-  const currentWeight = chartData[chartData.length - 1].weight
-  const averageWeight = chartData.reduce((sum: number, item: any) => sum + item.weight, 0) / chartData.length
-  const totalChange = currentWeight - startingWeight
+  // Sort weights by date/timestamp (oldest first) for consistent display
+  const sortedWeights = sortWeightsByDate(weightEntries)
+
+  // Calculate statistics using helper functions (by timestamp, not array position)
+  const startingWeight = getStartingWeight(sortedWeights)
+  const currentWeight = getCurrentWeight(sortedWeights)
+  const weightChange = calculateWeightChange(currentWeight, startingWeight)
+
+  // Calculate average weight
+  const averageWeight = sortedWeights.length > 0
+    ? sortedWeights.reduce((sum: number, item: WeightEntry) => sum + item.weight, 0) / sortedWeights.length
+    : 0
+
+  // Calculate days completed
+  const daysCompleted = sortedWeights.length
+
+  // Log for debugging
+  console.log('📊 === STATISTICS CALCULATION START ===')
+  console.log('Raw weight entries:', weightEntries)
+  console.log('Sorted weights:', sortedWeights)
+  console.log('Starting Weight:', startingWeight, 'kg')
+  console.log('Current Weight:', currentWeight, 'kg')
+  console.log('Weight Change:', weightChange, 'kg')
+  console.log('Average Weight:', averageWeight.toFixed(1), 'kg')
+  console.log('Days Completed:', daysCompleted)
+  console.log('📊 === STATISTICS CALCULATION END ===')
+
+  // Prepare chart data (sorted by date)
+  const chartData = sortedWeights.map((item, index) => ({
+    day: `Day ${index + 1}`,
+    weight: item.weight
+  }))
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -182,29 +314,36 @@ export default function PreviewProgressPage() {
           <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
             <p className="text-xs text-gray-600 mb-1">Starting</p>
             <p className="text-lg font-bold text-gray-900">
-              {startingWeight.toFixed(1)} kg
+              {startingWeight !== null ? `${startingWeight.toFixed(1)} kg` : 'N/A'}
             </p>
           </div>
 
           <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
             <p className="text-xs text-gray-600 mb-1">Current</p>
             <p className="text-lg font-bold text-gray-900">
-              {currentWeight.toFixed(1)} kg
+              {currentWeight !== null ? `${currentWeight.toFixed(1)} kg` : 'N/A'}
             </p>
           </div>
 
           <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
             <p className="text-xs text-gray-600 mb-1">Average</p>
             <p className="text-lg font-bold text-gray-900">
-              {averageWeight.toFixed(1)} kg
+              {averageWeight > 0 ? `${averageWeight.toFixed(1)} kg` : 'N/A'}
             </p>
           </div>
 
           <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
             <p className="text-xs text-gray-600 mb-1">Change</p>
-            <p className={`text-lg font-bold ${totalChange < 0 ? 'text-green-600' : 'text-orange-600'}`}>
-              {totalChange > 0 ? '+' : ''}{totalChange.toFixed(1)} kg
+            <p className={`text-lg font-bold ${weightChange < 0 ? 'text-green-600' : weightChange > 0 ? 'text-orange-600' : 'text-gray-600'}`}>
+              {weightChange !== 0 
+                ? `${weightChange > 0 ? '+' : ''}${weightChange.toFixed(1)} kg`
+                : '0.0 kg'}
             </p>
+            {weightChange !== 0 && (
+              <p className="text-xs text-gray-500 mt-1">
+                {weightChange < 0 ? '↓ Lost' : '↑ Gained'}
+              </p>
+            )}
           </div>
         </div>
 
