@@ -90,7 +90,12 @@ dist
 
 # Gatsby files
 .cache/
-public
+# Note: Next.js uses /public for static assets, so we keep it tracked.
+# Remove or comment out the ignore rule that some starters add by default.
+# public
+
+# Allow checked-in static assets for Next.js public directory
+!public/**
 
 # Storybook build outputs
 .out
