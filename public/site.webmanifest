@@ -1,7 +1,7 @@
 {
   "name": "WeightWin",
   "short_name": "WeightWin",
-  "description": "7-Day Weight Tracking Challenge with AI scale verification and coaching rewards.",
+  "description": "7 Day Weight Tracking Challenge",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

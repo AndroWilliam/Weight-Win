@@ -16,8 +16,8 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'WeightWin - 7 Days to Better Health',
-  description: 'Track your weight consistently for 7 days and earn a free nutritionist session. Simple, consistent, rewarding.',
+  title: 'WeightWin - 7 Day Weight Tracking Challenge',
+  description: '7 days. Daily scale photo. Free nutrition session. No calorie counting, no overwhelm. Just show up for a week.',
   keywords: 'weight tracking, nutrition, health, fitness, 7-day challenge',
   authors: [{ name: 'WeightWin Team' }],
   icons: {

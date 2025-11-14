@@ -1,10 +1,32 @@
 <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="512" rx="96" fill="#635BFF"/>
-  <path d="M90 180 L150 360 L210 240 L256 360 L302 240 L362 360 L422 180"
-        stroke="#FFFFFF"
-        stroke-width="72"
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#4338CA"/>
+    </linearGradient>
+    <linearGradient id="arrowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-opacity="0.45"/>
+    </filter>
+    <filter id="arrowShadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#059669" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bgGradient)"/>
+  <rect width="512" height="220" rx="112" fill="white" opacity="0.15"/>
+  <path d="M110 140 L170 380 L232 220 L280 380 L328 220 L390 380 L450 140"
+        stroke="white"
+        stroke-width="80"
         stroke-linecap="round"
         stroke-linejoin="round"
-        fill="none"/>
+        fill="none"
+        filter="url(#shadow)"/>
+  <g filter="url(#arrowShadow)">
+    <rect x="320" y="320" width="120" height="120" rx="32" fill="url(#arrowGradient)"/>
+    <path d="M380 360 L355 400 L368 400 L368 432 L392 432 L392 400 L405 400 Z" fill="white"/>
+  </g>
 </svg>
 
