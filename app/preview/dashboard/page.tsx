@@ -177,10 +177,10 @@ export default function PreviewDashboardPage() {
   if (!isDemoMode && !data) return null
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 transition-colors duration-200">
       {/* Demo Mode Banner */}
       {isDemoMode && (
-        <div className="bg-yellow-100 border-b-2 border-yellow-400 text-yellow-900 px-4 py-2 flex items-center justify-between">
+        <div className="bg-yellow-100 dark:bg-yellow-900/30 border-b-2 border-yellow-400 dark:border-yellow-600 text-yellow-900 dark:text-yellow-200 px-4 py-2 flex items-center justify-between transition-colors duration-200">
           <span className="flex items-center gap-2">
             <span className="text-lg">🎭</span>
             <span className="font-medium text-sm sm:text-base">DEMO MODE - Using Sample Data</span>
@@ -202,10 +202,10 @@ export default function PreviewDashboardPage() {
 
         {/* Title */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-neutral-50 mb-2 transition-colors duration-200">
             Welcome to Your Dashboard! 📊
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-neutral-300 transition-colors duration-200">
             Your personal weight tracking hub
           </p>
         </div>
@@ -213,43 +213,43 @@ export default function PreviewDashboardPage() {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Current Weight */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <div className="bg-white dark:bg-[#1E293B] rounded-xl p-6 shadow-sm border border-gray-200 dark:border-neutral-700 transition-colors duration-200">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600">Current Weight</span>
-              <TrendingDown className="h-5 w-5 text-blue-600" />
+              <span className="text-sm text-gray-600 dark:text-neutral-400 transition-colors duration-200">Current Weight</span>
+              <TrendingDown className="h-5 w-5 text-blue-600 dark:text-blue-500 transition-colors duration-200" />
             </div>
-            <p className="text-3xl font-bold text-gray-900">
+            <p className="text-3xl font-bold text-gray-900 dark:text-neutral-50 transition-colors duration-200">
               {displayData?.weight} {displayData?.weightUnit}
             </p>
-            <p className="text-xs text-green-600 mt-1">⭐ Starting point</p>
+            <p className="text-xs text-green-600 dark:text-green-500 mt-1 transition-colors duration-200">⭐ Starting point</p>
           </div>
 
           {/* Streak */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <div className="bg-white dark:bg-[#1E293B] rounded-xl p-6 shadow-sm border border-gray-200 dark:border-neutral-700 transition-colors duration-200">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600">Streak</span>
-              <Flame className="h-5 w-5 text-orange-600" />
+              <span className="text-sm text-gray-600 dark:text-neutral-400 transition-colors duration-200">Streak</span>
+              <Flame className="h-5 w-5 text-orange-600 dark:text-orange-500 transition-colors duration-200" />
             </div>
-            <p className="text-3xl font-bold text-gray-900">
+            <p className="text-3xl font-bold text-gray-900 dark:text-neutral-50 transition-colors duration-200">
               {displayData?.streakCount || 0} 🔥
             </p>
-            <p className="text-xs text-gray-600 mt-1">Day started</p>
+            <p className="text-xs text-gray-600 dark:text-neutral-400 mt-1 transition-colors duration-200">Day started</p>
           </div>
 
           {/* Days Left */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <div className="bg-white dark:bg-[#1E293B] rounded-xl p-6 shadow-sm border border-gray-200 dark:border-neutral-700 transition-colors duration-200">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600">Days Left</span>
-              <Calendar className="h-5 w-5 text-purple-600" />
+              <span className="text-sm text-gray-600 dark:text-neutral-400 transition-colors duration-200">Days Left</span>
+              <Calendar className="h-5 w-5 text-purple-600 dark:text-purple-500 transition-colors duration-200" />
             </div>
-            <p className="text-3xl font-bold text-gray-900">6 days</p>
-            <p className="text-xs text-gray-600 mt-1">In your challenge</p>
+            <p className="text-3xl font-bold text-gray-900 dark:text-neutral-50 transition-colors duration-200">6 days</p>
+            <p className="text-xs text-gray-600 dark:text-neutral-400 mt-1 transition-colors duration-200">In your challenge</p>
           </div>
         </div>
 
         {/* Latest Entry */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="bg-white dark:bg-[#1E293B] rounded-xl p-6 shadow-sm border border-gray-200 dark:border-neutral-700 transition-colors duration-200">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-neutral-50 mb-4 transition-colors duration-200">
             Latest Entry
           </h2>
           
@@ -263,16 +263,16 @@ export default function PreviewDashboardPage() {
             )}
 
             <div className="flex-1">
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-2xl font-bold text-gray-900 dark:text-neutral-50 transition-colors duration-200">
                 {displayData?.weight} {displayData?.weightUnit}
               </p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-neutral-400 transition-colors duration-200">
                 {displayData?.photoTimestamp
                   ? formatDateTime(displayData.photoTimestamp)
                   : 'Just now'
                 }
               </p>
-              <span className="inline-flex items-center gap-1 text-xs text-green-600 mt-1">
+              <span className="inline-flex items-center gap-1 text-xs text-green-600 dark:text-green-500 mt-1 transition-colors duration-200">
                 ✅ Verified by AI
               </span>
             </div>

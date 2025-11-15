@@ -19,7 +19,7 @@ export function PreviewBanner({ currentStep, totalSteps }: PreviewBannerProps) {
   }
 
   return (
-    <div className="bg-blue-600 text-white px-4 py-3 flex items-center justify-between">
+    <div className="bg-blue-600 dark:bg-blue-700 text-white px-4 py-3 flex items-center justify-between transition-colors duration-200">
       <div className="flex items-center gap-2">
         <span className="text-lg">🎯</span>
         <div>
@@ -27,10 +27,10 @@ export function PreviewBanner({ currentStep, totalSteps }: PreviewBannerProps) {
           <p className="text-xs opacity-90">Try all features without signing up</p>
         </div>
       </div>
-      
+
       <button
         onClick={handleExit}
-        className="text-white hover:bg-white/20 rounded-full p-1 transition-colors"
+        className="text-white hover:bg-white/20 dark:hover:bg-white/30 rounded-full p-1 transition-colors"
         aria-label="Exit demo"
       >
         <X className="h-5 w-5" />

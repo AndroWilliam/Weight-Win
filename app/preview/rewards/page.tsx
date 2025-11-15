@@ -184,10 +184,10 @@ export default function PreviewRewardsPage() {
   if (!isDemoMode && !data) return null
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 transition-colors duration-200">
       {/* Demo Mode Banner */}
       {isDemoMode && (
-        <div className="bg-yellow-100 border-b-2 border-yellow-400 text-yellow-900 px-4 py-2 flex items-center justify-between">
+        <div className="bg-yellow-100 dark:bg-yellow-900/30 border-b-2 border-yellow-400 dark:border-yellow-600 text-yellow-900 dark:text-yellow-200 px-4 py-2 flex items-center justify-between transition-colors duration-200">
           <span className="flex items-center gap-2">
             <span className="text-lg">🎭</span>
             <span className="font-medium text-sm sm:text-base">DEMO MODE - Using Sample Data</span>
@@ -209,43 +209,43 @@ export default function PreviewRewardsPage() {
 
         {/* Title */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-neutral-50 mb-2 transition-colors duration-200">
             🎁 You Earned a Reward!
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-neutral-300 transition-colors duration-200">
             Celebrate your first step to success
           </p>
         </div>
 
         {/* Badge Card */}
-        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-8 shadow-lg border-2 border-yellow-200">
+        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-xl p-8 shadow-lg border-2 border-yellow-200 dark:border-yellow-700 transition-colors duration-200">
           <div className="text-center space-y-4">
             {/* Badge Image */}
-            <div className="inline-flex items-center justify-center w-32 h-32 bg-white rounded-full shadow-md mb-4">
+            <div className="inline-flex items-center justify-center w-32 h-32 bg-white dark:bg-neutral-800 rounded-full shadow-md mb-4 transition-colors duration-200">
               <span className="text-6xl">🥇</span>
             </div>
 
             {/* Badge Title */}
-            <h2 className="text-2xl font-bold text-gray-900">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-neutral-50 transition-colors duration-200">
               FIRST STEP
             </h2>
 
             {/* Badge Description */}
-            <p className="text-gray-700 max-w-md mx-auto">
+            <p className="text-gray-700 dark:text-neutral-300 max-w-md mx-auto transition-colors duration-200">
               Congratulations! You took your first step to success!
               This is just the beginning of your amazing journey.
             </p>
 
             {/* Earned Date */}
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-neutral-400 transition-colors duration-200">
               Earned {formatWeightCheckDate(new Date())}
             </p>
           </div>
         </div>
 
         {/* Upcoming Badges */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="bg-white dark:bg-[#1E293B] rounded-xl p-6 shadow-sm border border-gray-200 dark:border-neutral-700 transition-colors duration-200">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-neutral-50 mb-4 transition-colors duration-200">
             More Badges to Unlock
           </h3>
 
@@ -257,15 +257,15 @@ export default function PreviewRewardsPage() {
               { icon: '👑', name: 'Month Master' },
               { icon: '💎', name: 'Consistency King' }
             ].map((badge, index) => (
-              <div 
+              <div
                 key={index}
-                className="bg-gray-100 rounded-lg p-4 text-center opacity-50"
+                className="bg-gray-100 dark:bg-neutral-800 rounded-lg p-4 text-center opacity-50 transition-colors duration-200"
               >
                 <div className="relative">
                   <span className="text-4xl grayscale">{badge.icon}</span>
-                  <Lock className="h-4 w-4 absolute top-0 right-0 text-gray-500" />
+                  <Lock className="h-4 w-4 absolute top-0 right-0 text-gray-500 dark:text-neutral-400 transition-colors duration-200" />
                 </div>
-                <p className="text-xs text-gray-600 mt-2">{badge.name}</p>
+                <p className="text-xs text-gray-600 dark:text-neutral-400 mt-2 transition-colors duration-200">{badge.name}</p>
               </div>
             ))}
           </div>

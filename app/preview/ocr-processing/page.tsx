@@ -243,10 +243,10 @@ export default function PreviewOCRProcessingPage() {
 
   if (processing) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 transition-colors duration-200">
         {/* Demo Mode Banner */}
         {isDemoMode && (
-          <div className="bg-yellow-100 border-b-2 border-yellow-400 text-yellow-900 px-4 py-2 flex items-center justify-between">
+          <div className="bg-yellow-100 dark:bg-yellow-900/30 border-b-2 border-yellow-400 dark:border-yellow-600 text-yellow-900 dark:text-yellow-200 px-4 py-2 flex items-center justify-between transition-colors duration-200">
             <span className="flex items-center gap-2">
               <span className="text-lg">🎭</span>
               <span className="font-medium text-sm sm:text-base">DEMO MODE - Using Sample Data</span>
@@ -258,13 +258,13 @@ export default function PreviewOCRProcessingPage() {
 
         <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
           <div className="text-center space-y-6">
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-neutral-50 transition-colors duration-200">
               🤖 AI is reading your scale...
             </h1>
 
             {/* Image Preview */}
             {displayData?.photoBase64 && (
-              <div className="bg-white rounded-xl p-4 shadow-sm">
+              <div className="bg-white dark:bg-[#1E293B] rounded-xl p-4 shadow-sm border border-neutral-200 dark:border-neutral-700 transition-colors duration-200">
                 <img
                   src={displayData.photoBase64}
                   alt="Your scale"
@@ -276,12 +276,12 @@ export default function PreviewOCRProcessingPage() {
             {/* Loading */}
             <div className="flex flex-col items-center gap-4 py-8">
               <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
-              <p className="text-gray-600">Processing your image...</p>
+              <p className="text-gray-600 dark:text-neutral-300 transition-colors duration-200">Processing your image...</p>
             </div>
 
             {/* Info */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-800">
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 transition-colors duration-200">
+              <p className="text-sm text-blue-800 dark:text-blue-200 transition-colors duration-200">
                 ✨ Our AI analyzes your scale photo<br />
                 No manual entry needed - just snap and go!
               </p>
@@ -296,10 +296,10 @@ export default function PreviewOCRProcessingPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 transition-colors duration-200">
         {/* Demo Mode Banner */}
         {isDemoMode && (
-          <div className="bg-yellow-100 border-b-2 border-yellow-400 text-yellow-900 px-4 py-2 flex items-center justify-between">
+          <div className="bg-yellow-100 dark:bg-yellow-900/30 border-b-2 border-yellow-400 dark:border-yellow-600 text-yellow-900 dark:text-yellow-200 px-4 py-2 flex items-center justify-between transition-colors duration-200">
             <span className="flex items-center gap-2">
               <span className="text-lg">🎭</span>
               <span className="font-medium text-sm sm:text-base">DEMO MODE - Using Sample Data</span>
@@ -311,13 +311,13 @@ export default function PreviewOCRProcessingPage() {
 
         <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
           <div className="text-center space-y-6">
-            <AlertTriangle className="h-16 w-16 text-orange-600 mx-auto" />
-            
+            <AlertTriangle className="h-16 w-16 text-orange-600 dark:text-orange-500 mx-auto transition-colors duration-200" />
+
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-neutral-50 mb-2 transition-colors duration-200">
                 Could not detect weight
               </h1>
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-neutral-300 transition-colors duration-200">
                 Make sure your scale display is clearly visible and try again
               </p>
             </div>
@@ -343,10 +343,10 @@ export default function PreviewOCRProcessingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 transition-colors duration-200">
       {/* Demo Mode Banner */}
       {isDemoMode && (
-        <div className="bg-yellow-100 border-b-2 border-yellow-400 text-yellow-900 px-4 py-2 flex items-center justify-between">
+        <div className="bg-yellow-100 dark:bg-yellow-900/30 border-b-2 border-yellow-400 dark:border-yellow-600 text-yellow-900 dark:text-yellow-200 px-4 py-2 flex items-center justify-between transition-colors duration-200">
           <span className="flex items-center gap-2">
             <span className="text-lg">🎭</span>
             <span className="font-medium text-sm sm:text-base">DEMO MODE - Using Sample Data</span>
@@ -358,20 +358,20 @@ export default function PreviewOCRProcessingPage() {
 
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
         <div className="text-center space-y-6">
-          <CheckCircle className="h-16 w-16 text-green-600 mx-auto" />
-          
+          <CheckCircle className="h-16 w-16 text-green-600 dark:text-green-500 mx-auto transition-colors duration-200" />
+
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-neutral-50 mb-2 transition-colors duration-200">
               ✅ Weight Detected!
             </h1>
-            <p className="text-5xl font-bold text-blue-600 my-4">
+            <p className="text-5xl font-bold text-blue-600 dark:text-blue-500 my-4 transition-colors duration-200">
               {weight} kg
             </p>
           </div>
 
           {/* Image with highlight */}
           {displayData?.photoBase64 && (
-            <div className="bg-white rounded-xl p-4 shadow-sm">
+            <div className="bg-white dark:bg-[#1E293B] rounded-xl p-4 shadow-sm border border-neutral-200 dark:border-neutral-700 transition-colors duration-200">
               <img
                 src={displayData.photoBase64}
                 alt="Your scale with detected weight"
@@ -381,8 +381,8 @@ export default function PreviewOCRProcessingPage() {
           )}
 
           {/* Success message */}
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <p className="text-sm text-green-800">
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 transition-colors duration-200">
+            <p className="text-sm text-green-800 dark:text-green-200 transition-colors duration-200">
               🎉 Perfect! We found your weight in just 2 seconds.<br />
               Let&apos;s see this in your dashboard!
             </p>

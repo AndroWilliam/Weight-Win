@@ -203,7 +203,7 @@ export default function PreviewWeightCheckPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 transition-colors duration-200">
       {/* Preview Banner */}
       <PreviewBanner currentStep={1} totalSteps={TOTAL_STEPS} />
 
@@ -222,16 +222,16 @@ export default function PreviewWeightCheckPage() {
 
         {/* Title */}
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-neutral-50 transition-colors duration-200">
             📸 Take Your First Photo
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-neutral-300 transition-colors duration-200">
             Upload a photo of your scale and watch the AI extract your weight
           </p>
         </div>
 
         {/* Upload Area */}
-        <div className="bg-white border-2 border-dashed border-gray-300 rounded-xl p-8 space-y-4">
+        <div className="bg-white dark:bg-[#1E293B] border-2 border-dashed border-gray-300 dark:border-neutral-700 rounded-xl p-8 space-y-4 transition-colors duration-200">
           {previewUrl ? (
             // Show preview
             <div className="space-y-4">
@@ -255,8 +255,8 @@ export default function PreviewWeightCheckPage() {
             // Show upload options
             <div className="space-y-6">
               <div className="text-center py-8">
-                <Camera className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 mb-6">
+                <Camera className="h-16 w-16 text-gray-400 dark:text-neutral-500 mx-auto mb-4 transition-colors duration-200" />
+                <p className="text-gray-600 dark:text-neutral-300 mb-6 transition-colors duration-200">
                   Take or upload a photo of your scale display
                 </p>
                 

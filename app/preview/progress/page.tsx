@@ -339,10 +339,10 @@ export default function PreviewProgressPage() {
   }))
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 transition-colors duration-200">
       {/* Demo Mode Banner */}
       {isDemoMode && (
-        <div className="bg-yellow-100 border-b-2 border-yellow-400 text-yellow-900 px-4 py-2 flex items-center justify-between">
+        <div className="bg-yellow-100 dark:bg-yellow-900/30 border-b-2 border-yellow-400 dark:border-yellow-600 text-yellow-900 dark:text-yellow-200 px-4 py-2 flex items-center justify-between transition-colors duration-200">
           <span className="flex items-center gap-2">
             <span className="text-lg">🎭</span>
             <span className="font-medium text-sm sm:text-base">DEMO MODE - Using Sample Data</span>
@@ -364,17 +364,17 @@ export default function PreviewProgressPage() {
 
         {/* Title */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-neutral-50 mb-2 transition-colors duration-200">
             Your Progress 📈
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-neutral-300 transition-colors duration-200">
             See your weight journey visualized
           </p>
         </div>
 
         {/* Chart */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="bg-white dark:bg-[#1E293B] rounded-xl p-6 shadow-sm border border-gray-200 dark:border-neutral-700 transition-colors duration-200">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-neutral-50 mb-4 transition-colors duration-200">
             7-Day Weight Progress
           </h2>
           
@@ -405,36 +405,36 @@ export default function PreviewProgressPage() {
 
         {/* Statistics */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-            <p className="text-xs text-gray-600 mb-1">Starting</p>
-            <p className="text-lg font-bold text-gray-900">
+          <div className="bg-white dark:bg-[#1E293B] rounded-lg p-4 shadow-sm border border-gray-200 dark:border-neutral-700 transition-colors duration-200">
+            <p className="text-xs text-gray-600 dark:text-neutral-400 mb-1 transition-colors duration-200">Starting</p>
+            <p className="text-lg font-bold text-gray-900 dark:text-neutral-50 transition-colors duration-200">
               {startingWeight !== null ? `${startingWeight.toFixed(1)} kg` : 'N/A'}
             </p>
           </div>
 
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-            <p className="text-xs text-gray-600 mb-1">Current</p>
-            <p className="text-lg font-bold text-gray-900">
+          <div className="bg-white dark:bg-[#1E293B] rounded-lg p-4 shadow-sm border border-gray-200 dark:border-neutral-700 transition-colors duration-200">
+            <p className="text-xs text-gray-600 dark:text-neutral-400 mb-1 transition-colors duration-200">Current</p>
+            <p className="text-lg font-bold text-gray-900 dark:text-neutral-50 transition-colors duration-200">
               {currentWeight !== null ? `${currentWeight.toFixed(1)} kg` : 'N/A'}
             </p>
           </div>
 
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-            <p className="text-xs text-gray-600 mb-1">Average</p>
-            <p className="text-lg font-bold text-gray-900">
+          <div className="bg-white dark:bg-[#1E293B] rounded-lg p-4 shadow-sm border border-gray-200 dark:border-neutral-700 transition-colors duration-200">
+            <p className="text-xs text-gray-600 dark:text-neutral-400 mb-1 transition-colors duration-200">Average</p>
+            <p className="text-lg font-bold text-gray-900 dark:text-neutral-50 transition-colors duration-200">
               {averageWeight > 0 ? `${averageWeight.toFixed(1)} kg` : 'N/A'}
             </p>
           </div>
 
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-            <p className="text-xs text-gray-600 mb-1">Change</p>
-            <p className={`text-lg font-bold ${weightChange < 0 ? 'text-green-600' : weightChange > 0 ? 'text-orange-600' : 'text-gray-600'}`}>
-              {weightChange !== 0 
+          <div className="bg-white dark:bg-[#1E293B] rounded-lg p-4 shadow-sm border border-gray-200 dark:border-neutral-700 transition-colors duration-200">
+            <p className="text-xs text-gray-600 dark:text-neutral-400 mb-1 transition-colors duration-200">Change</p>
+            <p className={`text-lg font-bold transition-colors duration-200 ${weightChange < 0 ? 'text-green-600 dark:text-green-500' : weightChange > 0 ? 'text-orange-600 dark:text-orange-500' : 'text-gray-600 dark:text-neutral-400'}`}>
+              {weightChange !== 0
                 ? `${weightChange > 0 ? '+' : ''}${weightChange.toFixed(1)} kg`
                 : '0.0 kg'}
             </p>
             {weightChange !== 0 && (
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-neutral-500 mt-1 transition-colors duration-200">
                 {weightChange < 0 ? '↓ Lost' : '↑ Gained'}
               </p>
             )}
@@ -442,8 +442,8 @@ export default function PreviewProgressPage() {
         </div>
 
         {/* Info */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm text-blue-800">
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 transition-colors duration-200">
+          <p className="text-sm text-blue-800 dark:text-blue-200 transition-colors duration-200">
             📊 This is sample data showing what your real progress will look like over 7 days.
             Your actual results will be based on your daily weight-ins!
           </p>
