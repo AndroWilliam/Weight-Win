@@ -106,7 +106,7 @@ export default function HomePage() {
                     Starting Demo...
                   </span>
                 ) : (
-                  'Start Free Trial 🚀'
+                  'Start Your Journey'
                 )}
               </Button>
             )}
