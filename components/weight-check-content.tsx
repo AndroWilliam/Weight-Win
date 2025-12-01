@@ -7,6 +7,8 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { maybeCompressImage } from "@/lib/images/compress"
 import { Camera, Upload, ArrowLeft, RotateCcw, Check, AlertCircle, AlertTriangle, RefreshCw } from "lucide-react"
 import { ManualWeightEntry } from "./ManualWeightEntry"
+import { PhoneCollectionModal } from "./PhoneCollectionModal"
+import { SkipWarningModal } from "./SkipWarningModal"
 import { fetchWithTimeout, TIMEOUT_PRESETS, RETRY_PRESETS } from "@/lib/fetch-with-timeout"
 import { toast } from "sonner"
 import { logNetworkError, logOcrError } from "@/lib/error-logger"
@@ -128,6 +130,9 @@ export function WeightCheckContent() {
   const [ocrError, setOcrError] = useState<OCRErrorInfo | null>(null)
   const [showManualEntry, setShowManualEntry] = useState(false)
   const [retryAttempt, setRetryAttempt] = useState(0)
+  const [showPhoneModal, setShowPhoneModal] = useState(false)
+  const [showSkipWarning, setShowSkipWarning] = useState(false)
+  const [dayNumber, setDayNumber] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -463,9 +468,10 @@ export function WeightCheckContent() {
         
         // Success - show success state
         setWeight(result.data.weight)
+        setDayNumber(result.data.dayNumber)
         setCurrentStep('success')
         setIsProcessing(false)
-        
+
         // Check if a new badge was earned and store for notification
         if (result.data.newBadgeEarned && result.data.badgeName) {
           localStorage.setItem('newBadgeEarned', JSON.stringify({
@@ -473,11 +479,19 @@ export function WeightCheckContent() {
             icon: result.data.badgeIcon || '🏆'
           }))
         }
-        
-        // Redirect to dashboard after showing success (changed from progress page)
-        setTimeout(() => {
-          router.push('/dashboard')
-        }, 2000)
+
+        // Phase 2: Check if Day 7 completed - show phone modal FIRST
+        if (result.data.dayNumber === 7 && result.data.isNewDay) {
+          // Show phone modal after success message (2 seconds)
+          setTimeout(() => {
+            setShowPhoneModal(true)
+          }, 2000)
+        } else {
+          // Redirect to dashboard after showing success for non-Day-7 completions
+          setTimeout(() => {
+            router.push('/dashboard')
+          }, 2000)
+        }
         
       } catch (error: any) {
         console.error('Error processing weight:', error)
@@ -528,6 +542,54 @@ export function WeightCheckContent() {
     setShowManualEntry(false)
     setCapturedImage(null)
     setCurrentStep('upload')
+  }
+
+  // Phase 2: Phone Collection Handlers
+  const handlePhoneSubmit = async (phoneNumber: string) => {
+    try {
+      const response = await fetch('/api/user/phone', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ phone_number: phoneNumber })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error?.message || 'Failed to save phone number')
+      }
+
+      // Success - close phone modal and redirect to dashboard
+      setShowPhoneModal(false)
+      toast.success('Phone number saved successfully!')
+
+      // Redirect to dashboard (badge modal will show there)
+      setTimeout(() => {
+        router.push('/dashboard')
+      }, 500)
+    } catch (error: any) {
+      console.error('Phone save error:', error)
+      throw error // Re-throw to let modal handle the error
+    }
+  }
+
+  const handlePhoneSkip = () => {
+    // Show warning modal
+    setShowSkipWarning(true)
+  }
+
+  const handleSkipWarningBack = () => {
+    // Return to phone input
+    setShowSkipWarning(false)
+  }
+
+  const handleSkipWarningConfirm = () => {
+    // Close all modals and redirect
+    setShowSkipWarning(false)
+    setShowPhoneModal(false)
+    router.push('/dashboard')
   }
 
   const handleBack = () => {
@@ -903,6 +965,20 @@ export function WeightCheckContent() {
           )}
         </div>
       </main>
+
+      {/* Phase 2: Phone Collection Modals */}
+      <PhoneCollectionModal
+        isOpen={showPhoneModal}
+        onClose={() => {}}  // Prevent closing by clicking outside
+        onSubmit={handlePhoneSubmit}
+        onSkip={handlePhoneSkip}
+      />
+
+      <SkipWarningModal
+        isOpen={showSkipWarning}
+        onBack={handleSkipWarningBack}
+        onConfirmSkip={handleSkipWarningConfirm}
+      />
     </div>
   )
 }
