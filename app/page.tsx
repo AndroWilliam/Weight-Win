@@ -8,6 +8,7 @@ import Link from "next/link"
 import { CheckCircle, TrendingUp, Award, ArrowRight, Users, Loader2 } from "lucide-react"
 import { NavigationHeader } from "@/components/navigation-header"
 import { ThemeToggle } from "@/components/theme-toggle"
+import BoldSoccerBanner from "@/components/BoldSoccerBanner"
 import { createClient } from '@/lib/supabase/client'
 import { isPreviewCompleted } from '@/lib/preview/previewCookies'
 
@@ -151,7 +152,7 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto">
           <div className="bg-muted rounded-2xl p-4 sm:p-6 md:p-8 text-center">
             <div className="w-full h-48 sm:h-56 md:h-64 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 rounded-xl flex items-center justify-center overflow-hidden">
-              <img 
+              <img
                 src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=600&fit=crop&crop=center&auto=format&q=80"
                 alt="Vintage mechanical scale with blue body and cream dial"
                 className="w-full h-full object-cover rounded-lg"
@@ -160,6 +161,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* BOLD Soccer Banner */}
+      <BoldSoccerBanner />
 
       {/* Why WeightWin Works */}
       <section className="py-8 sm:py-12 md:py-16 px-6 bg-muted/50">
