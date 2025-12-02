@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Loader2, Send, ShieldCheck, ShieldOff } from 'lucide-react'
+import { Loader2, Send, ShieldCheck, ShieldOff, Copy, Check } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
@@ -36,6 +36,7 @@ export function UserActionsDrawer({ userId, email, open, onOpenChange }: UserAct
   const [isSavingInvitations, setIsSavingInvitations] = useState(false)
   const [isSendingReset, setIsSendingReset] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
+  const [copiedField, setCopiedField] = useState<string | null>(null)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -207,6 +208,24 @@ export function UserActionsDrawer({ userId, email, open, onOpenChange }: UserAct
     }
   }
 
+  // Copy to clipboard helper
+  const copyToClipboard = async (text: string, fieldName: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedField(fieldName)
+      toast({
+        title: 'Copied to clipboard',
+        description: `${fieldName} copied successfully`,
+      })
+      setTimeout(() => setCopiedField(null), 2000)
+    } catch (error) {
+      toast({
+        title: 'Failed to copy',
+        description: 'Please try again',
+      })
+    }
+  }
+
   // Helper component for info rows
   function InfoRow({ label, value }: { label: React.ReactNode; value: React.ReactNode }) {
     return (
@@ -217,9 +236,43 @@ export function UserActionsDrawer({ userId, email, open, onOpenChange }: UserAct
     )
   }
 
+  // Info row with copy button
+  function InfoRowWithCopy({
+    label,
+    value,
+    copyValue,
+    fieldName
+  }: {
+    label: React.ReactNode;
+    value: React.ReactNode;
+    copyValue: string;
+    fieldName: string;
+  }) {
+    const isCopied = copiedField === fieldName
+    return (
+      <div className="flex justify-between items-start gap-4 py-2 border-b border-border/50 last:border-0">
+        <span className="text-sm text-muted-foreground flex-shrink-0">{label}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-foreground font-medium text-right">{value}</span>
+          <button
+            onClick={() => copyToClipboard(copyValue, fieldName)}
+            className="p-1 hover:bg-muted rounded transition-colors"
+            title={`Copy ${fieldName}`}
+          >
+            {isCopied ? (
+              <Check className="h-3 w-3 text-green-500" />
+            ) : (
+              <Copy className="h-3 w-3 text-muted-foreground" />
+            )}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full md:max-w-lg">
+      <SheetContent side="right" className="w-full md:max-w-lg overflow-y-auto">
         <SheetHeader className="gap-2">
           <SheetTitle className="text-xl">User Actions</SheetTitle>
           <SheetDescription>
@@ -235,32 +288,42 @@ export function UserActionsDrawer({ userId, email, open, onOpenChange }: UserAct
             </h4>
 
             <div className="space-y-0">
-              <InfoRow
+              <InfoRowWithCopy
                 label="Name"
                 value={permissions?.name || email?.split('@')[0] || 'Unknown'}
+                copyValue={permissions?.name || email?.split('@')[0] || 'Unknown'}
+                fieldName="Name"
               />
-              <InfoRow label="Email" value={email ?? 'Unknown'} />
+              <InfoRowWithCopy
+                label="Email"
+                value={email ?? 'Unknown'}
+                copyValue={email ?? 'Unknown'}
+                fieldName="Email"
+              />
               <InfoRow
                 label="User ID"
                 value={<span className="font-mono text-xs">{userId?.slice(0, 18)}...</span>}
               />
-              <InfoRow
-                label={
-                  <span className="flex items-center gap-2">
-                    Phone Number
-                    {permissions?.phone_number && (
+              {permissions?.phone_number ? (
+                <InfoRowWithCopy
+                  label={
+                    <span className="flex items-center gap-2">
+                      Phone Number
                       <span className="bg-yellow-500 text-black text-xs font-bold px-2 py-0.5 rounded">
                         NEW
                       </span>
-                    )}
-                  </span>
-                }
-                value={
-                  permissions?.phone_number || (
-                    <span className="text-muted-foreground/60">Not provided</span>
-                  )
-                }
-              />
+                    </span>
+                  }
+                  value={permissions.phone_number}
+                  copyValue={permissions.phone_number}
+                  fieldName="Phone Number"
+                />
+              ) : (
+                <InfoRow
+                  label="Phone Number"
+                  value={<span className="text-muted-foreground/60">Not provided</span>}
+                />
+              )}
               <InfoRow
                 label="Days Completed"
                 value={
