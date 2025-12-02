@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search } from 'lucide-react'
+import { Search, FileText, Loader2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SkeletonCard } from './SkeletonCard'
 import { Button } from '@/components/ui/button'
 import { UserActionsDrawer } from './UserActionsDrawer'
+import { useToast } from '@/hooks/use-toast'
 
 interface UserProgress {
   user_id: string
@@ -34,6 +35,8 @@ export function UsersTable({ rows }: UsersTableProps) {
   const [drawerUserId, setDrawerUserId] = useState<string | null>(null)
   const [drawerEmail, setDrawerEmail] = useState<string | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
+  const { toast } = useToast()
   const itemsPerPage = 5
 
   // Client-side search filter
@@ -54,6 +57,49 @@ export function UsersTable({ rows }: UsersTableProps) {
     await new Promise(resolve => setTimeout(resolve, 300))
     setCurrentPage(newPage)
     setIsLoadingPage(false)
+  }
+
+  // Export filtered users to Excel
+  const handleExport = async () => {
+    setIsExporting(true)
+    try {
+      const userIds = filteredRows.map(row => row.user_id)
+
+      const response = await fetch('/api/admin/export/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userIds }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Export failed')
+      }
+
+      // Download the Excel file
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `users-export-${new Date().toISOString().split('T')[0]}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(url)
+
+      toast({
+        title: 'Export successful!',
+        description: `Exported ${userIds.length} users to Excel`,
+      })
+    } catch (error) {
+      console.error('[UsersTable] Export error', error)
+      toast({
+        title: 'Failed to export users',
+        description: 'Please try again',
+      })
+    } finally {
+      setIsExporting(false)
+    }
   }
 
   // Reset to page 1 when filters change
@@ -166,6 +212,26 @@ export function UsersTable({ rows }: UsersTableProps) {
               <option value="active">Active</option>
               <option value="completed">Completed</option>
             </select>
+
+            {/* Export Button */}
+            <Button
+              onClick={handleExport}
+              disabled={isExporting || filteredRows.length === 0}
+              className="w-full sm:w-auto sm:ml-auto flex items-center gap-2"
+              variant="outline"
+            >
+              {isExporting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Exporting...</span>
+                </>
+              ) : (
+                <>
+                  <FileText className="h-4 w-4" />
+                  <span>Export Users</span>
+                </>
+              )}
+            </Button>
           </div>
         </div>
       </div>
