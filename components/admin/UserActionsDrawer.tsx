@@ -14,6 +14,12 @@ export interface AdminPermissionSnapshot {
   is_admin: boolean
   can_manage_invitations: boolean
   last_password_reset_requested_at: string | null
+  // Phase 3: User information fields
+  name?: string
+  phone_number?: string | null
+  total_days_completed?: number
+  current_streak?: number
+  last_check_in?: string | null
 }
 
 interface UserActionsDrawerProps {
@@ -29,6 +35,7 @@ export function UserActionsDrawer({ userId, email, open, onOpenChange }: UserAct
   const [isSavingAdmin, setIsSavingAdmin] = useState(false)
   const [isSavingInvitations, setIsSavingInvitations] = useState(false)
   const [isSendingReset, setIsSendingReset] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -163,6 +170,53 @@ export function UserActionsDrawer({ userId, email, open, onOpenChange }: UserAct
     }
   }
 
+  // Phase 3: Export BOLD Participants
+  const handleExportBOLD = async () => {
+    setIsExporting(true)
+    try {
+      const response = await fetch('/api/admin/export/bold-participants')
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Export failed')
+      }
+
+      // Download the CSV file
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `bold-soccer-participants-${new Date().toISOString().split('T')[0]}.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(url)
+
+      toast({
+        title: 'Export downloaded successfully!',
+        description: 'CSV file has been saved to your downloads.',
+      })
+    } catch (error) {
+      console.error('[UserActionsDrawer] handleExportBOLD error', error)
+      toast({
+        title: 'Failed to export participants',
+        description: 'Please try again.',
+      })
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  // Helper component for info rows
+  function InfoRow({ label, value }: { label: React.ReactNode; value: React.ReactNode }) {
+    return (
+      <div className="flex justify-between items-start gap-4 py-2 border-b border-border/50 last:border-0">
+        <span className="text-sm text-muted-foreground flex-shrink-0">{label}</span>
+        <span className="text-sm text-foreground font-medium text-right">{value}</span>
+      </div>
+    )
+  }
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full md:max-w-lg">
@@ -174,9 +228,75 @@ export function UserActionsDrawer({ userId, email, open, onOpenChange }: UserAct
         </SheetHeader>
 
         <div className="space-y-6 px-4 pb-6">
+          {/* Phase 3: User Information Section */}
+          <section className="rounded-xl border border-indigo-500/20 bg-indigo-50/5 dark:bg-indigo-950/10 p-4">
+            <h4 className="text-xs font-bold text-indigo-500 uppercase tracking-wider mb-4">
+              User Information
+            </h4>
+
+            <div className="space-y-0">
+              <InfoRow
+                label="Name"
+                value={permissions?.name || email?.split('@')[0] || 'Unknown'}
+              />
+              <InfoRow label="Email" value={email ?? 'Unknown'} />
+              <InfoRow
+                label="User ID"
+                value={<span className="font-mono text-xs">{userId?.slice(0, 18)}...</span>}
+              />
+              <InfoRow
+                label={
+                  <span className="flex items-center gap-2">
+                    Phone Number
+                    {permissions?.phone_number && (
+                      <span className="bg-yellow-500 text-black text-xs font-bold px-2 py-0.5 rounded">
+                        NEW
+                      </span>
+                    )}
+                  </span>
+                }
+                value={
+                  permissions?.phone_number || (
+                    <span className="text-muted-foreground/60">Not provided</span>
+                  )
+                }
+              />
+              <InfoRow
+                label="Days Completed"
+                value={
+                  <span
+                    className={
+                      (permissions?.total_days_completed ?? 0) >= 7
+                        ? 'text-green-500 font-semibold'
+                        : ''
+                    }
+                  >
+                    {permissions?.total_days_completed ?? 0}/7{' '}
+                    {(permissions?.total_days_completed ?? 0) >= 7 && '✓'}
+                  </span>
+                }
+              />
+              <InfoRow
+                label="Current Streak"
+                value={`${permissions?.current_streak ?? 0} days ${
+                  (permissions?.current_streak ?? 0) > 0 ? '🔥' : ''
+                }`}
+              />
+              <InfoRow
+                label="Last Check-in"
+                value={
+                  permissions?.last_check_in
+                    ? new Date(permissions.last_check_in).toLocaleDateString()
+                    : 'Never'
+                }
+              />
+            </div>
+          </section>
+
+          {/* Existing User Card */}
           <div className="rounded-xl border border-border bg-card p-4">
             <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase text-muted-foreground">User</p>
+              <p className="text-xs font-semibold uppercase text-muted-foreground">User Actions</p>
               <p className="text-base font-medium text-foreground">{email ?? 'Unknown user'}</p>
               <p className="text-xs text-muted-foreground">ID: {userId}</p>
             </div>
@@ -272,6 +392,45 @@ export function UserActionsDrawer({ userId, email, open, onOpenChange }: UserAct
               <li className={cn('flex items-center justify-between')}> <span>Password reset</span> <span>{permissions?.last_password_reset_requested_at ? new Date(permissions.last_password_reset_requested_at).toLocaleString() : 'Never sent'}</span></li>
             </ul>
           </section>
+
+          {/* Phase 3: Export BOLD Participants Section */}
+          {permissions?.phone_number && (permissions?.total_days_completed ?? 0) >= 7 ? (
+            <section className="rounded-xl border border-green-700/30 bg-green-900/10 dark:bg-green-950/20 p-4 space-y-3">
+              <h4 className="text-xs font-bold text-green-600 uppercase tracking-wider">
+                🎁 BOLD Soccer Campaign
+              </h4>
+              <p className="text-sm text-muted-foreground">
+                This user completed 7 days and submitted their phone number for the BOLD Soccer reward.
+              </p>
+              <Button
+                onClick={handleExportBOLD}
+                disabled={isExporting}
+                className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold flex items-center justify-center gap-2"
+              >
+                {isExporting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Exporting...
+                  </>
+                ) : (
+                  <>
+                    📊 Export BOLD Participants
+                  </>
+                )}
+              </Button>
+            </section>
+          ) : (
+            <section className="rounded-xl border border-border/50 bg-muted/10 p-4 space-y-3">
+              <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                🎁 BOLD Soccer Campaign
+              </h4>
+              <p className="text-sm text-muted-foreground/70">
+                {(permissions?.total_days_completed ?? 0) < 7
+                  ? 'User needs to complete 7 days to be eligible.'
+                  : "User hasn't submitted phone number yet."}
+              </p>
+            </section>
+          )}
         </div>
       </SheetContent>
     </Sheet>

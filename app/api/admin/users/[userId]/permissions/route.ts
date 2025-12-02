@@ -61,11 +61,44 @@ export const GET = withHandler(async (req: NextRequest, ctx: { params: { userId:
     )
   }
 
+  // Phase 3: Fetch additional user data
+  // Get phone number from user_settings
+  const { data: settingsData } = await supabase
+    .from('user_settings')
+    .select('phone_number')
+    .eq('user_id', targetUser)
+    .maybeSingle()
+
+  // Get days completed and streak from user_milestones
+  const { data: milestoneData } = await supabase
+    .from('user_milestones')
+    .select('total_days_completed, current_streak')
+    .eq('user_id', targetUser)
+    .maybeSingle()
+
+  // Get last check-in from weight_entries
+  const { data: latestEntry } = await supabase
+    .from('weight_entries')
+    .select('recorded_at')
+    .eq('user_id', targetUser)
+    .order('recorded_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  // Get user name from auth.users (using service role)
+  const { data: userData } = await supabase.auth.admin.getUserById(targetUser)
+
   const record = {
     user_id: targetUser,
     is_admin: !!adminData,
     can_manage_invitations: permData?.can_manage_invitations ?? false,
     last_password_reset_requested_at: permData?.last_password_reset_requested_at ?? null,
+    // Phase 3: Additional user data
+    name: userData?.user?.user_metadata?.full_name || null,
+    phone_number: settingsData?.phone_number || null,
+    total_days_completed: milestoneData?.total_days_completed ?? 0,
+    current_streak: milestoneData?.current_streak ?? 0,
+    last_check_in: latestEntry?.recorded_at || null,
   }
 
   logger.info('[Admin Permissions] Permissions loaded successfully', { requestId, targetUser })
