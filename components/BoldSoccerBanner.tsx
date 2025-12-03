@@ -1,6 +1,13 @@
 'use client'
 
 export default function BoldSoccerBanner() {
+  // Feature flag: Only show banner if campaign is active
+  const isCampaignActive = process.env.NEXT_PUBLIC_BOLD_CAMPAIGN_ENABLED === 'true'
+
+  if (!isCampaignActive) {
+    return null
+  }
+
   const handleCTA = async () => {
     // CRITICAL: Follow EXACT same logic as "Start Your Journey" button
     // Import dynamically to avoid SSR issues

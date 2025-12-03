@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -79,6 +79,18 @@ export function PhoneCollectionModal({
     }
   }
 
+  // Handle ESC key to trigger skip warning
+  useEffect(() => {
+    const handleEscKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen && !showSuccess) {
+        onSkip()
+      }
+    }
+
+    document.addEventListener('keydown', handleEscKey)
+    return () => document.removeEventListener('keydown', handleEscKey)
+  }, [isOpen, showSuccess, onSkip])
+
   // Success State
   if (showSuccess) {
     return (
@@ -102,12 +114,12 @@ export function PhoneCollectionModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" aria-labelledby="phone-modal-title" aria-describedby="phone-modal-description">
         {/* Header with BOLD Soccer gradient */}
         <div className="bg-gradient-to-br from-[#F59E0B] to-[#EF4444] rounded-t-lg -mx-6 -mt-6 px-6 pt-6 pb-4 mb-4">
           <div className="text-center">
-            <div className="text-5xl mb-2">🎉</div>
-            <h2 className="text-2xl font-bold text-black mb-1">
+            <div className="text-5xl mb-2" role="img" aria-label="Celebration">🎉</div>
+            <h2 id="phone-modal-title" className="text-2xl font-bold text-black mb-1">
               Congratulations!
             </h2>
             <p className="text-black/85 text-base">
@@ -121,7 +133,7 @@ export function PhoneCollectionModal({
             <p className="text-lg font-semibold text-foreground mb-2">
               You've unlocked 30% OFF BOLD Soccer Academy!
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p id="phone-modal-description" className="text-sm text-muted-foreground">
               Enter your phone number and we'll contact you with your exclusive offer.
             </p>
           </div>

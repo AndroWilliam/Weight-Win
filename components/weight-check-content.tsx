@@ -481,7 +481,8 @@ export function WeightCheckContent() {
         }
 
         // Phase 2: Check if Day 7 completed - show phone modal FIRST
-        if (result.data.dayNumber === 7 && result.data.isNewDay) {
+        const isCampaignActive = process.env.NEXT_PUBLIC_BOLD_CAMPAIGN_ENABLED === 'true'
+        if (result.data.dayNumber === 7 && result.data.isNewDay && isCampaignActive) {
           // Show phone modal after success message (2 seconds)
           setTimeout(() => {
             setShowPhoneModal(true)
