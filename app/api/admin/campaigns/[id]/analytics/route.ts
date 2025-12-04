@@ -10,7 +10,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     
     // Step 1: Check if user is logged in
     const { data: { user } } = await supabase.auth.getUser()

@@ -14,7 +14,15 @@
       "Bash(pnpm typecheck:*)",
       "Bash(git add:*)",
       "Bash(git commit -m \"$(cat <<''EOF''\nfix(mobile): Day 1 Mobile Critical Fixes - comprehensive mobile UX improvements\n\nCompleted all Day 1 mobile critical fixes for better mobile experience:\n\n**Admin Toolbar Layouts:**\n- Stacked toolbar elements on mobile (search, filters, buttons)\n- UsersTable and ApplicantsTable now stack vertically on mobile\n- Full-width controls on mobile, compact layout on desktop\n\n**Video Element Responsive Heights:**\n- Camera preview height: h-48 (mobile) → h-64 (tablet) → h-80 (desktop)\n- Ensures camera controls are visible on all screen sizes\n- Better mobile camera experience\n\n**Chart Container Responsive Heights:**\n- Progress page chart: h-48 (mobile) → h-64 (tablet) → h-80 (desktop)\n- Charts now fit properly on mobile screens\n- No vertical scroll issues\n\n**Admin Button Mobile Visibility:**\n- Added mobile-only admin button in dashboard header\n- Desktop navigation preserved with full admin button\n- Admin access now available on all screen sizes\n\n**Typography Minimum Size:**\n- Increased .text-caption from 12px to 13px on mobile\n- Improved readability on small screens\n- Desktop remains 12px for optimal density\n\n**Sheet/Drawer Full-Width on Mobile:**\n- NavigationHeader sheet: w-full on mobile, w-80 on desktop\n- UserActionsDrawer: w-full on mobile, max-w-lg on desktop\n- Better mobile drawer UX with full-screen experience\n\n**Impact:**\n- Mobile UX: All interactive elements properly sized and accessible\n- Responsive: Smooth transitions across all breakpoints (320px, 640px, 768px)\n- Accessibility: Touch targets and text sizes meet mobile standards\n- No horizontal scroll on any mobile screen\n\n**Testing:**\n- Ready for testing on 320px, 375px, and 768px devices\n- All navigation and admin features accessible on mobile\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(pnpm build:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(wait)",
+      "Bash(pnpm dev)",
+      "Bash(curl:*)",
+      "Bash(test:*)",
+      "Bash(pnpm add:*)"
     ],
     "deny": [],
     "ask": []

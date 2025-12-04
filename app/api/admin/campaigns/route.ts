@@ -51,7 +51,7 @@ const createCampaignSchema = z.object({
  */
 export async function POST(request: Request) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     
     // Step 1: Check if user is logged in
     const { data: { user } } = await supabase.auth.getUser()
@@ -195,7 +195,7 @@ export async function POST(request: Request) {
  */
 export async function GET(request: Request) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     
     // Step 1: Check if user is logged in
     const { data: { user } } = await supabase.auth.getUser()

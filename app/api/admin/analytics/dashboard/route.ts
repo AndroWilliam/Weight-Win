@@ -7,7 +7,7 @@ import { NextResponse } from 'next/server'
  */
 export async function GET(request: Request) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     
     // Step 1: Check if user is logged in
     const { data: { user } } = await supabase.auth.getUser()
