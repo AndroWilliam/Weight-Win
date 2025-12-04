@@ -18,20 +18,22 @@ export function generateSlug(name: string): string {
  * 
  * @param supabase - Supabase client instance
  * @param baseSlug - The base slug to check
- * @param excludeId - Optional partner ID to exclude (for updates)
+ * @param excludeId - Optional ID to exclude (for updates)
+ * @param tableName - Table to check for uniqueness ('partners' or 'campaigns')
  * @returns A unique slug
  */
 export async function ensureUniqueSlug(
   supabase: SupabaseClient,
   baseSlug: string,
-  excludeId?: string
+  excludeId?: string,
+  tableName: string = 'partners'
 ): Promise<string> {
   let slug = baseSlug
   let counter = 1
   
   while (true) {
     let query = supabase
-      .from('partners')
+      .from(tableName)
       .select('id')
       .eq('slug', slug)
     
