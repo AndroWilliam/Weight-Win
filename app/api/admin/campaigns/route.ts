@@ -272,9 +272,63 @@ export async function GET(request: Request) {
     
     if (error) {
       console.error('Database query error:', error)
+      // If error is about missing table/column, try without participants join
+      if (error.message?.includes('campaign_participants') || error.message?.includes('relation') || error.code === 'PGRST116') {
+        // Retry without participants join
+        const retryQuery = supabase
+          .from('campaigns')
+          .select(`*, partner:partners(id, name, slug, logo_url)`, { count: 'exact' })
+        
+        if (status && status !== 'all') {
+          retryQuery.eq('status', status)
+        }
+        if (partner_id) {
+          retryQuery.eq('partner_id', partner_id)
+        }
+        if (search) {
+          retryQuery.or(`name.ilike.%${search}%,reward_description.ilike.%${search}%`)
+        }
+        if (sort === 'name') {
+          retryQuery.order('name', { ascending: true })
+        } else if (sort === 'participants') {
+          retryQuery.order('completions', { ascending: false })
+        } else {
+          retryQuery.order('created_at', { ascending: false })
+        }
+        retryQuery.range(from, to)
+        
+        const { data: retryData, error: retryError, count: retryCount } = await retryQuery
+        
+        if (retryError) {
+          return NextResponse.json({
+            error: 'Database error',
+            message: 'Failed to fetch campaigns',
+            details: retryError.message
+          }, { status: 500 })
+        }
+        
+        // Add empty participants array to each campaign
+        const campaignsWithParticipants = (retryData || []).map((campaign: any) => ({
+          ...campaign,
+          participants: [{ count: 0 }]
+        }))
+        
+        return NextResponse.json({
+          success: true,
+          data: campaignsWithParticipants,
+          pagination: {
+            page,
+            limit,
+            total: retryCount || 0,
+            total_pages: Math.ceil((retryCount || 0) / limit)
+          }
+        }, { status: 200 })
+      }
+      
       return NextResponse.json({
         error: 'Database error',
-        message: 'Failed to fetch campaigns'
+        message: 'Failed to fetch campaigns',
+        details: error.message
       }, { status: 500 })
     }
     

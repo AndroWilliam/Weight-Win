@@ -30,9 +30,17 @@ export async function GET(request: Request) {
     }
     
     // Step 3: Get all campaigns
-    const { data: campaigns, count: totalCampaigns } = await supabase
+    const { data: campaigns, count: totalCampaigns, error: campaignsError } = await supabase
       .from('campaigns')
       .select('*', { count: 'exact' })
+    
+    if (campaignsError) {
+      console.error('Campaigns query error:', campaignsError)
+      return NextResponse.json({
+        error: 'Database error',
+        message: 'Failed to fetch campaigns'
+      }, { status: 500 })
+    }
     
     if (!campaigns) {
       return NextResponse.json({
@@ -73,9 +81,14 @@ export async function GET(request: Request) {
     const endedCampaigns = campaigns.filter(c => c.status === 'ended').length
     
     // Step 5: Get total participants count
-    const { count: totalParticipants } = await supabase
+    const { count: totalParticipants, error: participantsError } = await supabase
       .from('campaign_participants')
       .select('*', { count: 'exact', head: true })
+    
+    if (participantsError) {
+      console.error('Participants query error:', participantsError)
+      // Continue with 0 if table doesn't exist yet
+    }
     
     // Step 6: Calculate totals across all campaigns
     const totals = campaigns.reduce((acc, campaign) => ({
@@ -106,24 +119,39 @@ export async function GET(request: Request) {
     }
     
     // Step 8: Get partners count
-    const { count: totalPartners } = await supabase
+    const { count: totalPartners, error: partnersError } = await supabase
       .from('partners')
       .select('*', { count: 'exact', head: true })
       .eq('active', true)
     
+    if (partnersError) {
+      console.error('Partners query error:', partnersError)
+      // Continue with 0 if table doesn't exist yet
+    }
+    
     // Step 9: Get recent activity (last 7 days)
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
     
-    const { count: recentParticipants } = await supabase
-      .from('campaign_participants')
-      .select('*', { count: 'exact', head: true })
-      .gte('started_at', sevenDaysAgo)
+    let recentParticipants = 0
+    let recentCompletions = 0
     
-    const { count: recentCompletions } = await supabase
-      .from('campaign_participants')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'completed')
-      .gte('completed_at', sevenDaysAgo)
+    try {
+      const { count: recentParticipantsCount } = await supabase
+        .from('campaign_participants')
+        .select('*', { count: 'exact', head: true })
+        .gte('started_at', sevenDaysAgo)
+      recentParticipants = recentParticipantsCount || 0
+      
+      const { count: recentCompletionsCount } = await supabase
+        .from('campaign_participants')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'completed')
+        .gte('completed_at', sevenDaysAgo)
+      recentCompletions = recentCompletionsCount || 0
+    } catch (error) {
+      console.error('Recent activity query error:', error)
+      // Continue with 0 if queries fail
+    }
     
     // Step 10: Get top performing campaigns (by completion rate)
     const topCampaigns = campaigns
@@ -161,8 +189,8 @@ export async function GET(request: Request) {
         },
         avg_conversion: avgConversion,
         recent_activity: {
-          new_participants_7d: recentParticipants || 0,
-          new_completions_7d: recentCompletions || 0
+          new_participants_7d: recentParticipants,
+          new_completions_7d: recentCompletions
         },
         top_campaigns: topCampaigns
       }

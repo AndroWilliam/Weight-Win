@@ -7,7 +7,14 @@ import { CampaignStats } from '@/components/admin/campaigns/CampaignStats'
 import { CampaignFilters } from '@/components/admin/campaigns/CampaignFilters'
 import { CampaignCard } from '@/components/admin/campaigns/CampaignCard'
 
-const fetcher = (url: string) => fetch(url).then(res => res.json())
+const fetcher = async (url: string) => {
+  const res = await fetch(url)
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ error: 'Failed to fetch' }))
+    throw new Error(error.message || error.error || 'Failed to fetch')
+  }
+  return res.json()
+}
 
 export default function CampaignsPage() {
   const router = useRouter()
@@ -21,7 +28,7 @@ export default function CampaignsPage() {
     fetcher
   )
   
-  const { data: statsData } = useSWR('/api/admin/analytics/dashboard', fetcher)
+  const { data: statsData, error: statsError } = useSWR('/api/admin/analytics/dashboard', fetcher)
   
   const campaigns = data?.data || []
   const pagination = data?.pagination
@@ -44,7 +51,7 @@ export default function CampaignsPage() {
       </div>
       
       {/* Stats */}
-      {statsData && (
+      {statsData?.data?.overview && (
         <CampaignStats
           total={statsData.data.overview.total_campaigns}
           active={statsData.data.overview.active_campaigns}
