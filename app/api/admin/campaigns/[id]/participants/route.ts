@@ -24,7 +24,7 @@ export async function GET(
     
     // Step 2: Check if user is admin
     const { data: isAdmin, error: adminError } = await supabase
-      .rpc('is_admin', { user_id: user.id })
+      .rpc('is_admin', { uid: user.id })
     
     if (adminError || !isAdmin) {
       return NextResponse.json(
