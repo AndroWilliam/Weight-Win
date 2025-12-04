@@ -15,11 +15,13 @@ interface MobileTopNavProps {
 }
 
 const NAV_OPTIONS: SegmentedControlOption[] = [
+  { value: '/admin/campaigns', label: 'Campaigns' },
   { value: '/admin/applicants', label: 'Applicants' },
   { value: '/admin/users', label: 'Users' },
 ]
 
 const NAV_OPTIONS_SMALL: SegmentedControlOption[] = [
+  { value: '/admin/campaigns', label: 'Campaigns' },
   { value: '/admin/applicants', label: 'Apps' },
   { value: '/admin/users', label: 'Users' },
 ]
@@ -65,7 +67,7 @@ export function MobileTopNav({ notificationCount = 0, className }: MobileTopNavP
   }
 
   // Get current active tab
-  const activeTab = pathname || '/admin/applicants'
+  const activeTab = pathname || '/admin/campaigns'
 
   // Choose options based on screen size
   const options = isSmallScreen ? NAV_OPTIONS_SMALL : NAV_OPTIONS

@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { userIsAdmin } from '@/lib/admin/guard'
 import { createClient } from '@/lib/supabase/server'
 import { AdminHeader } from '@/components/admin/AdminHeader'
+import { Toaster } from 'sonner'
 
 export default async function AdminLayout({
   children,
@@ -35,6 +36,9 @@ export default async function AdminLayout({
       <main className="mx-auto max-w-7xl px-4 sm:px-6 py-4 sm:py-6">
         {children}
       </main>
+      
+      {/* Toast Notifications */}
+      <Toaster position="top-right" richColors />
     </div>
   )
 }

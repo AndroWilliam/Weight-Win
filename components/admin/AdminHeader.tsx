@@ -109,6 +109,16 @@ export function AdminHeader({ userInitials, notificationCount = 0 }: AdminHeader
           {/* Navigation Tabs - Desktop Only */}
           <nav className="flex gap-2 -mb-px">
             <Link
+              href="/admin/campaigns"
+              className={`px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors ${
+                isActive('/admin/campaigns')
+                  ? 'bg-primary text-white'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              }`}
+            >
+              Campaigns
+            </Link>
+            <Link
               href="/admin/applicants"
               className={`px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors ${
                 isActive('/admin/applicants')
