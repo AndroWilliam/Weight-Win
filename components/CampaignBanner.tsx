@@ -77,10 +77,10 @@ export function CampaignBanner({ userId }: CampaignBannerProps) {
         
         <div className="relative p-8 flex items-center gap-6">
           {/* Partner Logo */}
-          {(campaign.banner_logo_url || campaign.partner.logo_url) && (
+          {(campaign.banner_logo_url || campaign.partner?.logo_url) && (
             <img
-              src={campaign.banner_logo_url || campaign.partner.logo_url || ''}
-              alt={campaign.partner.name}
+              src={campaign.banner_logo_url || campaign.partner?.logo_url || ''}
+              alt={campaign.partner?.name || campaign.name}
               className="w-24 h-24 rounded-xl object-cover bg-white/90 p-2"
             />
           )}
@@ -119,10 +119,10 @@ export function CampaignBanner({ userId }: CampaignBannerProps) {
         )}
         
         <div className="relative p-6 text-center">
-          {(campaign.banner_logo_url || campaign.partner.logo_url) && (
+          {(campaign.banner_logo_url || campaign.partner?.logo_url) && (
             <img
-              src={campaign.banner_logo_url || campaign.partner.logo_url || ''}
-              alt={campaign.partner.name}
+              src={campaign.banner_logo_url || campaign.partner?.logo_url || ''}
+              alt={campaign.partner?.name || campaign.name}
               className="w-16 h-16 mx-auto mb-4 rounded-lg object-cover bg-white/90 p-1"
             />
           )}
