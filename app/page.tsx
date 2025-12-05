@@ -6,10 +6,16 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
 import { CheckCircle, TrendingUp, Award, ArrowRight, Users, Loader2 } from "lucide-react"
+import dynamic from 'next/dynamic'
 import { NavigationHeader } from "@/components/navigation-header"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { CampaignBanner } from "@/components/CampaignBanner"
 import { createClient } from '@/lib/supabase/client'
+
+// Dynamic import with SSR disabled to prevent hydration mismatch
+const CampaignBanner = dynamic(
+  () => import('@/components/CampaignBanner').then(mod => ({ default: mod.CampaignBanner })),
+  { ssr: false }
+)
 import { isPreviewCompleted } from '@/lib/preview/previewCookies'
 
 export default function HomePage() {
@@ -170,14 +176,13 @@ export default function HomePage() {
       </section>
 
       {/* Campaign Banner - Dynamic campaigns from database */}
-      {/* TEMPORARILY DISABLED FOR DEBUGGING */}
-      {/* {mounted && isAuthenticated && userId && (
+      {mounted && isAuthenticated && userId && (
         <section className="px-6 mb-8 sm:mb-12">
           <div className="max-w-4xl mx-auto">
             <CampaignBanner userId={userId} />
           </div>
         </section>
-      )} */}
+      )}
 
       {/* Why WeightWin Works */}
       <section className="py-8 sm:py-12 md:py-16 px-6 bg-muted/50">
