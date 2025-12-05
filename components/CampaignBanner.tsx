@@ -6,7 +6,7 @@ import { trackCampaignClick, joinCampaign, canJoinCampaign } from '@/lib/helpers
 import { toast } from 'sonner'
 
 interface CampaignBannerProps {
-  userId: string
+  userId?: string // Optional - works for logged out users too
 }
 
 export function CampaignBanner({ userId }: CampaignBannerProps) {
@@ -15,15 +15,27 @@ export function CampaignBanner({ userId }: CampaignBannerProps) {
   const [isJoining, setIsJoining] = useState(false)
   const [mounted, setMounted] = useState(false)
   
+  // Feature flag check
+  const featureFlagEnabled = process.env.NEXT_PUBLIC_BOLD_CAMPAIGN_ENABLED === 'true'
+  
+  // ALL hooks must be called before any early returns
   // Prevent hydration mismatch - only render after client mount
   useEffect(() => {
     setMounted(true)
   }, [])
   
-  // Feature flag check
-  const featureFlagEnabled = process.env.NEXT_PUBLIC_BOLD_CAMPAIGN_ENABLED === 'true'
+  // Rotate campaigns every 10 seconds if multiple
+  useEffect(() => {
+    if (!mounted || campaigns.length <= 1) return
+    
+    const timer = setInterval(() => {
+      setCurrentIndex(prev => (prev + 1) % campaigns.length)
+    }, 10000)
+    
+    return () => clearInterval(timer)
+  }, [mounted, campaigns.length])
   
-  // Don't render until mounted (prevents hydration errors)
+  // Now we can have early returns (after all hooks)
   if (!mounted) return null
   if (!featureFlagEnabled || isLoading) return null
   if (campaigns.length === 0) return null
@@ -33,22 +45,18 @@ export function CampaignBanner({ userId }: CampaignBannerProps) {
   // Safety check - ensure campaign and partner exist
   if (!campaign || !campaign.partner) return null
   
-  // Rotate campaigns every 10 seconds if multiple
-  useEffect(() => {
-    if (campaigns.length <= 1) return
-    
-    const timer = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % campaigns.length)
-    }, 10000)
-    
-    return () => clearInterval(timer)
-  }, [campaigns.length])
-  
   const handleClick = async () => {
-    // Track click
-    await trackCampaignClick(campaign.id, userId)
+    // Track click (works without userId too)
+    await trackCampaignClick(campaign.id, userId || null)
     
-    // Check eligibility
+    // If not logged in, redirect to sign up or show join prompt
+    if (!userId) {
+      toast.info('Sign up to join this campaign and earn rewards! 🎉')
+      // Could redirect to login: window.location.href = '/auth/login'
+      return
+    }
+    
+    // Check eligibility (only for logged-in users)
     setIsJoining(true)
     const { can_join, reason } = await canJoinCampaign(campaign.id, userId)
     
@@ -174,4 +182,3 @@ export function CampaignBanner({ userId }: CampaignBannerProps) {
     </div>
   )
 }
-

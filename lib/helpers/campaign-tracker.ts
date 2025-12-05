@@ -3,7 +3,7 @@
  */
 export async function trackCampaignClick(
   campaignId: string,
-  userId: string
+  userId: string | null
 ): Promise<void> {
   try {
     await fetch('/api/campaigns/track-click', {

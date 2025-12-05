@@ -175,11 +175,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Campaign Banner - Dynamic campaigns from database */}
-      {mounted && isAuthenticated && userId && (
+      {/* Campaign Banner - Dynamic campaigns from database (shown to ALL users) */}
+      {mounted && (
         <section className="px-6 mb-8 sm:mb-12">
           <div className="max-w-4xl mx-auto">
-            <CampaignBanner userId={userId} />
+            <CampaignBanner userId={userId || undefined} />
           </div>
         </section>
       )}
