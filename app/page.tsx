@@ -170,13 +170,14 @@ export default function HomePage() {
       </section>
 
       {/* Campaign Banner - Dynamic campaigns from database */}
-      {mounted && isAuthenticated && userId && (
+      {/* TEMPORARILY DISABLED FOR DEBUGGING */}
+      {/* {mounted && isAuthenticated && userId && (
         <section className="px-6 mb-8 sm:mb-12">
           <div className="max-w-4xl mx-auto">
             <CampaignBanner userId={userId} />
           </div>
         </section>
-      )}
+      )} */}
 
       {/* Why WeightWin Works */}
       <section className="py-8 sm:py-12 md:py-16 px-6 bg-muted/50">
