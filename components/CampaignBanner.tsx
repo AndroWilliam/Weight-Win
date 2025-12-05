@@ -13,14 +13,25 @@ export function CampaignBanner({ userId }: CampaignBannerProps) {
   const { campaigns, isLoading } = useCampaigns()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isJoining, setIsJoining] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  
+  // Prevent hydration mismatch - only render after client mount
+  useEffect(() => {
+    setMounted(true)
+  }, [])
   
   // Feature flag check
   const featureFlagEnabled = process.env.NEXT_PUBLIC_BOLD_CAMPAIGN_ENABLED === 'true'
   
+  // Don't render until mounted (prevents hydration errors)
+  if (!mounted) return null
   if (!featureFlagEnabled || isLoading) return null
   if (campaigns.length === 0) return null
   
   const campaign = campaigns[currentIndex]
+  
+  // Safety check - ensure campaign and partner exist
+  if (!campaign || !campaign.partner) return null
   
   // Rotate campaigns every 10 seconds if multiple
   useEffect(() => {
