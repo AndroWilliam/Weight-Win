@@ -18,6 +18,11 @@ export default function HomePage() {
   const [userId, setUserId] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [isNavigating, setIsNavigating] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     async function checkAuth() {
@@ -165,7 +170,7 @@ export default function HomePage() {
       </section>
 
       {/* Campaign Banner - Dynamic campaigns from database */}
-      {isAuthenticated && userId && (
+      {mounted && isAuthenticated && userId && (
         <section className="px-6 mb-8 sm:mb-12">
           <div className="max-w-4xl mx-auto">
             <CampaignBanner userId={userId} />
