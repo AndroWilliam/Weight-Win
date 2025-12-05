@@ -16,12 +16,14 @@ interface MobileTopNavProps {
 
 const NAV_OPTIONS: SegmentedControlOption[] = [
   { value: '/admin/campaigns', label: 'Campaigns' },
+  { value: '/admin/partners', label: 'Partners' },
   { value: '/admin/applicants', label: 'Applicants' },
   { value: '/admin/users', label: 'Users' },
 ]
 
 const NAV_OPTIONS_SMALL: SegmentedControlOption[] = [
   { value: '/admin/campaigns', label: 'Campaigns' },
+  { value: '/admin/partners', label: 'Partners' },
   { value: '/admin/applicants', label: 'Apps' },
   { value: '/admin/users', label: 'Users' },
 ]

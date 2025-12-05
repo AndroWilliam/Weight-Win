@@ -119,6 +119,16 @@ export function AdminHeader({ userInitials, notificationCount = 0 }: AdminHeader
               Campaigns
             </Link>
             <Link
+              href="/admin/partners"
+              className={`px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors ${
+                isActive('/admin/partners')
+                  ? 'bg-primary text-white'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              }`}
+            >
+              Partners
+            </Link>
+            <Link
               href="/admin/applicants"
               className={`px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors ${
                 isActive('/admin/applicants')
