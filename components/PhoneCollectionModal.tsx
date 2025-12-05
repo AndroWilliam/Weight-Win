@@ -9,15 +9,21 @@ import { AlertCircle, Check } from 'lucide-react'
 interface PhoneCollectionModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (phoneNumber: string) => Promise<void>
+  onSubmit: (phoneNumber: string, campaignId?: string) => Promise<void>
   onSkip: () => void
+  campaignName?: string
+  campaignId?: string
+  rewardDescription?: string
 }
 
 export function PhoneCollectionModal({
   isOpen,
   onClose,
   onSubmit,
-  onSkip
+  onSkip,
+  campaignName,
+  campaignId,
+  rewardDescription
 }: PhoneCollectionModalProps) {
   const [phoneNumber, setPhoneNumber] = useState('+20')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -41,7 +47,7 @@ export function PhoneCollectionModal({
     setIsSubmitting(true)
 
     try {
-      await onSubmit(phoneNumber)
+      await onSubmit(phoneNumber, campaignId)
 
       // Show success state
       setShowSuccess(true)
@@ -104,7 +110,9 @@ export function PhoneCollectionModal({
               ✅ Phone Number Submitted!
             </h3>
             <p className="text-green-700 dark:text-green-400">
-              We'll contact you soon with your BOLD Soccer discount details.
+              {campaignName 
+                ? `We'll contact you soon with your ${campaignName} reward details.`
+                : "We'll contact you soon with your discount details."}
             </p>
           </div>
         </DialogContent>
@@ -130,8 +138,14 @@ export function PhoneCollectionModal({
 
         <DialogHeader className="space-y-3">
           <div className="text-center">
+            {campaignName && (
+              <div className="bg-muted rounded-lg p-3 mb-3">
+                <p className="text-xs text-muted-foreground mb-1">Campaign</p>
+                <p className="text-sm font-semibold text-foreground">{campaignName}</p>
+              </div>
+            )}
             <p className="text-lg font-semibold text-foreground mb-2">
-              You've unlocked 30% OFF BOLD Soccer Academy!
+              {rewardDescription || "You've unlocked an exclusive reward!"}
             </p>
             <p id="phone-modal-description" className="text-sm text-muted-foreground">
               Enter your phone number and we'll contact you with your exclusive offer.

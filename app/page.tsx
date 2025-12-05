@@ -8,13 +8,14 @@ import Link from "next/link"
 import { CheckCircle, TrendingUp, Award, ArrowRight, Users, Loader2 } from "lucide-react"
 import { NavigationHeader } from "@/components/navigation-header"
 import { ThemeToggle } from "@/components/theme-toggle"
-import BoldSoccerBanner from "@/components/BoldSoccerBanner"
+import { CampaignBanner } from "@/components/CampaignBanner"
 import { createClient } from '@/lib/supabase/client'
 import { isPreviewCompleted } from '@/lib/preview/previewCookies'
 
 export default function HomePage() {
   const router = useRouter()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [userId, setUserId] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [isNavigating, setIsNavigating] = useState(false)
 
@@ -23,6 +24,7 @@ export default function HomePage() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       setIsAuthenticated(!!user)
+      setUserId(user?.id || '')
       setLoading(false)
     }
 
@@ -162,8 +164,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* BOLD Soccer Banner */}
-      <BoldSoccerBanner />
+      {/* Campaign Banner - Dynamic campaigns from database */}
+      {isAuthenticated && userId && (
+        <section className="px-6 mb-8 sm:mb-12">
+          <div className="max-w-4xl mx-auto">
+            <CampaignBanner userId={userId} />
+          </div>
+        </section>
+      )}
 
       {/* Why WeightWin Works */}
       <section className="py-8 sm:py-12 md:py-16 px-6 bg-muted/50">
