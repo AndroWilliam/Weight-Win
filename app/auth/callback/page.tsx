@@ -9,8 +9,14 @@ export default function AuthCallbackPage() {
   const router = useRouter()
   const [status, setStatus] = useState<"init" | "exchanging" | "success" | "error">("init")
   const [message, setMessage] = useState<string>("")
+  const [mounted, setMounted] = useState(false)
 
-  const { code, next, err, errCode, errDesc, hasHashToken } = useMemo(() => {
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const { code, next, err, errCode, errDesc, hasHashToken} = useMemo(() => {
     if (typeof window === "undefined") return { 
       code: null as string | null, 
       next: "/setup",
@@ -188,6 +194,17 @@ export default function AuthCallbackPage() {
     run()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code, hasHashToken])
+
+  // Don't render until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="max-w-sm w-full rounded-xl border border-border bg-card p-6 text-center space-y-3">
+          <h1 className="text-lg font-semibold text-foreground">Loading…</h1>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
