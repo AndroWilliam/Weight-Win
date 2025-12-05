@@ -101,7 +101,7 @@ export default function HomePage() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            {!loading && !isAuthenticated && (
+            {mounted && !loading && !isAuthenticated && (
               <Button
                 size="lg"
                 className="text-lg font-semibold px-8 min-w-fit"
@@ -119,7 +119,7 @@ export default function HomePage() {
               </Button>
             )}
 
-            {!loading && isAuthenticated && (
+            {mounted && !loading && isAuthenticated && (
               <Link href="/dashboard">
                 <Button 
                   size="lg"
@@ -131,7 +131,7 @@ export default function HomePage() {
               </Link>
             )}
 
-            {loading && (
+            {(!mounted || loading) && (
               <Button 
                 size="lg"
                 className="text-lg font-semibold px-8 min-w-fit"

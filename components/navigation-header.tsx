@@ -11,6 +11,11 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 export function NavigationHeader() {
   const [user, setUser] = useState<{ initials: string; isAdmin: boolean } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     async function loadUser() {
@@ -85,12 +90,12 @@ export function NavigationHeader() {
         {/* Right side - Desktop */}
         <div className="hidden md:flex items-center gap-4">
           <ThemeToggle />
-          {!isLoading && user ? (
+          {mounted && !isLoading && user ? (
             <ProfileDropdown
               userInitials={user.initials}
               isAdmin={user.isAdmin}
             />
-          ) : (
+          ) : mounted && !isLoading && !user ? (
             <Link href="/auth/login">
               <Button
                 variant="outline"
@@ -99,19 +104,19 @@ export function NavigationHeader() {
                 Log In
               </Button>
             </Link>
-          )}
+          ) : null}
         </div>
 
         {/* Mobile Menu */}
         <div className="md:hidden flex items-center gap-3">
           <ThemeToggle />
-          {!isLoading && user ? (
+          {mounted && !isLoading && user ? (
             /* Show profile dropdown when logged in on mobile */
             <ProfileDropdown
               userInitials={user.initials}
               isAdmin={user.isAdmin}
             />
-          ) : (
+          ) : mounted && !isLoading && !user ? (
             /* Show Log In button when not logged in */
             <Link href="/auth/login">
               <Button
@@ -121,7 +126,7 @@ export function NavigationHeader() {
                 Log In
               </Button>
             </Link>
-          )}
+          ) : null}
         </div>
       </div>
     </header>
