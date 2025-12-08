@@ -168,7 +168,28 @@ export async function GET(request: Request) {
       .sort((a, b) => parseFloat(b.completion_rate) - parseFloat(a.completion_rate))
       .slice(0, 5)
     
-    // Step 11: Return dashboard data
+    // Step 11: Get partners for campaign names
+    const { data: partners } = await supabase
+      .from('partners')
+      .select('id, name')
+    
+    const partnerMap = new Map(partners?.map(p => [p.id, p.name]) || [])
+    
+    // Step 12: Prepare campaigns list with partner names
+    const campaignsList = campaigns.map(c => ({
+      id: c.id,
+      name: c.name,
+      status: c.status,
+      partner_name: partnerMap.get(c.partner_id) || 'Unknown Partner',
+      banner_clicks: c.banner_clicks || 0,
+      challenge_starts: c.challenge_starts || 0,
+      completions: c.completions || 0,
+      phone_submissions: c.phone_submissions || 0,
+      start_date: c.start_date,
+      end_date: c.end_date
+    }))
+    
+    // Step 13: Return dashboard data
     return NextResponse.json({
       success: true,
       data: {
@@ -178,7 +199,8 @@ export async function GET(request: Request) {
           scheduled_campaigns: scheduledCampaigns,
           ended_campaigns: endedCampaigns,
           total_partners: totalPartners || 0,
-          total_participants: totalParticipants || 0
+          total_participants: totalParticipants || 0,
+          total_phones: totals.phone_submissions
         },
         totals: {
           banner_clicks: totals.banner_clicks,
@@ -192,7 +214,8 @@ export async function GET(request: Request) {
           new_participants_7d: recentParticipants,
           new_completions_7d: recentCompletions
         },
-        top_campaigns: topCampaigns
+        top_campaigns: topCampaigns,
+        campaigns: campaignsList
       }
     }, { status: 200 })
     

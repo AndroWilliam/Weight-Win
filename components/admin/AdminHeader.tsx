@@ -111,7 +111,7 @@ export function AdminHeader({ userInitials, notificationCount = 0 }: AdminHeader
             <Link
               href="/admin/campaigns"
               className={`px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors ${
-                isActive('/admin/campaigns')
+                isActive('/admin/campaigns') && !pathname?.includes('/analytics')
                   ? 'bg-primary text-white'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted'
               }`}
@@ -127,6 +127,16 @@ export function AdminHeader({ userInitials, notificationCount = 0 }: AdminHeader
               }`}
             >
               Partners
+            </Link>
+            <Link
+              href="/admin/analytics"
+              className={`px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors ${
+                pathname === '/admin/analytics' || pathname?.includes('/analytics')
+                  ? 'bg-primary text-white'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              }`}
+            >
+              📊 Analytics
             </Link>
             <Link
               href="/admin/applicants"
