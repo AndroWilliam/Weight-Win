@@ -6,6 +6,7 @@ import { DailyTips } from "@/components/daily-tips"
 import { RewardCountdown } from "@/components/reward-countdown"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { ErrorBoundary } from "@/components/ErrorBoundary"
+import CampaignWidget from "@/components/dashboard/CampaignWidget"
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import { Camera, Home, Shield } from "lucide-react"
@@ -313,7 +314,7 @@ export default function DashboardPage() {
           </section>
 
           {/* Progress Card - Full Width */}
-          <section className="rounded-2xl border border-border bg-card p-5 sm:p-8 shadow-sm" aria-labelledby="progress-heading">
+          <section id="progress-section" className="rounded-2xl border border-border bg-card p-5 sm:p-8 shadow-sm" aria-labelledby="progress-heading">
             <div className="text-center mb-5 sm:mb-8">
               <h3 id="progress-heading" className="text-fluid-2xl font-semibold text-card-foreground">Your Progress</h3>
             </div>
@@ -361,16 +362,10 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          {/* Bottom Cards - Reward and Daily Tips Side by Side */}
+          {/* Bottom Cards - Campaign Widget and Daily Tips Side by Side */}
           <div className="grid gap-5 sm:gap-6 lg:grid-cols-2">
-            {/* Reward Card */}
-            <RewardCountdown 
-              currentDay={currentDay} 
-              daysRemaining={challengeData?.daysRemaining || 7}
-              currentMilestone={currentMilestone}
-              nextMilestone={nextMilestone}
-              className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20" 
-            />
+            {/* Campaign Widget */}
+            <CampaignWidget />
 
             {/* Daily Tips Card */}
             <DailyTips className="bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20" />
