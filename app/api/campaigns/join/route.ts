@@ -60,7 +60,7 @@ export async function POST(request: Request) {
       .insert({
         campaign_id,
         user_id: user.id,
-        status: 'active',
+        status: 'in_progress',
         started_at: new Date().toISOString()
       })
       .select()
