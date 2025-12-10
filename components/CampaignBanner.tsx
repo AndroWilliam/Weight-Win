@@ -102,6 +102,56 @@ export function CampaignBanner({ userId }: CampaignBannerProps) {
           <div className="absolute inset-0 bg-black/40" />
         )}
 
+        {/* Navigation Arrows - Desktop - Top Right Corner */}
+        {campaigns.length > 1 && (
+          <div className="absolute top-4 right-4 flex gap-2 z-10">
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                goToPrevious()
+              }}
+              className="w-10 h-10 rounded-lg bg-black bg-opacity-50 hover:bg-opacity-70 backdrop-blur-sm flex items-center justify-center text-white transition-all duration-200 hover:scale-105"
+              aria-label="Previous campaign"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                goToNext()
+              }}
+              className="w-10 h-10 rounded-lg bg-black bg-opacity-50 hover:bg-opacity-70 backdrop-blur-sm flex items-center justify-center text-white transition-all duration-200 hover:scale-105"
+              aria-label="Next campaign"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          </div>
+        )}
+
         <div className="relative p-8 flex items-center gap-6">
           {/* Partner Logo */}
           {(campaign.banner_logo_url || campaign.partner?.logo_url) && (
@@ -129,20 +179,35 @@ export function CampaignBanner({ userId }: CampaignBannerProps) {
             </button>
           </div>
         </div>
+      </div>
+      
+      {/* Mobile Banner */}
+      <div
+        className="md:hidden relative rounded-2xl overflow-hidden cursor-pointer"
+        onClick={handleClick}
+        style={{
+          background: campaign.banner_bg_url
+            ? `url(${campaign.banner_bg_url}) center/cover`
+            : `linear-gradient(135deg, ${campaign.primary_color}, ${campaign.secondary_color})`
+        }}
+      >
+        {campaign.banner_bg_url && (
+          <div className="absolute inset-0 bg-black/40" />
+        )}
 
-        {/* Navigation Arrows - Desktop */}
+        {/* Navigation Arrows - Mobile - Top Right Corner */}
         {campaigns.length > 1 && (
-          <>
+          <div className="absolute top-3 right-3 flex gap-2 z-10">
             <button
               onClick={(e) => {
                 e.stopPropagation()
                 goToPrevious()
               }}
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 backdrop-blur-sm flex items-center justify-center text-white transition-all duration-300 hover:scale-110 z-10"
+              className="w-9 h-9 rounded-lg bg-black bg-opacity-50 hover:bg-opacity-70 backdrop-blur-sm flex items-center justify-center text-white transition-all duration-200 hover:scale-105"
               aria-label="Previous campaign"
             >
               <svg
-                className="w-6 h-6"
+                className="w-4 h-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -160,11 +225,11 @@ export function CampaignBanner({ userId }: CampaignBannerProps) {
                 e.stopPropagation()
                 goToNext()
               }}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 backdrop-blur-sm flex items-center justify-center text-white transition-all duration-300 hover:scale-110 z-10"
+              className="w-9 h-9 rounded-lg bg-black bg-opacity-50 hover:bg-opacity-70 backdrop-blur-sm flex items-center justify-center text-white transition-all duration-200 hover:scale-105"
               aria-label="Next campaign"
             >
               <svg
-                className="w-6 h-6"
+                className="w-4 h-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -177,22 +242,7 @@ export function CampaignBanner({ userId }: CampaignBannerProps) {
                 />
               </svg>
             </button>
-          </>
-        )}
-      </div>
-      
-      {/* Mobile Banner */}
-      <div
-        className="md:hidden relative rounded-2xl overflow-hidden cursor-pointer"
-        onClick={handleClick}
-        style={{
-          background: campaign.banner_bg_url
-            ? `url(${campaign.banner_bg_url}) center/cover`
-            : `linear-gradient(135deg, ${campaign.primary_color}, ${campaign.secondary_color})`
-        }}
-      >
-        {campaign.banner_bg_url && (
-          <div className="absolute inset-0 bg-black/40" />
+          </div>
         )}
 
         <div className="relative p-6 text-center">
@@ -218,56 +268,6 @@ export function CampaignBanner({ userId }: CampaignBannerProps) {
             {isJoining ? 'Joining...' : campaign.cta_text}
           </button>
         </div>
-
-        {/* Navigation Arrows - Mobile */}
-        {campaigns.length > 1 && (
-          <>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                goToPrevious()
-              }}
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 backdrop-blur-sm flex items-center justify-center text-white transition-all duration-300 hover:scale-110 z-10"
-              aria-label="Previous campaign"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                goToNext()
-              }}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 backdrop-blur-sm flex items-center justify-center text-white transition-all duration-300 hover:scale-110 z-10"
-              aria-label="Next campaign"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
-          </>
-        )}
       </div>
       
       {/* Campaign Indicator (if multiple) */}

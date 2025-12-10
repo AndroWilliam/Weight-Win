@@ -68,6 +68,50 @@ export default function CampaignCarousel({
     <div className="relative">
       {/* Card */}
       <div className="mb-6 relative">
+        {/* Navigation Arrows - Top Right Corner */}
+        {campaigns.length > 1 && (
+          <div className="absolute top-4 right-4 flex gap-2 z-10">
+            <button
+              onClick={goToPrevious}
+              className="w-10 h-10 rounded-lg bg-gray-800 bg-opacity-70 hover:bg-opacity-90 backdrop-blur-sm flex items-center justify-center text-white transition-all duration-200 hover:scale-105"
+              aria-label="Previous campaign"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+            <button
+              onClick={goToNext}
+              className="w-10 h-10 rounded-lg bg-gray-800 bg-opacity-70 hover:bg-opacity-90 backdrop-blur-sm flex items-center justify-center text-white transition-all duration-200 hover:scale-105"
+              aria-label="Next campaign"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          </div>
+        )}
+
         <CampaignCard
           campaign={currentCampaign}
           isParticipating={isParticipating}
@@ -88,53 +132,6 @@ export default function CampaignCarousel({
               : undefined
           }
         />
-
-        {/* Navigation Arrows */}
-        {campaigns.length > 1 && (
-          <>
-            {/* Left Arrow */}
-            <button
-              onClick={goToPrevious}
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 backdrop-blur-sm flex items-center justify-center text-white transition-all duration-300 hover:scale-110 z-10"
-              aria-label="Previous campaign"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
-
-            {/* Right Arrow */}
-            <button
-              onClick={goToNext}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 backdrop-blur-sm flex items-center justify-center text-white transition-all duration-300 hover:scale-110 z-10"
-              aria-label="Next campaign"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
-          </>
-        )}
       </div>
 
       {/* Dot Navigation */}
