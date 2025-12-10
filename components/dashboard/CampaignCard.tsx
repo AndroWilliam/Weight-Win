@@ -153,7 +153,9 @@ export default function CampaignCard({
             className={`flex-1 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-300 ${
               isEnded
                 ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
-                : 'bg-white bg-opacity-20 hover:bg-opacity-30 backdrop-blur-sm hover:-translate-y-1 text-white'
+                : isParticipating
+                ? 'bg-white bg-opacity-20 hover:bg-opacity-30 backdrop-blur-sm hover:-translate-y-1 text-green-600'
+                : 'bg-white bg-opacity-20 hover:bg-opacity-30 backdrop-blur-sm hover:-translate-y-1 text-orange-600'
             }`}
           >
             Campaign Details
