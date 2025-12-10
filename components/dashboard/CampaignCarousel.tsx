@@ -56,10 +56,18 @@ export default function CampaignCarousel({
   const currentCampaign = campaigns[currentIndex]
   const isParticipating = isParticipatingCampaign(currentCampaign)
 
+  const goToPrevious = () => {
+    setCurrentIndex((prev) => (prev === 0 ? campaigns.length - 1 : prev - 1))
+  }
+
+  const goToNext = () => {
+    setCurrentIndex((prev) => (prev + 1) % campaigns.length)
+  }
+
   return (
     <div className="relative">
       {/* Card */}
-      <div className="mb-6">
+      <div className="mb-6 relative">
         <CampaignCard
           campaign={currentCampaign}
           isParticipating={isParticipating}
@@ -80,6 +88,53 @@ export default function CampaignCarousel({
               : undefined
           }
         />
+
+        {/* Navigation Arrows */}
+        {campaigns.length > 1 && (
+          <>
+            {/* Left Arrow */}
+            <button
+              onClick={goToPrevious}
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 backdrop-blur-sm flex items-center justify-center text-white transition-all duration-300 hover:scale-110 z-10"
+              aria-label="Previous campaign"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+
+            {/* Right Arrow */}
+            <button
+              onClick={goToNext}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 backdrop-blur-sm flex items-center justify-center text-white transition-all duration-300 hover:scale-110 z-10"
+              aria-label="Next campaign"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          </>
+        )}
       </div>
 
       {/* Dot Navigation */}
