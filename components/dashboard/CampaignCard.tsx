@@ -34,8 +34,7 @@ export default function CampaignCard({
   const needsPhone =
     isCompleted &&
     isParticipatingCampaign(campaign) &&
-    !campaign.phone_submitted &&
-    campaign.require_phone
+    !campaign.phone_submitted
 
   // Calculate progress
   const daysCompleted = isParticipatingCampaign(campaign)
@@ -94,10 +93,10 @@ export default function CampaignCard({
         <div className="flex items-start gap-4 mb-6">
           {/* Logo */}
           <div className="flex-shrink-0 w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-            {campaign.partner.logo_url ? (
+            {campaign.banner_logo_url ? (
               <Image
-                src={campaign.partner.logo_url}
-                alt={campaign.partner.name}
+                src={campaign.banner_logo_url}
+                alt={campaign.partner_name}
                 width={64}
                 height={64}
                 className="w-12 h-12 object-contain"
@@ -113,7 +112,7 @@ export default function CampaignCard({
               {campaign.name}
             </h3>
             <p className="text-sm text-white text-opacity-90">
-              {campaign.partner.name}
+              {campaign.partner_name}
             </p>
           </div>
         </div>
@@ -140,7 +139,7 @@ export default function CampaignCard({
         {!isParticipating && !isEnded && (
           <div className="mb-6">
             <p className="text-sm text-white text-opacity-90 line-clamp-3">
-              {campaign.reward_description}
+              {campaign.banner_body}
             </p>
           </div>
         )}

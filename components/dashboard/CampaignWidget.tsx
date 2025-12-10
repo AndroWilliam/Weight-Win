@@ -93,7 +93,7 @@ export default function CampaignWidget() {
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          user_campaign_id: selectedCampaignForPhone.user_campaign_id,
+          user_campaign_id: selectedCampaignForPhone.participation_id,
           phone_number: phoneNumber.trim(),
         }),
       })
@@ -228,7 +228,7 @@ export default function CampaignWidget() {
               <p className="text-sm text-gray-400 mb-1">Campaign</p>
               <p className="text-white font-bold">{selectedCampaignForPhone.name}</p>
               <p className="text-sm text-gray-300 mt-2">
-                {selectedCampaignForPhone.reward_description}
+                {selectedCampaignForPhone.banner_body}
               </p>
             </div>
 

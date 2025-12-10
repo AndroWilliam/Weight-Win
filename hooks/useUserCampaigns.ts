@@ -11,37 +11,30 @@ const fetcher = async (url: string) => {
 interface Campaign {
   id: string
   name: string
-  slug: string
-  partner_id: string
+  partner_name: string
+  banner_logo_url: string | null
   reward_type: string
   discount_percentage: number
-  reward_description: string
+  discount_amount: number | null
   required_days: number
-  require_phone: boolean
-  reuse_phone: boolean
   banner_heading: string
   banner_body: string
   cta_text: string
-  banner_logo_url: string | null
-  banner_bg_url: string | null
-  primary_color: string
-  secondary_color: string
   status: string
   start_date: string
   end_date: string
-  terms_conditions: string | null
-  partner: {
-    name: string
-    logo_url: string | null
-  }
+  primary_color: string
+  secondary_color: string
 }
 
 interface ParticipatingCampaign extends Campaign {
-  user_campaign_id: string
+  participation_id: string
   days_completed: number
+  started_at: string
+  progress_percentage: number
   phone_submitted: boolean
-  joined_at: string
-  campaign_status: string
+  phone_number: string | null
+  participation_status: string
 }
 
 interface UserCampaignsResponse {

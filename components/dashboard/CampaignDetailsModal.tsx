@@ -93,10 +93,10 @@ export default function CampaignDetailsModal({
           <div className="flex items-start gap-4 mb-6 pb-6 border-b border-gray-800">
             {/* Logo */}
             <div className="flex-shrink-0 w-16 h-16 bg-gray-800 rounded-xl flex items-center justify-center">
-              {campaign.partner.logo_url ? (
+              {campaign.banner_logo_url ? (
                 <Image
-                  src={campaign.partner.logo_url}
-                  alt={campaign.partner.name}
+                  src={campaign.banner_logo_url}
+                  alt={campaign.partner_name}
                   width={64}
                   height={64}
                   className="w-12 h-12 object-contain"
@@ -111,7 +111,7 @@ export default function CampaignDetailsModal({
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
                 {campaign.name}
               </h2>
-              <p className="text-gray-400">{campaign.partner.name}</p>
+              <p className="text-gray-400">{campaign.partner_name}</p>
             </div>
           </div>
 
@@ -138,12 +138,12 @@ export default function CampaignDetailsModal({
             </h3>
             <div className="p-4 bg-gradient-to-r from-orange-600 to-red-600 rounded-xl">
               <p className="text-white font-medium">
-                {campaign.reward_description}
+                {campaign.banner_body}
               </p>
               {campaign.discount_percentage > 0 && (
                 <p className="text-white text-opacity-90 text-sm mt-2">
                   {campaign.discount_percentage}% discount on{' '}
-                  {campaign.partner.name}
+                  {campaign.partner_name}
                 </p>
               )}
             </div>
@@ -167,12 +167,10 @@ export default function CampaignDetailsModal({
                 <span className="text-indigo-400 mt-1">•</span>
                 <span>Take a photo of your scale daily</span>
               </div>
-              {campaign.require_phone && (
-                <div className="flex items-start gap-3 text-gray-300">
-                  <span className="text-indigo-400 mt-1">•</span>
-                  <span>Submit phone number after completion</span>
-                </div>
-              )}
+              <div className="flex items-start gap-3 text-gray-300">
+                <span className="text-indigo-400 mt-1">•</span>
+                <span>Submit phone number after completion</span>
+              </div>
             </div>
           </div>
 
@@ -201,18 +199,6 @@ export default function CampaignDetailsModal({
             </div>
           </div>
 
-          {/* Terms & Conditions */}
-          {campaign.terms_conditions && (
-            <div className="mb-6">
-              <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
-                <span>📜</span>
-                Terms &amp; Conditions
-              </h3>
-              <div className="p-4 bg-gray-800 rounded-xl text-sm text-gray-300 whitespace-pre-wrap">
-                {campaign.terms_conditions}
-              </div>
-            </div>
-          )}
 
           {/* Action Buttons */}
           {!isParticipating && campaign.status === 'active' && onJoin && (
