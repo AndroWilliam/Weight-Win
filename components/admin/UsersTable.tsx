@@ -7,6 +7,16 @@ import { SkeletonCard } from './SkeletonCard'
 import { Button } from '@/components/ui/button'
 import { UserActionsDrawer } from './UserActionsDrawer'
 import { useToast } from '@/hooks/use-toast'
+import { CampaignPills } from './CampaignPills'
+
+interface Campaign {
+  id: string
+  name: string
+  short_name: string
+  emoji: string
+  status: string
+  campaign_status: string
+}
 
 interface UserProgress {
   user_id: string
@@ -20,6 +30,7 @@ interface UserProgress {
   last_weigh_in_at: string | null
   days_to_reward: number
   progress_percent: number
+  campaigns?: Campaign[]
 }
 
 interface UsersTableProps {
@@ -36,11 +47,14 @@ export function UsersTable({ rows }: UsersTableProps) {
   const [drawerEmail, setDrawerEmail] = useState<string | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
+  const [campaignFilter, setCampaignFilter] = useState<'active' | 'all'>('active')
+  const [usersWithCampaigns, setUsersWithCampaigns] = useState<UserProgress[]>([])
+  const [isLoadingCampaigns, setIsLoadingCampaigns] = useState(true)
   const { toast } = useToast()
   const itemsPerPage = 5
 
-  // Client-side search filter
-  const filteredRows = rows.filter(row =>
+  // Client-side search filter (use usersWithCampaigns instead of rows)
+  const filteredRows = usersWithCampaigns.filter(row =>
     row.email.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
@@ -106,6 +120,53 @@ export function UsersTable({ rows }: UsersTableProps) {
   useEffect(() => {
     setCurrentPage(1)
   }, [searchTerm, userFilter])
+
+  // Fetch campaigns for each user
+  useEffect(() => {
+    const fetchCampaigns = async () => {
+      setIsLoadingCampaigns(true)
+
+      try {
+        const usersWithCampaignsData = await Promise.all(
+          rows.map(async (user) => {
+            try {
+              const response = await fetch(`/api/admin/users/${user.user_id}/campaigns`)
+              const data = await response.json()
+
+              let campaigns = data.data || []
+
+              // Apply filter
+              if (campaignFilter === 'active') {
+                campaigns = campaigns.filter((c: Campaign) => c.status === 'in_progress')
+              }
+
+              return {
+                ...user,
+                campaigns,
+              }
+            } catch (error) {
+              console.error(`Failed to fetch campaigns for user ${user.user_id}:`, error)
+              return {
+                ...user,
+                campaigns: [],
+              }
+            }
+          })
+        )
+
+        setUsersWithCampaigns(usersWithCampaignsData)
+      } catch (error) {
+        console.error('Failed to fetch campaigns:', error)
+        setUsersWithCampaigns(rows.map(user => ({ ...user, campaigns: [] })))
+      } finally {
+        setIsLoadingCampaigns(false)
+      }
+    }
+
+    if (rows.length > 0) {
+      fetchCampaigns()
+    }
+  }, [rows, campaignFilter])
 
   const getProgressBarSegments = (totalWeighIns: number) => {
     const segments = []
@@ -187,7 +248,33 @@ export function UsersTable({ rows }: UsersTableProps) {
       {/* Toolbar */}
       <div className="p-4 border-b border-border bg-card">
         <div className="flex flex-col gap-4">
-          <h2 className="text-lg font-semibold text-foreground pl-2">Users</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-foreground pl-2">Users</h2>
+
+            {/* Campaign Filter Toggle */}
+            <div className="flex gap-2 bg-muted rounded-lg p-1">
+              <button
+                onClick={() => setCampaignFilter('active')}
+                className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors ${
+                  campaignFilter === 'active'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Active Campaigns
+              </button>
+              <button
+                onClick={() => setCampaignFilter('all')}
+                className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors ${
+                  campaignFilter === 'all'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                All Campaigns
+              </button>
+            </div>
+          </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             {/* Search */}
@@ -238,7 +325,7 @@ export function UsersTable({ rows }: UsersTableProps) {
 
       {/* Mobile Card List */}
       <div className="md:hidden p-4 space-y-3">
-        {isLoadingPage ? (
+        {isLoadingPage || isLoadingCampaigns ? (
           <>
             {Array.from({ length: itemsPerPage }).map((_, i) => (
               <SkeletonCard key={i} />
@@ -312,6 +399,10 @@ export function UsersTable({ rows }: UsersTableProps) {
                         {row.email}
                       </span>
                     </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-muted-foreground">Campaigns</span>
+                      <CampaignPills campaigns={row.campaigns || []} />
+                    </div>
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Streak</span>
                       <span className="text-foreground">{row.longest_streak ?? 0} days</span>
@@ -351,6 +442,7 @@ export function UsersTable({ rows }: UsersTableProps) {
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-32">User</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-56">Email</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-36">Progress</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-56">Campaigns</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-48">Streak</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-44">Last Weigh-in</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-32">Days to Reward</th>
@@ -358,12 +450,13 @@ export function UsersTable({ rows }: UsersTableProps) {
             </tr>
           </thead>
           <tbody>
-            {isLoadingPage ? (
+            {isLoadingPage || isLoadingCampaigns ? (
               Array.from({ length: itemsPerPage }).map((_, i) => (
                 <tr key={i} className="border-b border-border animate-pulse">
                   <td className="px-4 py-4"><div className="h-4 bg-muted rounded w-24" /></td>
                   <td className="px-4 py-4"><div className="h-4 bg-muted rounded w-40" /></td>
                   <td className="px-4 py-4"><div className="h-4 bg-muted rounded w-28" /></td>
+                  <td className="px-4 py-4"><div className="flex gap-2">{Array.from({length: 2}).map((_, j) => <div key={j} className="h-6 w-20 bg-muted rounded-full" />)}</div></td>
                   <td className="px-4 py-4"><div className="flex gap-1">{Array.from({length: 7}).map((_, j) => <div key={j} className="w-6 h-6 bg-muted rounded" />)}</div></td>
                   <td className="px-4 py-4"><div className="h-4 bg-muted rounded w-32" /></td>
                   <td className="px-4 py-4"><div className="h-5 bg-muted rounded-full w-20" /></td>
@@ -410,6 +503,9 @@ export function UsersTable({ rows }: UsersTableProps) {
                         {row.progress_percent}%
                       </span>
                     </div>
+                  </td>
+                  <td className="px-4 py-4">
+                    <CampaignPills campaigns={row.campaigns || []} />
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex gap-0.5">
