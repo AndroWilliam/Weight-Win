@@ -36,15 +36,15 @@ BEGIN
   SELECT
     cp.id,
     cp.user_id,
-    au.email as user_email,
+    au.email::text as user_email,  -- Cast to TEXT for type compatibility
     (au.id IS NULL) as user_deleted,
     cp.campaign_id,
-    cp.status,
+    cp.status::text,  -- Cast to TEXT for type compatibility
     cp.days_completed,
     cp.current_streak,
     cp.started_at,
     cp.completed_at,
-    cp.phone_number,
+    cp.phone_number::text,  -- Cast to TEXT for type compatibility
     cp.reward_claimed,
     cp.created_at,
     cp.updated_at
