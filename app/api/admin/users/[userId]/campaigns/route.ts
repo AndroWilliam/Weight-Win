@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { userId: string } }
 ) {
   try {
     const supabase = await createClient()
@@ -32,7 +32,7 @@ export async function GET(
     }
 
     // 2. Fetch user's campaigns
-    const userId = params.id
+    const userId = params.userId
 
     const { data: participations, error: participationsError } = await supabase
       .from('campaign_participants')
