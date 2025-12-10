@@ -42,41 +42,12 @@ export async function GET(
     const page = parseInt(searchParams.get('page') || '1')
     const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100)
     
-    // Step 4: Build query
-    let query = supabase
-      .from('campaign_participants')
-      .select('*', { count: 'exact' })
-      .eq('campaign_id', params.id)
-    
-    // Filter by status
-    if (status !== 'all') {
-      query = query.eq('status', status)
-    }
-    
-    // Filter by phone status
-    if (phoneStatus === 'provided') {
-      query = query.not('phone_number', 'is', null)
-    } else if (phoneStatus === 'missing') {
-      query = query.is('phone_number', null)
-    }
-    
-    // Sorting
-    if (sort === 'progress') {
-      query = query.order('days_completed', { ascending: false })
-    } else if (sort === 'completion') {
-      query = query.order('completed_at', { ascending: false, nullsFirst: false })
-    } else {
-      // Default: sort by date (newest first)
-      query = query.order('started_at', { ascending: false })
-    }
-    
-    // Step 5: Apply pagination
-    const from = (page - 1) * limit
-    const to = from + limit - 1
-    query = query.range(from, to)
-    
-    const { data: participants, error, count } = await query
-    
+    // Step 4: Fetch participants with emails using RPC function
+    const { data: participants, error } = await supabase
+      .rpc('get_campaign_participants_with_emails', {
+        p_campaign_id: params.id
+      })
+
     if (error) {
       console.error('Database query error:', error)
       return NextResponse.json({
@@ -84,15 +55,58 @@ export async function GET(
         message: 'Failed to fetch participants'
       }, { status: 500 })
     }
-    
-    // Step 6: Filter by search if provided (in JavaScript since we can't easily join auth.users)
+
+    // Step 5: Apply filters in JavaScript (since RPC doesn't support complex filtering)
     let filteredParticipants = participants || []
-    
-    // Step 7: Format response data
-    const formattedData = filteredParticipants.map(p => ({
+
+    // Filter by status
+    if (status !== 'all') {
+      filteredParticipants = filteredParticipants.filter(p => p.status === status)
+    }
+
+    // Filter by phone status
+    if (phoneStatus === 'provided') {
+      filteredParticipants = filteredParticipants.filter(p => p.phone_number != null)
+    } else if (phoneStatus === 'missing') {
+      filteredParticipants = filteredParticipants.filter(p => p.phone_number == null)
+    }
+
+    // Step 6: Apply search filter
+    if (search) {
+      const searchLower = search.toLowerCase()
+      filteredParticipants = filteredParticipants.filter(p =>
+        p.user_email?.toLowerCase().includes(searchLower) ||
+        p.phone_number?.includes(search) ||
+        p.user_id?.toLowerCase().includes(searchLower)
+      )
+    }
+
+    // Step 7: Apply sorting
+    if (sort === 'progress') {
+      filteredParticipants.sort((a, b) => b.days_completed - a.days_completed)
+    } else if (sort === 'completion') {
+      filteredParticipants.sort((a, b) => {
+        if (!a.completed_at) return 1
+        if (!b.completed_at) return -1
+        return new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime()
+      })
+    }
+    // Default sort by date is already done by RPC function
+
+    // Step 8: Get total count before pagination
+    const totalCount = filteredParticipants.length
+
+    // Step 9: Apply pagination
+    const from = (page - 1) * limit
+    const to = from + limit
+    const paginatedParticipants = filteredParticipants.slice(from, to)
+
+    // Step 10: Format response data
+    const formattedData = paginatedParticipants.map(p => ({
       id: p.id,
       user_id: p.user_id,
-      user_email: 'User', // Email would require joining auth.users with proper RLS
+      user_email: p.user_email,
+      user_deleted: p.user_deleted,
       started_at: p.started_at,
       completed_at: p.completed_at,
       phone_number: p.phone_number,
@@ -101,23 +115,15 @@ export async function GET(
       status: p.status,
       reward_claimed: p.reward_claimed || false
     }))
-    
-    // Apply search filter if provided
-    const searchFiltered = search 
-      ? formattedData.filter(p => 
-          p.user_email.toLowerCase().includes(search.toLowerCase()) ||
-          p.user_id.toLowerCase().includes(search.toLowerCase())
-        )
-      : formattedData
-    
+
     return NextResponse.json({
       success: true,
-      data: searchFiltered,
+      data: formattedData,
       pagination: {
         page,
         limit,
-        total: count || 0,
-        total_pages: Math.ceil((count || 0) / limit)
+        total: totalCount,
+        total_pages: Math.ceil(totalCount / limit)
       }
     }, { status: 200 })
     

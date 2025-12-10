@@ -10,7 +10,8 @@ interface Participant {
   phone_number: string | null
   days_completed: number
   status: string
-  user_email?: string
+  user_email?: string | null
+  user_deleted?: boolean
 }
 
 interface ParticipantTableProps {
@@ -128,9 +129,20 @@ export function ParticipantTable({ participants, requiredDays }: ParticipantTabl
             ) : (
               filteredParticipants.map((participant) => (
                 <tr key={participant.id} className="border-b border-[#333] hover:bg-[#0a0a0a]">
-                  <td className="py-4 text-white">
+                  <td className="py-4">
                     <div className="max-w-[200px] truncate">
-                      {participant.user_email || participant.user_id.slice(0, 8) + '...'}
+                      {participant.user_deleted || !participant.user_email ? (
+                        <span className="text-gray-500 italic">[Deleted User]</span>
+                      ) : (
+                        <a
+                          href={`/admin/users?search=${participant.user_id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-indigo-400 hover:underline font-medium"
+                        >
+                          {participant.user_email}
+                        </a>
+                      )}
                     </div>
                   </td>
                   <td className="py-4">
