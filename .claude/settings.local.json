@@ -22,7 +22,8 @@
       "Bash(pnpm dev)",
       "Bash(curl:*)",
       "Bash(test:*)",
-      "Bash(pnpm add:*)"
+      "Bash(pnpm add:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []
